@@ -1,7 +1,7 @@
 {
   "name": "simplicity",
   "version": "1.0.0",
-  "description": "Simplicity marketing site, a static HTML page with no build step required",
+  "description": "Simplicity",
   "private": true,
   "scripts": {
     "start": "npx serve . -l 3000",
