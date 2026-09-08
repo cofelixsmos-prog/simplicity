@@ -1,0 +1,13 @@
+{
+  "name": "simplicity",
+  "version": "1.0.0",
+  "description": "Simplicity marketing site, a static HTML page with no build step required",
+  "private": true,
+  "scripts": {
+    "start": "npx serve . -l 3000",
+    "dev": "npx serve . -l 3000"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
