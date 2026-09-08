@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simplicity</title>
+<script>
+  // Set theme before paint to avoid a flash of the wrong theme
+  (function () {
+    var saved = localStorage.getItem('simplicity-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  :root {
+    --bg: #F3F1EC;
+    --fg: #000000;
+    --fg-muted: #6B6A63;
+    --nav-border: rgba(0,0,0,0.06);
+    --nav-link: #4B4A45;
+    --btn-outline-border: rgba(0,0,0,0.14);
+    --btn-outline-hover: rgba(0,0,0,0.03);
+    --accent: #FF5A1F;
+    --accent-hover: #F04E15;
+  }
+
+  html[data-theme="dark"] {
+    --bg: #0A0A0A;
+    --fg: #F3F1EC;
+    --fg-muted: #9A968C;
+    --nav-border: rgba(255,255,255,0.08);
+    --nav-link: #B8B4AA;
+    --btn-outline-border: rgba(255,255,255,0.18);
+    --btn-outline-hover: rgba(255,255,255,0.06);
+    --accent: #FF5A1F;
+    --accent-hover: #FF7440;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+
+  /* ---------- Navigation ---------- */
+
+  nav {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 26px 52px;
+    border-bottom: 1px solid var(--nav-border);
+    transition: border-color 0.25s ease;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-dot {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .nav-dot circle {
+    fill: var(--fg);
+    transition: fill 0.25s ease;
+  }
+
+  .nav-wordmark {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .nav-links a {
+    font-size: 14.5px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--nav-link);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .nav-links a:hover {
+    color: var(--fg);
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ---------- Nav dropdown (full-width panel) ---------- */
+
+  .nav-dropdown {
+    position: static;
+  }
+
+  .nav-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14.5px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--nav-link);
+    font-family: inherit;
+    padding: 0;
+    transition: color 0.15s ease;
+  }
+
+  .nav-dropdown:hover .nav-dropdown-trigger {
+    color: var(--fg);
+  }
+
+  .nav-dropdown-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--nav-border);
+    padding: 56px 52px;
+    display: flex;
+    gap: 90px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    z-index: 10;
+  }
+
+  .nav-dropdown:hover .nav-dropdown-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-col-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    margin-bottom: 22px;
+  }
+
+  .dropdown-links {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .dropdown-links.large a {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .dropdown-links.small {
+    gap: 12px;
+  }
+
+  .dropdown-links.small a {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .dropdown-links a {
+    color: var(--fg);
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .dropdown-links a:hover {
+    opacity: 0.6;
+  }
+
+  @media (max-width: 900px) {
+    .nav-dropdown-panel { display: none; }
+  }
+
+  /* Dim the page content behind the open dropdown, like the reference */
+  .hero {
+    transition: filter 0.25s ease, opacity 0.25s ease;
+  }
+
+  nav:has(.nav-dropdown:hover) ~ .hero {
+    filter: blur(6px);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* ---------- Theme toggle ---------- */
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--btn-outline-border);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, border-color 0.25s ease;
+  }
+
+  .theme-toggle:hover {
+    background: var(--btn-outline-hover);
+  }
+
+  .theme-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .theme-toggle circle,
+  .theme-toggle path {
+    fill: var(--fg);
+    stroke: var(--fg);
+    transition: fill 0.25s ease, stroke 0.25s ease;
+  }
+
+  .theme-toggle .sun-rays path {
+    fill: none;
+  }
+
+  .theme-toggle .sun-rays {
+    display: none;
+  }
+
+  html[data-theme="dark"] .theme-toggle .moon {
+    display: none;
+  }
+
+  html[data-theme="dark"] .theme-toggle .sun-rays {
+    display: block;
+  }
+
+  /* ---------- Buttons ---------- */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 11px 24px;
+    border-radius: 24px;
+    font-size: 14.5px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    border: none;
+    white-space: nowrap;
+    transition: opacity 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--fg);
+  }
+
+  .btn-ghost:hover {
+    opacity: 0.6;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--btn-outline-border);
+  }
+
+  .btn-outline:hover {
+    background: var(--btn-outline-hover);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    padding-left: 20px;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn-dot {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Hero (asymmetric) ---------- */
+
+  .hero {
+    position: relative;
+    min-height: 88vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  #pixel-field {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 40px 24px 90px;
+    text-align: center;
+  }
+
+  .wordmark {
+    display: block;
+    width: 90vw;
+    max-width: 820px;
+    height: auto;
+  }
+
+  .wordmark circle {
+    fill: var(--fg);
+    transition: r 0.12s ease-out, fill 0.12s ease-out;
+  }
+
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    max-width: 460px;
+  }
+
+  .hero-right h1 {
+    font-size: 38px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    color: var(--fg);
+    text-align: center;
+  }
+
+  .hero-right h1 strong {
+    font-weight: 700;
+  }
+
+  .tagline {
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    color: var(--fg-muted);
+    line-height: 1.65;
+    text-align: center;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ---------- Responsive ---------- */
+
+  @media (max-width: 760px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .hero-grid { padding: 40px 24px 70px; }
+    .hero-right h1 { font-size: 28px; }
+  }
+
+  /* ---------- Shared section heading styles ---------- */
+
+  .section-head {
+    max-width: 640px;
+    margin: 0 auto 56px;
+    text-align: center;
+  }
+
+  .section-eyebrow {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-size: 38px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .section-copy {
+    font-size: 16px;
+    color: var(--fg-muted);
+    line-height: 1.6;
+  }
+
+  /* ---------- Simplicity Work: asymmetric but with real presence ---------- */
+
+  .product-section {
+    padding: 140px 52px 120px;
+    border-top: 1px solid var(--nav-border);
+    overflow: hidden;
+  }
+
+  .work-layout {
+    max-width: 1320px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 90px;
+  }
+
+  .work-kicker {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 22px;
+  }
+
+  .work-headline {
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--fg);
+    margin-bottom: 22px;
+  }
+
+  .work-sub {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--fg-muted);
+    max-width: 320px;
+  }
+
+  .work-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .work-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 40px 24px;
+    margin: 0 -24px;
+    border-bottom: 1px solid var(--nav-border);
+    overflow: hidden;
+    transition: padding-left 0.25s ease;
+  }
+
+  .work-list .work-row:first-child {
+    border-top: 1px solid var(--nav-border);
+  }
+
+  .work-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--fg);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 0;
+  }
+
+  .work-row:hover::before {
+    transform: translateX(0);
+  }
+
+  .work-row:hover {
+    padding-left: 40px;
+  }
+
+  .work-row.soon {
+    opacity: 0.4;
+  }
+
+  .work-row-num,
+  .work-dotmark,
+  .work-row-body {
+    position: relative;
+    z-index: 1;
+  }
+
+  .work-row-num {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--fg-muted);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    width: 24px;
+    transition: color 0.3s ease;
+  }
+
+  .work-row:hover .work-row-num {
+    color: var(--bg);
+  }
+
+  .work-dotmark {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+  }
+
+  .work-dotmark circle {
+    fill: var(--fg);
+    transition: fill 0.3s ease;
+  }
+
+  .work-row:hover .work-dotmark circle {
+    fill: var(--accent);
+  }
+
+  .work-row-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .work-row-name {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: color 0.3s ease;
+  }
+
+  .work-row:hover .work-row-name {
+    color: var(--bg);
+  }
+
+  .work-row-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    border: 1px solid var(--nav-border);
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+
+  .work-row-desc {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--fg-muted);
+    max-width: 340px;
+    text-align: right;
+    transition: color 0.3s ease;
+  }
+
+  .work-row:hover .work-row-desc {
+    color: var(--bg);
+    opacity: 0.7;
+  }
+
+  @media (max-width: 900px) {
+    .work-layout { grid-template-columns: 1fr; gap: 48px; }
+    .work-sub { max-width: 100%; }
+    .work-row-body { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .work-row-desc { text-align: left; }
+  }
+
+  @media (max-width: 560px) {
+    .product-section { padding: 80px 24px; }
+    .work-headline { font-size: 34px; }
+    .work-row-name { font-size: 19px; }
+  }
+
+  /* ---------- Harness section: bold, huge, high contrast ---------- */
+
+  .harness-section {
+    padding: 140px 52px 120px;
+    background: #0A0A0A;
+    color: #fff;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+
+  .harness-top {
+    max-width: 1320px;
+    margin: 0 auto 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 90px;
+    align-items: end;
+  }
+
+  .harness-kicker {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #FF7440;
+    margin-bottom: 22px;
+  }
+
+  .harness-headline {
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+
+  .harness-sub {
+    font-size: 16px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.55);
+    max-width: 420px;
+  }
+
+  .swarm-continuous {
+    max-width: 1320px;
+    margin: 70px auto 0;
+    width: 100%;
+    height: 320px;
+    display: block;
+  }
+
+  .swarm-continuous circle {
+    fill: #FF5A1F;
+  }
+
+  .swarm-labels {
+    max-width: 1320px;
+    margin: -8px auto 110px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.4);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .swarm-labels span:last-child {
+    color: #FF7440;
+  }
+
+  .harness-flow {
+    max-width: 1320px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .flow-step {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 36px 24px;
+    margin: 0 -24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+    transition: padding-left 0.25s ease;
+  }
+
+  .harness-flow .flow-step:last-child {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .flow-step::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #FF5A1F;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 0;
+  }
+
+  .flow-step:hover::before {
+    transform: translateX(0);
+  }
+
+  .flow-step:hover {
+    padding-left: 40px;
+  }
+
+  .flow-step-num,
+  .flow-step-body {
+    position: relative;
+    z-index: 1;
+  }
+
+  .flow-step-num {
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.35);
+    width: 24px;
+    flex-shrink: 0;
+    transition: color 0.3s ease;
+  }
+
+  .flow-step:hover .flow-step-num {
+    color: rgba(0,0,0,0.4);
+  }
+
+  .flow-step-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .flow-step-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    flex-shrink: 0;
+    width: 220px;
+    transition: color 0.3s ease;
+  }
+
+  .flow-step:hover .flow-step-title,
+  .flow-step:hover .flow-step-desc {
+    color: #0A0A0A;
+  }
+
+  .flow-step-desc {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.5);
+    max-width: 480px;
+    transition: color 0.3s ease;
+  }
+
+  @media (max-width: 900px) {
+    .harness-top { grid-template-columns: 1fr; gap: 24px; }
+    .flow-step-body { flex-direction: column; gap: 8px; }
+    .flow-step-title { width: auto; }
+  }
+
+  @media (max-width: 560px) {
+    .harness-section { padding: 80px 24px; }
+    .harness-headline { font-size: 32px; }
+    .swarm-continuous { height: 140px; }
+  }
+
+  /* ---------- Works section ---------- */
+
+  .works {
+    padding: 90px 52px 110px;
+  }
+
+  .works-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 60px;
+    max-width: 1400px;
+    margin: 0 auto 44px;
+    flex-wrap: wrap;
+  }
+
+  .works-heading {
+    font-size: 56px;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    max-width: 620px;
+    flex: 1 1 480px;
+  }
+
+  .works-heading .underline {
+    text-decoration: underline;
+    text-decoration-thickness: 4px;
+    text-underline-offset: 6px;
+  }
+
+  .works-copy {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--fg);
+    max-width: 380px;
+    flex: 1 1 320px;
+    padding-top: 6px;
+  }
+
+  .works-card {
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+    border-radius: 18px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: #1a2a44; /* fallback base tone if video hasn't loaded */
+  }
+
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .works-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Subtle animated grain overlay on top of the video */
+  .works-grain {
+    position: absolute;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    animation: grainShift 8s steps(8) infinite;
+  }
+
+  @keyframes grainShift {
+    0%   { transform: translate(0, 0); }
+    12%  { transform: translate(-3%, 2%); }
+    24%  { transform: translate(2%, -4%); }
+    36%  { transform: translate(-4%, -2%); }
+    48%  { transform: translate(3%, 3%); }
+    60%  { transform: translate(-2%, 4%); }
+    72%  { transform: translate(4%, -3%); }
+    84%  { transform: translate(-3%, -3%); }
+    100% { transform: translate(0, 0); }
+  }
+
+  .works-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: 40px 8%;
+    text-align: center;
+  }
+
+  .works-title-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .works-wordmark {
+    display: block;
+    width: 560px;
+    max-width: 78vw;
+    height: auto;
+  }
+
+  .works-wordmark circle {
+    fill: #fff;
+  }
+
+  .works-word {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 100px;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    color: #fff;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.25);
+    position: relative;
+    top: 0.05em;
+  }
+
+  .works-tagline {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.92);
+    text-shadow: 0 1px 12px rgba(0,0,0,0.2);
+  }
+
+  .works-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #F3F1EC;
+    color: #000;
+    padding: 11px 22px;
+    border-radius: 24px;
+    font-size: 14.5px;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    margin-top: 14px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  .works-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 760px) {
+    .works { padding: 50px 20px 70px; }
+    .works-header { gap: 24px; margin-bottom: 28px; }
+    .works-heading { font-size: 32px; }
+    .works-copy { font-size: 15px; }
+    .works-title-block { gap: 14px; }
+    .works-wordmark { width: 260px; }
+    .works-word { font-size: 52px; }
+    .works-tagline { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <svg class="nav-dot" viewBox="0 0 40 40">
+        <circle cx="20" cy="6"  r="3.2"/>
+        <circle cx="12" cy="12" r="2.8"/>
+        <circle cx="28" cy="12" r="2.8"/>
+        <circle cx="7"  cy="20" r="2.4"/>
+        <circle cx="33" cy="20" r="2.4"/>
+        <circle cx="20" cy="20" r="2.2"/>
+        <circle cx="20" cy="28" r="2"/>
+        <circle cx="20" cy="34" r="1.8"/>
+      </svg>
+      <span class="nav-wordmark">Simplicity</span>
+    </div>
+
+    <div class="nav-links">
+      <div class="nav-dropdown" id="product-dropdown">
+        <button class="nav-dropdown-trigger">Product</button>
+        <div class="nav-dropdown-panel">
+          <div>
+            <p class="dropdown-col-label">Explore Product</p>
+            <div class="dropdown-links large">
+              <a href="#simplicity-work">Simplicity Work</a>
+              <a href="#harness">Harness</a>
+              <a href="#works">Our Work</a>
+              <a href="#">Dot System</a>
+            </div>
+          </div>
+
+          <div>
+            <p class="dropdown-col-label">Latest Updates</p>
+            <div class="dropdown-links small">
+              <a href="#">Simplicity 3.0</a>
+              <a href="#">Simplicity 2.4</a>
+              <a href="#">Simplicity 2.3</a>
+              <a href="#">Simplicity 2.2</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-dropdown" id="pricing-dropdown">
+        <button class="nav-dropdown-trigger">Pricing</button>
+        <div class="nav-dropdown-panel">
+          <div>
+            <p class="dropdown-col-label">Plans</p>
+            <div class="dropdown-links large">
+              <a href="#">Free</a>
+              <a href="#">Pro</a>
+              <a href="#">Team</a>
+              <a href="#">Enterprise</a>
+            </div>
+          </div>
+
+          <div>
+            <p class="dropdown-col-label">Add ons</p>
+            <div class="dropdown-links small">
+              <a href="#">Harness credits</a>
+              <a href="#">Extra storage</a>
+              <a href="#">Priority support</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-dropdown" id="docs-dropdown">
+        <button class="nav-dropdown-trigger">Docs</button>
+        <div class="nav-dropdown-panel">
+          <div>
+            <p class="dropdown-col-label">Guides</p>
+            <div class="dropdown-links large">
+              <a href="#">Getting Started</a>
+              <a href="#">Simplicity Work</a>
+              <a href="#">Harness</a>
+              <a href="#">API Reference</a>
+            </div>
+          </div>
+
+          <div>
+            <p class="dropdown-col-label">Resources</p>
+            <div class="dropdown-links small">
+              <a href="#">Changelog</a>
+              <a href="#">Status</a>
+              <a href="#">Support</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-dropdown" id="about-dropdown">
+        <button class="nav-dropdown-trigger">About</button>
+        <div class="nav-dropdown-panel">
+          <div>
+            <p class="dropdown-col-label">Company</p>
+            <div class="dropdown-links large">
+              <a href="#">Our Story</a>
+              <a href="#">Careers</a>
+              <a href="#">Blog</a>
+              <a href="#">Contact</a>
+            </div>
+          </div>
+
+          <div>
+            <p class="dropdown-col-label">Legal</p>
+            <div class="dropdown-links small">
+              <a href="#">Privacy</a>
+              <a href="#">Terms</a>
+              <a href="#">Security</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle class="moon" cx="12" cy="12" r="7"/>
+          <g class="sun-rays">
+            <circle cx="12" cy="12" r="4.5"/>
+            <path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12M19.07 19.07l-2.12-2.12M7.05 7.05L4.93 4.93" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+          </g>
+        </svg>
+      </button>
+      <button class="btn btn-ghost">Log in</button>
+      <button class="btn btn-outline">Sign up</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <canvas id="pixel-field"></canvas>
+
+    <div class="hero-grid">
+      <div class="hero-left">
+        <svg id="wordmark" class="wordmark" viewBox="0 0 2269 430" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <div class="hero-right">
+        <h1>Automation, <strong>reduced</strong> to its essential form.</h1>
+        <p class="tagline">A design language built from one shape, used only where it means something.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary">
+            <svg class="btn-dot" viewBox="0 0 14 14">
+              <circle cx="7" cy="7" r="2.4" fill="#fff"/>
+              <circle cx="7" cy="1.4" r="1.5" fill="#fff" opacity="0.75"/>
+              <circle cx="12.6" cy="7" r="1.5" fill="#fff" opacity="0.75"/>
+              <circle cx="7" cy="12.6" r="1.5" fill="#fff" opacity="0.75"/>
+              <circle cx="1.4" cy="7" r="1.5" fill="#fff" opacity="0.75"/>
+            </svg>
+            Get started
+          </button>
+          <button class="btn btn-outline">Learn more</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="works" id="works">
+    <div class="works-header">
+      <h2 class="works-heading">Our <span class="underline">finest</span> works</h2>
+      <p class="works-copy">Every project we ship starts from the same essential shape. Simplicity is a design language, and these are the products that put it into practice.</p>
+    </div>
+    <div class="works-card reveal-on-scroll">
+      <video class="works-video" autoplay muted loop playsinline>
+        <source src="videocloud.mp4" type="video/mp4">
+      </video>
+      <div class="works-grain"></div>
+      <div class="works-overlay">
+        <div class="works-title-block">
+          <svg id="works-wordmark" class="works-wordmark" viewBox="0 0 2269 430" xmlns="http://www.w3.org/2000/svg"></svg>
+          <span class="works-word">Work</span>
+        </div>
+        <p class="works-tagline">Every project we ship, built from the same essential shape.</p>
+        <button class="works-btn">
+          All Works
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="product-section" id="simplicity-work">
+    <div class="work-layout">
+      <div>
+        <p class="work-kicker">Simplicity Work</p>
+        <h2 class="work-headline">Every document your work needs.</h2>
+        <p class="work-sub">Generated and edited without leaving the conversation. One shape, arranged differently depending on what the work calls for.</p>
+      </div>
+
+      <div class="work-list">
+        <div class="work-row">
+          <span class="work-row-num">01</span>
+          <svg class="work-dotmark" viewBox="0 0 60 60">
+            <circle cx="14" cy="10" r="3.4"/><circle cx="30" cy="10" r="3.4"/><circle cx="46" cy="10" r="3.4"/>
+            <circle cx="14" cy="24" r="3.4"/><circle cx="30" cy="24" r="3.4"/><circle cx="46" cy="24" r="3.4"/>
+            <circle cx="14" cy="38" r="3.4"/><circle cx="30" cy="38" r="3.4"/>
+            <circle cx="14" cy="52" r="3.4"/>
+          </svg>
+          <div class="work-row-body">
+            <div class="work-row-name">Slides</div>
+            <div class="work-row-desc">Full presentation decks from a prompt or an outline, ready to present.</div>
+          </div>
+        </div>
+
+        <div class="work-row">
+          <span class="work-row-num">02</span>
+          <svg class="work-dotmark" viewBox="0 0 60 60">
+            <circle cx="30" cy="8" r="3.4"/>
+            <circle cx="30" cy="20" r="3.4"/><circle cx="30" cy="32" r="3.4"/><circle cx="30" cy="44" r="3.4"/><circle cx="30" cy="56" r="3.4"/>
+            <circle cx="18" cy="26" r="2.8"/><circle cx="42" cy="26" r="2.8"/>
+            <circle cx="18" cy="38" r="2.8"/><circle cx="42" cy="38" r="2.8"/>
+          </svg>
+          <div class="work-row-body">
+            <div class="work-row-name">Documents</div>
+            <div class="work-row-desc">Reports, letters, and long form writing, formatted and ready to send.</div>
+          </div>
+        </div>
+
+        <div class="work-row">
+          <span class="work-row-num">03</span>
+          <svg class="work-dotmark" viewBox="0 0 60 60">
+            <circle cx="10" cy="10" r="3.4"/><circle cx="24" cy="10" r="3.4"/><circle cx="38" cy="10" r="3.4"/><circle cx="52" cy="10" r="3.4"/>
+            <circle cx="10" cy="24" r="2.8"/><circle cx="24" cy="24" r="3.8"/><circle cx="38" cy="24" r="2.8"/><circle cx="52" cy="24" r="3.8"/>
+            <circle cx="10" cy="38" r="3.8"/><circle cx="24" cy="38" r="2.8"/><circle cx="38" cy="38" r="3.8"/><circle cx="52" cy="38" r="2.8"/>
+            <circle cx="10" cy="52" r="2.8"/><circle cx="24" cy="52" r="3.8"/><circle cx="38" cy="52" r="2.8"/><circle cx="52" cy="52" r="3.8"/>
+          </svg>
+          <div class="work-row-body">
+            <div class="work-row-name">Spreadsheets</div>
+            <div class="work-row-desc">Models, trackers, and formulas built and calculated automatically.</div>
+          </div>
+        </div>
+
+        <div class="work-row">
+          <span class="work-row-num">04</span>
+          <svg class="work-dotmark" viewBox="0 0 60 60">
+            <circle cx="18" cy="10" r="3.4"/><circle cx="32" cy="10" r="3.4"/><circle cx="46" cy="10" r="3.4"/>
+            <circle cx="14" cy="24" r="3.4"/><circle cx="50" cy="24" r="3.4"/>
+            <circle cx="14" cy="38" r="3.4"/><circle cx="50" cy="38" r="3.4"/>
+            <circle cx="20" cy="50" r="3.4"/><circle cx="30" cy="54" r="3.4"/><circle cx="40" cy="50" r="3.4"/>
+          </svg>
+          <div class="work-row-body">
+            <div class="work-row-name">PDFs</div>
+            <div class="work-row-desc">Create, fill, merge, and mark up PDFs, no separate editor required.</div>
+          </div>
+        </div>
+
+        <div class="work-row soon">
+          <span class="work-row-num">05</span>
+          <svg class="work-dotmark" viewBox="0 0 60 60">
+            <circle cx="30" cy="8" r="3.4"/>
+            <circle cx="12" cy="18" r="3.4"/><circle cx="48" cy="18" r="3.4"/>
+            <circle cx="12" cy="38" r="3.4"/><circle cx="48" cy="38" r="3.4"/>
+            <circle cx="30" cy="30" r="3.4"/>
+            <circle cx="30" cy="52" r="3.4"/>
+          </svg>
+          <div class="work-row-body">
+            <div class="work-row-name">3D Models <span class="work-row-tag">Coming soon</span></div>
+            <div class="work-row-desc">Generate and edit 3D assets from a description or a reference image.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="harness-section" id="harness">
+    <div class="harness-top">
+      <div>
+        <p class="harness-kicker">Harness</p>
+        <h2 class="harness-headline">Work sized to the task.</h2>
+      </div>
+      <p class="harness-sub">A quick question gets one or two agents and a fast answer. Something like rocket engine configurations, or a long running debate, can summon up to 80 subagents working in parallel, each with a role, searching, analysing, and checking each other's output for hours at a time.</p>
+    </div>
+
+    <svg class="swarm-continuous" id="swarm-continuous" viewBox="0 0 1320 320" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="swarm-labels">
+      <span>2 agents, light task</span>
+      <span>80 agents, deep research</span>
+    </div>
+
+    <div class="harness-flow">
+      <div class="flow-step">
+        <span class="flow-step-num">01</span>
+        <div class="flow-step-body">
+          <div class="flow-step-title">Assess</div>
+          <div class="flow-step-desc">Harness reads the task and decides how much work it actually needs.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-step-num">02</span>
+        <div class="flow-step-body">
+          <div class="flow-step-title">Assign roles</div>
+          <div class="flow-step-desc">Subagents are given specific jobs including search, analysis, writing, and verification.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-step-num">03</span>
+        <div class="flow-step-body">
+          <div class="flow-step-title">Work in parallel</div>
+          <div class="flow-step-desc">Agents share memory and check each other's output as they go.</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <span class="flow-step-num">04</span>
+        <div class="flow-step-body">
+          <div class="flow-step-title">Executor reviews</div>
+          <div class="flow-step-desc">One executor consolidates everything into a single, checked result.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // ---------- Wordmark: build from data + animate assembly on load ----------
+    (function () {
+      var DOTS = [[120.0,41.0,8.5],[150.0,41.0,9.0],[180.0,41.0,9.0],[210.0,41.0,8.33],[240.0,41.0,6.83],[360.0,41.0,9.0],[390.0,41.0,9.0],[1200.0,41.0,9.0],[1230.0,41.0,9.0],[1320.0,41.0,6.0],[1350.0,41.0,9.0],[1380.0,41.0,8.0],[1710.0,41.0,9.0],[1740.0,41.0,9.0],[75.0,67.0,8.5],[105.0,67.0,9.0],[135.0,67.0,9.0],[165.0,67.0,9.0],[195.0,67.0,9.0],[225.0,67.0,9.0],[255.0,67.0,7.0],[345.0,67.0,7.0],[375.0,67.0,9.0],[405.0,67.0,8.0],[1185.0,67.0,7.0],[1215.0,67.0,9.0],[1245.0,67.0,8.0],[1335.0,67.0,9.0],[1365.0,67.0,9.0],[1695.0,67.0,6.0],[1725.0,67.0,9.0],[1755.0,67.0,8.0],[1845.0,67.0,8.0],[1875.0,67.0,9.0],[1905.0,67.0,6.0],[60.0,92.9,8.33],[90.0,92.9,9.0],[120.0,92.9,7.33],[240.0,92.9,6.67],[1200.0,92.9,9.0],[1230.0,92.9,9.0],[1860.0,92.9,9.0],[1890.0,92.9,9.0],[75.0,118.9,9.0],[105.0,118.9,9.0],[345.0,118.9,7.0],[375.0,118.9,9.0],[405.0,118.9,8.0],[495.0,118.9,9.0],[525.0,118.9,9.0],[585.0,118.9,8.67],[615.0,118.9,9.0],[645.0,118.9,8.67],[705.0,118.9,6.67],[735.0,118.9,9.0],[765.0,118.9,9.0],[795.0,118.9,7.83],[915.0,118.9,9.0],[945.0,118.9,9.0],[1005.0,118.9,8.83],[1035.0,118.9,9.0],[1065.0,118.9,9.0],[1185.0,118.9,7.0],[1215.0,118.9,9.0],[1245.0,118.9,8.0],[1335.0,118.9,9.0],[1365.0,118.9,9.0],[1515.0,118.9,8.67],[1545.0,118.9,9.0],[1575.0,118.9,9.0],[1605.0,118.9,9.0],[1695.0,118.9,6.0],[1725.0,118.9,9.0],[1755.0,118.9,8.0],[1815.0,118.9,9.0],[1845.0,118.9,9.0],[1875.0,118.9,9.0],[1905.0,118.9,9.0],[1935.0,118.9,9.0],[1965.0,118.9,9.0],[2025.0,118.9,9.0],[2055.0,118.9,8.83],[2175.0,118.9,8.17],[2205.0,118.9,9.0],[2235.0,118.9,6.17],[60.0,144.9,7.83],[90.0,144.9,9.0],[120.0,144.9,9.0],[150.0,144.9,7.33],[360.0,144.9,9.0],[390.0,144.9,9.0],[480.0,144.9,7.0],[510.0,144.9,9.0],[540.0,144.9,9.0],[570.0,144.9,8.83],[600.0,144.9,8.5],[630.0,144.9,9.0],[660.0,144.9,9.0],[690.0,144.9,8.5],[720.0,144.9,8.5],[750.0,144.9,8.83],[780.0,144.9,9.0],[810.0,144.9,8.67],[900.0,144.9,7.0],[930.0,144.9,9.0],[960.0,144.9,8.83],[990.0,144.9,8.67],[1020.0,144.9,8.17],[1050.0,144.9,9.0],[1080.0,144.9,9.0],[1110.0,144.9,6.5],[1200.0,144.9,9.0],[1230.0,144.9,9.0],[1320.0,144.9,6.0],[1350.0,144.9,9.0],[1380.0,144.9,8.0],[1470.0,144.9,8.0],[1500.0,144.9,9.0],[1530.0,144.9,9.0],[1560.0,144.9,7.67],[1590.0,144.9,7.67],[1620.0,144.9,9.0],[1710.0,144.9,9.0],[1740.0,144.9,9.0],[1830.0,144.9,9.0],[1860.0,144.9,9.0],[1890.0,144.9,9.0],[1920.0,144.9,9.0],[1950.0,144.9,9.0],[2010.0,144.9,6.17],[2040.0,144.9,9.0],[2070.0,144.9,8.0],[2160.0,144.9,6.5],[2190.0,144.9,9.0],[2220.0,144.9,7.33],[75.0,170.9,7.83],[105.0,170.9,9.0],[135.0,170.9,9.0],[165.0,170.9,9.0],[195.0,170.9,9.0],[225.0,170.9,8.83],[345.0,170.9,7.0],[375.0,170.9,9.0],[405.0,170.9,8.0],[495.0,170.9,9.0],[525.0,170.9,9.0],[555.0,170.9,7.17],[645.0,170.9,9.0],[675.0,170.9,9.0],[765.0,170.9,8.33],[795.0,170.9,9.0],[825.0,170.9,6.83],[915.0,170.9,9.0],[945.0,170.9,9.0],[975.0,170.9,6.17],[1065.0,170.9,9.0],[1095.0,170.9,9.0],[1185.0,170.9,7.0],[1215.0,170.9,9.0],[1245.0,170.9,8.0],[1335.0,170.9,9.0],[1365.0,170.9,9.0],[1455.0,170.9,8.0],[1485.0,170.9,9.0],[1515.0,170.9,8.33],[1695.0,170.9,6.0],[1725.0,170.9,9.0],[1755.0,170.9,8.0],[1845.0,170.9,8.0],[1875.0,170.9,9.0],[1905.0,170.9,6.0],[2025.0,170.9,7.0],[2055.0,170.9,9.0],[2085.0,170.9,6.83],[2175.0,170.9,9.0],[2205.0,170.9,8.67],[120.0,196.9,6.67],[150.0,196.9,8.5],[180.0,196.9,9.0],[210.0,196.9,9.0],[240.0,196.9,9.0],[270.0,196.9,6.0],[360.0,196.9,9.0],[390.0,196.9,9.0],[480.0,196.9,7.0],[510.0,196.9,9.0],[540.0,196.9,8.33],[630.0,196.9,9.0],[660.0,196.9,9.0],[690.0,196.9,6.17],[780.0,196.9,9.0],[810.0,196.9,9.0],[900.0,196.9,7.0],[930.0,196.9,9.0],[960.0,196.9,7.67],[1080.0,196.9,9.0],[1110.0,196.9,9.0],[1200.0,196.9,9.0],[1230.0,196.9,9.0],[1320.0,196.9,6.0],[1350.0,196.9,9.0],[1380.0,196.9,8.0],[1470.0,196.9,9.0],[1500.0,196.9,9.0],[1710.0,196.9,9.0],[1740.0,196.9,9.0],[1860.0,196.9,9.0],[1890.0,196.9,9.0],[2040.0,196.9,8.0],[2070.0,196.9,9.0],[2160.0,196.9,9.0],[2190.0,196.9,9.0],[225.0,222.8,9.0],[255.0,222.8,9.0],[345.0,222.8,7.0],[375.0,222.8,9.0],[405.0,222.8,8.0],[495.0,222.8,9.0],[525.0,222.8,9.0],[645.0,222.8,9.0],[675.0,222.8,9.0],[765.0,222.8,7.0],[795.0,222.8,9.0],[825.0,222.8,7.0],[915.0,222.8,9.0],[945.0,222.8,9.0],[1065.0,222.8,8.0],[1095.0,222.8,9.0],[1125.0,222.8,7.0],[1185.0,222.8,7.0],[1215.0,222.8,9.0],[1245.0,222.8,8.0],[1335.0,222.8,9.0],[1365.0,222.8,9.0],[1455.0,222.8,9.0],[1485.0,222.8,9.0],[1695.0,222.8,6.0],[1725.0,222.8,9.0],[1755.0,222.8,8.0],[1845.0,222.8,8.0],[1875.0,222.8,9.0],[1905.0,222.8,6.0],[2055.0,222.8,8.67],[2085.0,222.8,9.0],[2145.0,222.8,9.0],[2175.0,222.8,9.0],[210.0,248.8,7.33],[240.0,248.8,9.0],[270.0,248.8,8.0],[360.0,248.8,9.0],[390.0,248.8,9.0],[480.0,248.8,7.0],[510.0,248.8,9.0],[540.0,248.8,8.0],[630.0,248.8,9.0],[660.0,248.8,9.0],[780.0,248.8,9.0],[810.0,248.8,9.0],[900.0,248.8,7.0],[930.0,248.8,9.0],[960.0,248.8,8.5],[1080.0,248.8,9.0],[1110.0,248.8,9.0],[1200.0,248.8,9.0],[1230.0,248.8,9.0],[1320.0,248.8,6.0],[1350.0,248.8,9.0],[1380.0,248.8,8.0],[1470.0,248.8,9.0],[1500.0,248.8,9.0],[1710.0,248.8,9.0],[1740.0,248.8,9.0],[1860.0,248.8,9.0],[1890.0,248.8,9.0],[2070.0,248.8,9.0],[2100.0,248.8,9.0],[2130.0,248.8,8.0],[2160.0,248.8,9.0],[75.0,274.8,9.0],[105.0,274.8,7.83],[135.0,274.8,6.17],[195.0,274.8,8.17],[225.0,274.8,9.0],[255.0,274.8,9.0],[345.0,274.8,7.0],[375.0,274.8,9.0],[405.0,274.8,8.0],[495.0,274.8,9.0],[525.0,274.8,9.0],[645.0,274.8,9.0],[675.0,274.8,9.0],[765.0,274.8,7.0],[795.0,274.8,9.0],[825.0,274.8,7.0],[915.0,274.8,9.0],[945.0,274.8,9.0],[975.0,274.8,8.5],[1035.0,274.8,6.83],[1065.0,274.8,9.0],[1095.0,274.8,9.0],[1185.0,274.8,7.0],[1215.0,274.8,9.0],[1245.0,274.8,8.0],[1335.0,274.8,9.0],[1365.0,274.8,9.0],[1455.0,274.8,6.5],[1485.0,274.8,9.0],[1515.0,274.8,9.0],[1545.0,274.8,6.17],[1695.0,274.8,6.0],[1725.0,274.8,9.0],[1755.0,274.8,8.0],[1845.0,274.8,7.5],[1875.0,274.8,9.0],[1905.0,274.8,8.5],[1935.0,274.8,6.0],[1965.0,274.8,5.5],[2085.0,274.8,9.0],[2115.0,274.8,9.0],[2145.0,274.8,9.0],[2175.0,274.8,6.17],[60.0,300.8,7.83],[90.0,300.8,9.0],[120.0,300.8,9.0],[150.0,300.8,9.0],[180.0,300.8,9.0],[210.0,300.8,9.0],[240.0,300.8,8.5],[360.0,300.8,9.0],[390.0,300.8,9.0],[480.0,300.8,7.0],[510.0,300.8,9.0],[540.0,300.8,8.0],[630.0,300.8,9.0],[660.0,300.8,9.0],[780.0,300.8,9.0],[810.0,300.8,9.0],[900.0,300.8,7.0],[930.0,300.8,9.0],[960.0,300.8,7.67],[990.0,300.8,8.83],[1020.0,300.8,9.0],[1050.0,300.8,9.0],[1080.0,300.8,9.0],[1200.0,300.8,9.0],[1230.0,300.8,9.0],[1320.0,300.8,6.0],[1350.0,300.8,9.0],[1380.0,300.8,8.0],[1500.0,300.8,9.0],[1530.0,300.8,9.0],[1560.0,300.8,9.0],[1590.0,300.8,9.0],[1620.0,300.8,9.0],[1710.0,300.8,9.0],[1740.0,300.8,9.0],[1860.0,300.8,8.17],[1890.0,300.8,9.0],[1920.0,300.8,9.0],[1950.0,300.8,9.0],[2100.0,300.8,9.0],[2130.0,300.8,9.0],[2160.0,300.8,7.5],[135.0,326.8,6.67],[165.0,326.8,7.0],[195.0,326.8,6.33],[915.0,326.8,9.0],[945.0,326.8,9.0],[1035.0,326.8,7.0],[1545.0,326.8,6.67],[1575.0,326.8,7.0],[2115.0,326.8,9.0],[2145.0,326.8,8.67],[900.0,352.7,7.0],[930.0,352.7,9.0],[960.0,352.7,7.0],[2100.0,352.7,9.0],[2130.0,352.7,9.0],[915.0,378.7,9.0],[945.0,378.7,9.0],[2055.0,378.7,9.0],[2085.0,378.7,9.0],[2115.0,378.7,8.83],[900.0,404.7,5.67],[930.0,404.7,7.0],[960.0,404.7,5.67],[2040.0,404.7,7.0],[2070.0,404.7,7.0],[2100.0,404.7,6.0]];
+      var svg = document.getElementById('wordmark');
+      var ns = 'http://www.w3.org/2000/svg';
+
+      // Sort by distance from a corner so growth reads as a directional sweep
+      var sorted = DOTS.slice().sort(function (a, b) {
+        var da = a[0] * 0.6 + a[1];
+        var db = b[0] * 0.6 + b[1];
+        return da - db;
+      });
+
+      var circles = [];
+      sorted.forEach(function (d, i) {
+        var c = document.createElementNS(ns, 'circle');
+        c.setAttribute('cx', d[0]);
+        c.setAttribute('cy', d[1]);
+        c.setAttribute('r', 0);
+        c.setAttribute('data-r', d[2]);
+        c.setAttribute('class', 'wm-dot');
+        svg.appendChild(c);
+        circles.push({ el: c, r: d[2], delay: i * 1.1 });
+      });
+
+      function animateIn() {
+        var start = performance.now();
+        var DURATION = 900; // total assembly duration in ms
+        function frame(now) {
+          var elapsed = now - start;
+          var done = true;
+          for (var i = 0; i < circles.length; i++) {
+            var item = circles[i];
+            var t = (elapsed - item.delay) / 260; // per-dot pop duration
+            if (t < 0) { done = false; continue; }
+            if (t > 1) t = 1; else done = false;
+            var eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+            item.el.setAttribute('r', (item.r * eased).toFixed(2));
+          }
+          if (!done) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        circles.forEach(function (item) { item.el.setAttribute('r', item.r); });
+      } else {
+        animateIn();
+      }
+
+      // ---------- Per-dot cursor proximity (after assembly) ----------
+      var HOVER_RADIUS = 90;
+      var GROW_FACTOR = 1.8;
+      var HOVER_COLOR = '#FF5A1F';
+      var pending = false, lastEvt = null;
+
+      function updateHover(clientX, clientY) {
+        var rect = svg.getBoundingClientRect();
+        var vb = svg.viewBox.baseVal;
+        var scaleX = vb.width / rect.width;
+        var scaleY = vb.height / rect.height;
+        var svgX = (clientX - rect.left) * scaleX;
+        var svgY = (clientY - rect.top) * scaleY;
+
+        for (var i = 0; i < circles.length; i++) {
+          var item = circles[i];
+          var cx = parseFloat(item.el.getAttribute('cx'));
+          var cy = parseFloat(item.el.getAttribute('cy'));
+          var dx = cx - svgX, dy = cy - svgY;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < HOVER_RADIUS) {
+            var t = 1 - dist / HOVER_RADIUS;
+            item.el.setAttribute('r', (item.r * (1 + (GROW_FACTOR - 1) * t)).toFixed(2));
+            item.el.setAttribute('fill', HOVER_COLOR);
+          } else {
+            item.el.setAttribute('r', item.r);
+            item.el.removeAttribute('fill');
+          }
+        }
+      }
+
+      function resetHover() {
+        circles.forEach(function (item) {
+          item.el.setAttribute('r', item.r);
+          item.el.removeAttribute('fill');
+        });
+      }
+
+      function onMove(e) {
+        lastEvt = e;
+        if (!pending) {
+          pending = true;
+          requestAnimationFrame(function () {
+            pending = false;
+            if (lastEvt) updateHover(lastEvt.clientX, lastEvt.clientY);
+          });
+        }
+      }
+
+      svg.addEventListener('mousemove', onMove);
+      svg.addEventListener('mouseleave', resetHover);
+      svg.addEventListener('touchmove', function (e) {
+        if (e.touches && e.touches[0]) onMove(e.touches[0]);
+      }, { passive: true });
+      svg.addEventListener('touchend', resetHover);
+
+      // ---------- Render the same dots, statically, inside the works card ----------
+      var worksSvg = document.getElementById('works-wordmark');
+      if (worksSvg) {
+        var frag = document.createDocumentFragment();
+        DOTS.forEach(function (d) {
+          var c = document.createElementNS(ns, 'circle');
+          c.setAttribute('cx', d[0]);
+          c.setAttribute('cy', d[1]);
+          c.setAttribute('r', d[2]);
+          frag.appendChild(c);
+        });
+        worksSvg.appendChild(frag);
+      }
+    })();
+  </script>
+
+  <script>
+    // ---------- Background pixel colonies (growth = "processing") ----------
+    (function () {
+      var canvas = document.getElementById('pixel-field');
+      var ctx = canvas.getContext('2d');
+      var hero = document.querySelector('.hero');
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var W, H;
+      var CELL = 12;
+      var COLOR = '#FF5A1F';
+
+      function resize() {
+        var rect = hero.getBoundingClientRect();
+        W = canvas.width = rect.width;
+        H = canvas.height = rect.height;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function makeColony() {
+        var seedX = Math.floor(Math.random() * (W / CELL));
+        var seedY = Math.floor(Math.random() * (H / CELL));
+        var maxCells = 4 + Math.floor(Math.random() * 3);
+        return {
+          cells: [{ x: seedX, y: seedY, hole: false }],
+          frontier: [{ x: seedX, y: seedY }],
+          maxCells: maxCells,
+          growEvery: 30 + Math.floor(Math.random() * 20),
+          frame: 0,
+          state: 'growing',
+          holdFrames: 150 + Math.floor(Math.random() * 90),
+          holdCount: 0
+        };
+      }
+
+      function growColony(c) {
+        if (c.cells.length >= c.maxCells || c.frontier.length === 0) {
+          c.state = 'holding';
+          return;
+        }
+        var base = c.frontier[Math.floor(Math.random() * c.frontier.length)];
+        var dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+        var d = dirs[Math.floor(Math.random() * dirs.length)];
+        var nx = base.x + d[0], ny = base.y + d[1];
+        var exists = c.cells.some(function (cell) { return cell.x === nx && cell.y === ny; });
+        if (!exists) {
+          var isHole = Math.random() < 0.22;
+          c.cells.push({ x: nx, y: ny, hole: isHole });
+          c.frontier.push({ x: nx, y: ny });
+        }
+        if (c.cells.length >= c.maxCells) c.state = 'holding';
+      }
+
+      var colonies = [];
+      var maxColonies = 6;
+      for (var i = 0; i < maxColonies; i++) {
+        var c = makeColony();
+        c.frame = -Math.floor(Math.random() * 200);
+        colonies.push(c);
+      }
+
+      function drawCell(cell) {
+        var px = cell.x * CELL, py = cell.y * CELL;
+        ctx.fillStyle = COLOR;
+        ctx.fillRect(px, py, CELL, CELL);
+        if (cell.hole) {
+          ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#F3F1EC';
+          var r = CELL * 0.28;
+          ctx.beginPath();
+          ctx.arc(px + CELL / 2, py + CELL / 2, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function step() {
+        ctx.clearRect(0, 0, W, H);
+        for (var i = 0; i < colonies.length; i++) {
+          var c = colonies[i];
+          c.frame++;
+          if (c.frame < 0) continue;
+          if (c.state === 'growing') {
+            if (c.frame % c.growEvery === 0) growColony(c);
+          } else if (c.state === 'holding') {
+            c.holdCount++;
+            if (c.holdCount > c.holdFrames) c.state = 'dead';
+          }
+          if (c.state !== 'dead') {
+            for (var j = 0; j < c.cells.length; j++) drawCell(c.cells[j]);
+          } else {
+            colonies[i] = makeColony();
+          }
+        }
+        if (!reduced) requestAnimationFrame(step);
+      }
+
+      if (reduced) {
+        colonies.forEach(function (c) {
+          while (c.state === 'growing') growColony(c);
+          c.cells.forEach(drawCell);
+        });
+      } else {
+        step();
+      }
+    })();
+  </script>
+
+  <script>
+    // ---------- Dark mode toggle ----------
+    (function () {
+      var btn = document.getElementById('theme-toggle');
+      btn.addEventListener('click', function () {
+        var root = document.documentElement;
+        var current = root.getAttribute('data-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('simplicity-theme', next);
+      });
+    })();
+  </script>
+
+  <script>
+    // ---------- Reveal the works card as it scrolls into view ----------
+    (function () {
+      var els = document.querySelectorAll('.reveal-on-scroll');
+      if (!('IntersectionObserver' in window)) {
+        els.forEach(function (el) { el.classList.add('is-visible'); });
+        return;
+      }
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2 });
+      els.forEach(function (el) { observer.observe(el); });
+    })();
+  </script>
+
+  <script>
+    // ---------- Render one continuous field: sparse and large on the left (2 agents), dense and small on the right (80 agents) ----------
+    (function () {
+      var svg = document.getElementById('swarm-continuous');
+      if (!svg) return;
+      var ns = 'http://www.w3.org/2000/svg';
+      var W = 1320, H = 320;
+
+      // Two isolated, larger dots on the left edge
+      [ [110, 140, 13], [190, 190, 13] ].forEach(function (p) {
+        var c = document.createElementNS(ns, 'circle');
+        c.setAttribute('cx', p[0]);
+        c.setAttribute('cy', p[1]);
+        c.setAttribute('r', p[2]);
+        var anim = document.createElementNS(ns, 'animate');
+        anim.setAttribute('attributeName', 'cy');
+        anim.setAttribute('values', p[1] + ';' + (p[1] - 14) + ';' + p[1]);
+        anim.setAttribute('dur', '3.4s');
+        anim.setAttribute('repeatCount', 'indefinite');
+        c.appendChild(anim);
+        svg.appendChild(c);
+      });
+
+      // A field of 80 small dots, density increasing left to right
+      var count = 80;
+      for (var i = 0; i < count; i++) {
+        var t = i / (count - 1); // 0 -> 1 across the width
+        // bias x toward the right so density visibly increases
+        var x = 480 + Math.pow(t, 0.6) * (W - 520);
+        var y = 30 + Math.random() * (H - 60);
+        var r = 2.6 + Math.random() * 2.2;
+        var c = document.createElementNS(ns, 'circle');
+        c.setAttribute('cx', x.toFixed(1));
+        c.setAttribute('cy', y.toFixed(1));
+        c.setAttribute('r', r.toFixed(1));
+        c.setAttribute('opacity', (0.45 + Math.random() * 0.5).toFixed(2));
+
+        var anim = document.createElementNS(ns, 'animate');
+        anim.setAttribute('attributeName', 'cy');
+        var drift = 5 + Math.random() * 9;
+        anim.setAttribute('values', y.toFixed(1) + ';' + (y - drift).toFixed(1) + ';' + y.toFixed(1));
+        anim.setAttribute('dur', (2.2 + Math.random() * 2.6).toFixed(1) + 's');
+        anim.setAttribute('repeatCount', 'indefinite');
+        c.appendChild(anim);
+
+        svg.appendChild(c);
+      }
+    })();
+  </script>
+
+</body>
+</html>
