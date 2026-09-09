@@ -121,7 +121,7 @@
     </div>
 
     <div class="nav-actions">
-      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
         <svg viewBox="0 0 24 24" fill="none">
           <circle class="moon" cx="12" cy="12" r="7"/>
           <g class="sun-rays">
@@ -130,9 +130,26 @@
           </g>
         </svg>
       </button>
-      <!--
-      <button class="btn btn-ghost">Log in</button>
-      <button class="btn btn-outline">Sign up</button>
-      -->
+      <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+      <a href="#works">Our Work</a>
+      <div class="mobile-menu-divider"></div>
+      <button class="mobile-theme-toggle" id="mobile-theme-toggle" aria-label="Theme">
+        <span>Theme</span>
+        <span class="mobile-theme-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle class="moon" cx="12" cy="12" r="7"/>
+            <g class="sun-rays">
+              <circle cx="12" cy="12" r="4.5"/>
+              <path d="M12 1.5v3M12 19.5v3M22.5 12h-3M4.5 12h-3M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12M19.07 19.07l-2.12-2.12M7.05 7.05L4.93 4.93" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            </g>
+          </svg>
+        </span>
+      </button>
     </div>
   </nav>

@@ -5,6 +5,7 @@
       var hero = document.querySelector('.hero');
       var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var W, H;
+      var protectedRect;
       var CELL = 12;
       var COLOR = '#FF5A1F';
 
@@ -12,13 +13,30 @@
         var rect = hero.getBoundingClientRect();
         W = canvas.width = rect.width;
         H = canvas.height = rect.height;
+        var content = document.querySelector('.hero-grid').getBoundingClientRect();
+        protectedRect = {
+          left: content.left - rect.left - CELL,
+          top: content.top - rect.top - CELL,
+          right: content.right - rect.left + CELL,
+          bottom: content.bottom - rect.top + CELL
+        };
       }
       resize();
       window.addEventListener('resize', resize);
 
+      function isProtected(x, y) {
+        return protectedRect && x * CELL < protectedRect.right &&
+          (x + 1) * CELL > protectedRect.left &&
+          y * CELL < protectedRect.bottom &&
+          (y + 1) * CELL > protectedRect.top;
+      }
+
       function makeColony() {
-        var seedX = Math.floor(Math.random() * (W / CELL));
-        var seedY = Math.floor(Math.random() * (H / CELL));
+        var seedX, seedY;
+        do {
+          seedX = Math.floor(Math.random() * (W / CELL));
+          seedY = Math.floor(Math.random() * (H / CELL));
+        } while (isProtected(seedX, seedY));
         var maxCells = 4 + Math.floor(Math.random() * 3);
         return {
           cells: [{ x: seedX, y: seedY, hole: false }],
@@ -59,6 +77,7 @@
       }
 
       function drawCell(cell) {
+        if (isProtected(cell.x, cell.y)) return;
         var px = cell.x * CELL, py = cell.y * CELL;
         ctx.fillStyle = COLOR;
         ctx.fillRect(px, py, CELL, CELL);

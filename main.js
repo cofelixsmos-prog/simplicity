@@ -33,13 +33,38 @@
   }
 
   function setupThemeToggle() {
-    var button = document.getElementById('theme-toggle');
-    if (!button) return;
-    button.addEventListener('click', function () {
+    var buttons = document.querySelectorAll('#theme-toggle, #mobile-theme-toggle');
+    if (!buttons.length) return;
+    buttons.forEach(function (button) {
+      button.addEventListener('click', function () {
       var root = document.documentElement;
       var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', next);
       localStorage.setItem('simplicity-theme', next);
+      });
+    });
+  }
+
+  function setupMobileMenu() {
+    var toggle = document.getElementById('mobile-menu-toggle');
+    var menu = document.getElementById('mobile-menu');
+    if (!toggle || !menu) return;
+
+    function setOpen(isOpen) {
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      toggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+      menu.setAttribute('aria-hidden', String(!isOpen));
+      menu.classList.toggle('is-open', isOpen);
+    }
+
+    toggle.addEventListener('click', function () {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+    menu.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () { setOpen(false); });
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') setOpen(false);
     });
   }
 
@@ -66,6 +91,7 @@
     .then(function (markup) {
       insertSections(markup);
       setupThemeToggle();
+      setupMobileMenu();
       setupReveal();
       return loadScript('https://unpkg.com/lenis@1/dist/lenis.min.js')
         .then(function () {
