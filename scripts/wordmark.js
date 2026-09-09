@@ -97,8 +97,9 @@
         }
       }
 
-      svg.addEventListener('mousemove', onMove);
-      svg.addEventListener('mouseleave', resetHover);
+      svg.addEventListener('pointermove', onMove);
+      svg.addEventListener('pointerleave', resetHover);
+      window.addEventListener('scroll', resetHover, { passive: true });
       svg.addEventListener('touchmove', function (e) {
         if (e.touches && e.touches[0]) onMove(e.touches[0]);
       }, { passive: true });
@@ -116,5 +117,19 @@
           frag.appendChild(c);
         });
         worksSvg.appendChild(frag);
+      }
+
+      // ---------- Render the same dots, statically, big, inside the footer ----------
+      var footerSvg = document.getElementById('footer-wordmark');
+      if (footerSvg) {
+        var footerFrag = document.createDocumentFragment();
+        DOTS.forEach(function (d) {
+          var c = document.createElementNS(ns, 'circle');
+          c.setAttribute('cx', d[0]);
+          c.setAttribute('cy', d[1]);
+          c.setAttribute('r', d[2]);
+          footerFrag.appendChild(c);
+        });
+        footerSvg.appendChild(footerFrag);
       }
     })();

@@ -3,8 +3,7 @@
     ['nav', 'sections/nav.html'],
     ['hero', 'sections/hero.html'],
     ['works', 'sections/works.html'],
-    ['product', 'sections/product.html'],
-    ['harness', 'sections/harness.html']
+    ['footer', 'sections/footer.html']
   ];
 
   function loadSection(path) {
@@ -68,11 +67,14 @@
       insertSections(markup);
       setupThemeToggle();
       setupReveal();
-      return Promise.all([
-        loadScript('scripts/wordmark.js'),
-        loadScript('scripts/pixel-field.js'),
-        loadScript('scripts/swarm.js')
-      ]);
+      return loadScript('https://unpkg.com/lenis@1/dist/lenis.min.js')
+        .then(function () {
+          return Promise.all([
+            loadScript('scripts/wordmark.js'),
+            loadScript('scripts/pixel-field.js'),
+            loadScript('scripts/lenis-init.js')
+          ]);
+        });
     })
     .catch(function (error) {
       console.error(error);
