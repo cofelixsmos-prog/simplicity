@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand — Simplicity</title>
+<meta name="description" content="Simplicity brand assets, logo, colors, and usage guidelines.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script>
+  (function () {
+    var saved = localStorage.getItem('simplicity-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #F3F1EC; --fg: #000000; --fg-muted: #6B6A63;
+    --accent: #FF5A1F; --accent-hover: #F04E15;
+    --nav-border: rgba(0,0,0,0.06);
+    --card-bg: #EAE8E1;
+    --card-border: rgba(0,0,0,0.08);
+  }
+  html[data-theme="dark"] {
+    --bg: #0A0A0A; --fg: #F3F1EC; --fg-muted: #9A968C;
+    --accent: #FF5A1F; --accent-hover: #FF7440;
+    --nav-border: rgba(255,255,255,0.08);
+    --card-bg: #141414;
+    --card-border: rgba(255,255,255,0.08);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--fg); background: var(--bg);
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+
+  /* Header */
+  .page-header {
+    padding: 26px 52px; border-bottom: 1px solid var(--nav-border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .page-header a { color: var(--fg); text-decoration: none; font-weight: 600; font-size: 1rem; }
+  .page-header a:hover { color: var(--accent); }
+
+  /* Content */
+  .content { max-width: 900px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+
+  h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+  .subtitle { color: var(--fg-muted); font-size: 1.1rem; margin-bottom: 3.5rem; line-height: 1.6; }
+
+  h2 {
+    font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--fg-muted);
+    margin-bottom: 1.5rem; margin-top: 3.5rem;
+    padding-bottom: 0.75rem; border-bottom: 1px solid var(--nav-border);
+  }
+
+  /* Logo showcase */
+  .logo-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+  .logo-card {
+    border-radius: 12px; padding: 3rem 2rem;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--card-border);
+    position: relative;
+  }
+  .logo-card.light-card { background: #F3F1EC; }
+  .logo-card.dark-card { background: #0A0A0A; }
+  .logo-card.accent-card { background: var(--accent); }
+
+  .logo-card svg { width: 180px; height: auto; }
+  .logo-card .card-label {
+    position: absolute; bottom: 12px; right: 16px;
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
+    opacity: 0.5;
+  }
+  .logo-card.light-card .card-label { color: #000; }
+  .logo-card.dark-card .card-label { color: #F3F1EC; }
+  .logo-card.accent-card .card-label { color: #fff; }
+
+  /* Dot logo */
+  .dot-logo-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.25rem;
+  }
+  .dot-card {
+    border-radius: 12px; padding: 2.5rem;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--card-border);
+    position: relative;
+  }
+  .dot-card svg { width: 56px; height: 56px; }
+  .dot-card.light-card { background: #F3F1EC; }
+  .dot-card.dark-card { background: #0A0A0A; }
+  .dot-card.accent-card { background: var(--accent); }
+  .dot-card .card-label {
+    position: absolute; bottom: 10px; right: 14px;
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em;
+    opacity: 0.5;
+  }
+  .dot-card.light-card .card-label { color: #000; }
+  .dot-card.dark-card .card-label { color: #F3F1EC; }
+  .dot-card.accent-card .card-label { color: #fff; }
+
+  /* Colors */
+  .color-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.25rem;
+  }
+  .color-swatch {
+    border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--card-border);
+  }
+  .color-swatch .swatch-block {
+    height: 100px; width: 100%;
+  }
+  .color-swatch .swatch-info {
+    padding: 0.75rem 1rem;
+    background: var(--card-bg);
+  }
+  .color-swatch .swatch-name { font-weight: 600; font-size: 0.85rem; }
+  .color-swatch .swatch-hex { color: var(--fg-muted); font-size: 0.8rem; font-family: monospace; }
+
+  /* Typography */
+  .type-sample {
+    background: var(--card-bg); border-radius: 12px;
+    padding: 2rem 2.5rem; border: 1px solid var(--card-border);
+  }
+  .type-sample .type-name {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--fg-muted); margin-bottom: 0.75rem;
+  }
+  .type-sample .type-display {
+    font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3;
+  }
+  .type-sample .type-body {
+    font-size: 1rem; color: var(--fg-muted); margin-top: 0.75rem; line-height: 1.6;
+  }
+
+  /* Guidelines */
+  .guidelines {
+    background: var(--card-bg); border-radius: 12px;
+    padding: 2rem 2.5rem; border: 1px solid var(--card-border);
+    line-height: 1.8;
+  }
+  .guidelines p { color: var(--fg-muted); margin-bottom: 0.75rem; }
+  .guidelines ul { padding-left: 1.5rem; color: var(--fg-muted); }
+  .guidelines li { margin-bottom: 0.4rem; }
+  .guidelines strong { color: var(--fg); }
+
+  /* Download */
+  .download-btn {
+    display: inline-block; margin-top: 1.5rem;
+    padding: 0.7rem 1.75rem; font-size: 0.9rem; font-weight: 500;
+    color: #fff; background: var(--accent); border: none;
+    border-radius: 8px; text-decoration: none; cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .download-btn:hover { background: var(--accent-hover); }
+
+  @media (max-width: 600px) {
+    .page-header { padding: 20px 24px; }
+    .content { padding: 2.5rem 1.25rem 4rem; }
+    h1 { font-size: 1.75rem; }
+    .logo-card { padding: 2rem 1.5rem; }
+    .logo-card svg { width: 140px; }
+  }
+</style>
+</head>
+<body>
+  <div class="page-header">
+    <a href="/">← Simplicity</a>
+  </div>
+
+  <div class="content">
+    <h1>Brand</h1>
+    <p class="subtitle">Assets and guidelines for using the Simplicity brand. Please use these resources as provided and don't modify the logos or colors.</p>
+
+    <!-- Wordmark -->
+    <h2>Wordmark</h2>
+    <div class="logo-grid">
+      <div class="logo-card light-card">
+        <svg viewBox="0 0 40 40" style="width:40px; display:none;"></svg>
+        <span style="font-size:2rem; font-weight:700; letter-spacing:-0.03em; color:#000;">Simplicity</span>
+        <span class="card-label">Light</span>
+      </div>
+      <div class="logo-card dark-card">
+        <span style="font-size:2rem; font-weight:700; letter-spacing:-0.03em; color:#F3F1EC;">Simplicity</span>
+        <span class="card-label">Dark</span>
+      </div>
+      <div class="logo-card accent-card">
+        <span style="font-size:2rem; font-weight:700; letter-spacing:-0.03em; color:#fff;">Simplicity</span>
+        <span class="card-label">Accent</span>
+      </div>
+    </div>
+
+    <!-- Dot Mark -->
+    <h2>Dot Mark</h2>
+    <div class="dot-logo-grid">
+      <div class="dot-card light-card">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="6"  r="3.2" fill="#000"/>
+          <circle cx="12" cy="12" r="2.8" fill="#000"/>
+          <circle cx="28" cy="12" r="2.8" fill="#000"/>
+          <circle cx="7"  cy="20" r="2.4" fill="#000"/>
+          <circle cx="33" cy="20" r="2.4" fill="#000"/>
+          <circle cx="20" cy="20" r="2.2" fill="#000"/>
+          <circle cx="20" cy="28" r="2"   fill="#000"/>
+          <circle cx="20" cy="34" r="1.8" fill="#000"/>
+        </svg>
+        <span class="card-label">Light</span>
+      </div>
+      <div class="dot-card dark-card">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="6"  r="3.2" fill="#F3F1EC"/>
+          <circle cx="12" cy="12" r="2.8" fill="#F3F1EC"/>
+          <circle cx="28" cy="12" r="2.8" fill="#F3F1EC"/>
+          <circle cx="7"  cy="20" r="2.4" fill="#F3F1EC"/>
+          <circle cx="33" cy="20" r="2.4" fill="#F3F1EC"/>
+          <circle cx="20" cy="20" r="2.2" fill="#F3F1EC"/>
+          <circle cx="20" cy="28" r="2"   fill="#F3F1EC"/>
+          <circle cx="20" cy="34" r="1.8" fill="#F3F1EC"/>
+        </svg>
+        <span class="card-label">Dark</span>
+      </div>
+      <div class="dot-card accent-card">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="6"  r="3.2" fill="#fff"/>
+          <circle cx="12" cy="12" r="2.8" fill="#fff" opacity="0.9"/>
+          <circle cx="28" cy="12" r="2.8" fill="#fff" opacity="0.9"/>
+          <circle cx="7"  cy="20" r="2.4" fill="#fff" opacity="0.8"/>
+          <circle cx="33" cy="20" r="2.4" fill="#fff" opacity="0.8"/>
+          <circle cx="20" cy="20" r="2.2" fill="#fff" opacity="0.7"/>
+          <circle cx="20" cy="28" r="2"   fill="#fff" opacity="0.6"/>
+          <circle cx="20" cy="34" r="1.8" fill="#fff" opacity="0.5"/>
+        </svg>
+        <span class="card-label">Accent</span>
+      </div>
+    </div>
+
+    <a class="download-btn" href="/favicon.svg" download="simplicity-dot-mark.svg">Download dot mark SVG</a>
+
+    <!-- Colors -->
+    <h2>Colors</h2>
+    <div class="color-grid">
+      <div class="color-swatch">
+        <div class="swatch-block" style="background:#FF5A1F;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Accent Orange</div>
+          <div class="swatch-hex">#FF5A1F</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-block" style="background:#F04E15;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Accent Hover</div>
+          <div class="swatch-hex">#F04E15</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-block" style="background:#F3F1EC;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Light Background</div>
+          <div class="swatch-hex">#F3F1EC</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-block" style="background:#0A0A0A;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Dark Background</div>
+          <div class="swatch-hex">#0A0A0A</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-block" style="background:#000000;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Foreground</div>
+          <div class="swatch-hex">#000000</div>
+        </div>
+      </div>
+      <div class="color-swatch">
+        <div class="swatch-block" style="background:#6B6A63;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Muted</div>
+          <div class="swatch-hex">#6B6A63</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typography -->
+    <h2>Typography</h2>
+    <div class="type-sample">
+      <div class="type-name">System Font Stack</div>
+      <div class="type-display">The easiest way to automate.</div>
+      <p class="type-body">-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif</p>
+    </div>
+
+    <!-- Guidelines -->
+    <h2>Usage Guidelines</h2>
+    <div class="guidelines">
+      <p><strong>Do:</strong></p>
+      <ul>
+        <li>Use the logo on clean, uncluttered backgrounds</li>
+        <li>Maintain clear space around the logo</li>
+        <li>Use approved color combinations shown above</li>
+      </ul>
+      <p style="margin-top:1.25rem;"><strong>Don't:</strong></p>
+      <ul>
+        <li>Stretch, rotate, or distort the logo</li>
+        <li>Change the logo colors outside of approved palettes</li>
+        <li>Place the logo on busy or low-contrast backgrounds</li>
+        <li>Use the logo at sizes smaller than 24px</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

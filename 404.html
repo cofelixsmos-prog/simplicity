@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — Simplicity</title>
+  <script>
+    (function () {
+      var saved = localStorage.getItem('simplicity-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #F3F1EC;
+      --fg: #000000;
+      --fg-muted: #6B6A63;
+      --accent: #FF5A1F;
+      --accent-hover: #F04E15;
+    }
+    html[data-theme="dark"] {
+      --bg: #0A0A0A;
+      --fg: #F3F1EC;
+      --fg-muted: #9A968C;
+      --accent: #FF5A1F;
+      --accent-hover: #FF7440;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: var(--fg);
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 2rem;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .error-code {
+      font-size: clamp(5rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--accent);
+    }
+
+    .error-message {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--fg-muted);
+      margin-top: 0.75rem;
+      max-width: 26ch;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 2.5rem;
+      padding: 0.75rem 2rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .back-link:hover { background: var(--accent-hover); }
+  </style>
+</head>
+<body>
+  <p class="error-code">404</p>
+  <p class="error-message">This page doesn't exist. Let's head back home.</p>
+  <a class="back-link" href="/">Back to homepage</a>
+</body>
+</html>
