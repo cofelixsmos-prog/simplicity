@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brand — Simplicity</title>
-<meta name="description" content="Simplicity brand assets, logo, colors, and usage guidelines.">
+<meta name="description" content="Simplicity brand assets, logo, typography, colors, and usage guidelines.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script>
   (function () {
@@ -14,308 +14,598 @@
     document.documentElement.setAttribute('data-theme', theme);
   })();
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/style.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --bg: #F3F1EC; --fg: #000000; --fg-muted: #6B6A63;
-    --accent: #FF5A1F; --accent-hover: #F04E15;
-    --nav-border: rgba(0,0,0,0.06);
     --card-bg: #EAE8E1;
     --card-border: rgba(0,0,0,0.08);
   }
   html[data-theme="dark"] {
-    --bg: #0A0A0A; --fg: #F3F1EC; --fg-muted: #9A968C;
-    --accent: #FF5A1F; --accent-hover: #FF7440;
-    --nav-border: rgba(255,255,255,0.08);
     --card-bg: #141414;
     --card-border: rgba(255,255,255,0.08);
   }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    color: var(--fg); background: var(--bg);
-    transition: background 0.25s ease, color 0.25s ease;
+
+  .brand-hero {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(48px, 8vw, 90px) 24px 0;
   }
 
-  /* Header */
-  .page-header {
-    padding: 26px 52px; border-bottom: 1px solid var(--nav-border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .page-header a { color: var(--fg); text-decoration: none; font-weight: 600; font-size: 1rem; }
-  .page-header a:hover { color: var(--accent); }
-
-  /* Content */
-  .content { max-width: 900px; margin: 0 auto; padding: 4rem 2rem 6rem; }
-
-  h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
-  .subtitle { color: var(--fg-muted); font-size: 1.1rem; margin-bottom: 3.5rem; line-height: 1.6; }
-
-  h2 {
-    font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--fg-muted);
-    margin-bottom: 1.5rem; margin-top: 3.5rem;
-    padding-bottom: 0.75rem; border-bottom: 1px solid var(--nav-border);
+  .brand-hero h1 {
+    font-size: clamp(2.75rem, 7vw, 4.5rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
   }
 
-  /* Logo showcase */
-  .logo-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.25rem;
+  .brand-hero p {
+    color: var(--fg-muted);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 52ch;
+    margin-top: 18px;
   }
-  .logo-card {
-    border-radius: 12px; padding: 3rem 2rem;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px solid var(--card-border);
-    position: relative;
-  }
-  .logo-card.light-card { background: #F3F1EC; }
-  .logo-card.dark-card { background: #0A0A0A; }
-  .logo-card.accent-card { background: var(--accent); }
 
-  .logo-card svg { width: 180px; height: auto; }
-  .logo-card .card-label {
-    position: absolute; bottom: 12px; right: 16px;
-    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
-    opacity: 0.5;
+  /* Full-bleed photo */
+  .brand-photo {
+    margin-top: clamp(48px, 8vw, 80px);
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
   }
-  .logo-card.light-card .card-label { color: #000; }
-  .logo-card.dark-card .card-label { color: #F3F1EC; }
-  .logo-card.accent-card .card-label { color: #fff; }
 
-  /* Dot logo */
-  .dot-logo-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1.25rem;
+  .brand-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 50%;
+    display: block;
   }
-  .dot-card {
-    border-radius: 12px; padding: 2.5rem;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px solid var(--card-border);
-    position: relative;
-  }
-  .dot-card svg { width: 56px; height: 56px; }
-  .dot-card.light-card { background: #F3F1EC; }
-  .dot-card.dark-card { background: #0A0A0A; }
-  .dot-card.accent-card { background: var(--accent); }
-  .dot-card .card-label {
-    position: absolute; bottom: 10px; right: 14px;
-    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em;
-    opacity: 0.5;
-  }
-  .dot-card.light-card .card-label { color: #000; }
-  .dot-card.dark-card .card-label { color: #F3F1EC; }
-  .dot-card.accent-card .card-label { color: #fff; }
 
-  /* Colors */
-  .color-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 1.25rem;
+  .brand-photo-caption {
+    max-width: 1120px;
+    margin: 14px auto 0;
+    padding: 0 24px;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
   }
-  .color-swatch {
-    border-radius: 12px; overflow: hidden;
-    border: 1px solid var(--card-border);
-  }
-  .color-swatch .swatch-block {
-    height: 100px; width: 100%;
-  }
-  .color-swatch .swatch-info {
-    padding: 0.75rem 1rem;
-    background: var(--card-bg);
-  }
-  .color-swatch .swatch-name { font-weight: 600; font-size: 0.85rem; }
-  .color-swatch .swatch-hex { color: var(--fg-muted); font-size: 0.8rem; font-family: monospace; }
 
-  /* Typography */
-  .type-sample {
-    background: var(--card-bg); border-radius: 12px;
-    padding: 2rem 2.5rem; border: 1px solid var(--card-border);
+  .brand-intro-copy {
+    max-width: 1120px;
+    margin: clamp(48px, 8vw, 80px) auto 0;
+    padding: 0 24px;
   }
-  .type-sample .type-name {
-    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--fg-muted); margin-bottom: 0.75rem;
+
+  .brand-intro-copy h2 {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
   }
-  .type-sample .type-display {
-    font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3;
+
+  .brand-intro-copy p {
+    margin-top: 18px;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--fg-muted);
+    max-width: 60ch;
   }
-  .type-sample .type-body {
-    font-size: 1rem; color: var(--fg-muted); margin-top: 0.75rem; line-height: 1.6;
+
+  @media (max-width: 700px) {
+    .brand-photo { aspect-ratio: 4 / 5; }
+  }
+
+  .content {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: clamp(48px, 8vw, 80px) 24px clamp(90px, 10vw, 130px);
+  }
+
+  section + section {
+    margin-top: clamp(64px, 9vw, 100px);
+    padding-top: clamp(64px, 9vw, 100px);
+    border-top: 1px solid var(--nav-border);
+  }
+
+  .section-head h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 32px;
+  }
+
+  /* Wordmark band */
+  .wordmark-band {
+    padding: clamp(64px, 10vw, 120px) 24px;
+    margin-top: clamp(64px, 9vw, 100px);
+    border-top: 1px solid var(--nav-border);
+  }
+
+  .wordmark-band-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .wordmark-band-label {
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+    margin-bottom: 20px;
+  }
+
+  .mark-big {
+    display: block;
+    font-size: clamp(3rem, 9vw, 6.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--fg);
+    line-height: 1;
+  }
+
+  .dot-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(28px, 5vw, 56px);
+    align-items: center;
+    margin-top: 48px;
+  }
+
+  .dot-row svg {
+    width: 48px;
+    height: 48px;
+    color: var(--fg);
+  }
+
+  .dot-row .dot-on-accent {
+    background: var(--accent);
+    padding: 16px;
+    border-radius: 10px;
+    display: inline-flex;
+  }
+
+  .wordmark-band .download-btn {
+    margin-top: 40px;
+  }
+
+  /* Color band — full-bleed strip of real color, not tiny swatches */
+  .color-band {
+    padding: clamp(56px, 8vw, 90px) 24px 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .color-band-label {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+  }
+
+  .color-band-strip {
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .color-band-tile {
+    flex: 1 1 160px;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px 20px;
+    transition: flex-grow 0.25s ease;
+  }
+
+  .color-band-tile:hover {
+    flex-grow: 1.6;
+  }
+
+  .color-band-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .color-band-hex {
+    display: block;
+    font-family: monospace;
+    font-size: 0.8rem;
+    opacity: 0.75;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 700px) {
+    .color-band-strip { flex-wrap: wrap; }
+    .color-band-tile { flex: 1 1 45%; min-height: 120px; }
+    .color-band-tile:hover { flex-grow: 1; }
+  }
+
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2rem;
+    padding: 0.75rem 1.75rem; font-size: 0.9rem; font-weight: 500;
+    color: #fff; background: var(--accent); border: none;
+    border-radius: 24px; text-decoration: none; cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .download-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+  /* Typography — raw on page, no div/card */
+  .type-block + .type-block { margin-top: 40px; }
+  .type-label {
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    margin-bottom: 10px;
+  }
+  .type-display {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .type-display.t-1 { font-size: clamp(2.5rem, 7vw, 4.5rem); }
+  .type-display.t-2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 600; }
+  .type-body-sample {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--fg-muted);
+    max-width: 60ch;
+    margin-top: 8px;
+  }
+  .type-stack {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    margin-top: 10px;
+  }
+
+  /* Buttons showcase, dot language */
+  .button-showcase {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .dot-send-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .dot-send-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .dot-send-btn svg { width: 18px; height: 18px; }
+  .dot-send-btn circle { fill: #fff; }
+
+  .dot-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--btn-outline-border);
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .dot-icon-btn:hover { background: var(--btn-outline-hover); }
+  .dot-icon-btn svg { width: 16px; height: 16px; }
+  .dot-icon-btn circle { fill: var(--fg); }
+
+  .dot-text-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 22px 11px 18px;
+    border-radius: 24px;
+    background: transparent;
+    border: 1px solid var(--btn-outline-border);
+    color: var(--fg);
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .dot-text-btn:hover { background: var(--btn-outline-hover); }
+  .dot-text-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .dot-text-btn circle { fill: var(--fg); }
+
+  .button-caption {
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    margin-top: 10px;
+  }
+
+  .button-group { display: flex; flex-direction: column; align-items: flex-start; }
+
+  /* Our Identity */
+  .identity-band {
+    padding: clamp(64px, 10vw, 120px) 24px;
+    border-top: 1px solid var(--nav-border);
+  }
+
+  .identity-band-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .identity-copy {
+    font-size: clamp(1.5rem, 3.2vw, 2.25rem);
+    line-height: 1.45;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+
+  .identity-copy strong { font-weight: 800; }
+
+  .identity-traits {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 28px;
+    margin-top: 52px;
+    text-align: left;
+  }
+
+  .identity-trait {
+    border-top: 1px solid var(--nav-border);
+    padding-top: 16px;
+  }
+
+  .identity-trait h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+
+  .identity-trait p {
+    font-size: 0.95rem;
+    color: var(--fg-muted);
+    line-height: 1.6;
   }
 
   /* Guidelines */
-  .guidelines {
-    background: var(--card-bg); border-radius: 12px;
-    padding: 2rem 2.5rem; border: 1px solid var(--card-border);
-    line-height: 1.8;
+  .guidelines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
   }
-  .guidelines p { color: var(--fg-muted); margin-bottom: 0.75rem; }
-  .guidelines ul { padding-left: 1.5rem; color: var(--fg-muted); }
-  .guidelines li { margin-bottom: 0.4rem; }
-  .guidelines strong { color: var(--fg); }
-
-  /* Download */
-  .download-btn {
-    display: inline-block; margin-top: 1.5rem;
-    padding: 0.7rem 1.75rem; font-size: 0.9rem; font-weight: 500;
-    color: #fff; background: var(--accent); border: none;
-    border-radius: 8px; text-decoration: none; cursor: pointer;
-    transition: background 0.15s ease;
+  .guidelines-card {
+    background: var(--card-bg); border-radius: 16px;
+    padding: 2rem 2.25rem; border: 1px solid var(--card-border);
+    line-height: 1.75;
   }
-  .download-btn:hover { background: var(--accent-hover); }
+  .guidelines-card h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  .guidelines-card ul { padding-left: 1.1rem; color: var(--fg-muted); }
+  .guidelines-card li { margin-bottom: 0.5rem; }
 
   @media (max-width: 600px) {
-    .page-header { padding: 20px 24px; }
     .content { padding: 2.5rem 1.25rem 4rem; }
-    h1 { font-size: 1.75rem; }
-    .logo-card { padding: 2rem 1.5rem; }
-    .logo-card svg { width: 140px; }
   }
 </style>
 </head>
 <body>
-  <div class="page-header">
-    <a href="/">← Simplicity</a>
+  <div class="brand-loader" id="brand-loader">
+    <svg class="brand-loader-grid" id="brand-loader-grid" viewBox="0 0 80 112"></svg>
   </div>
+
+  <div class="brand-hero">
+    <h1>Brand</h1>
+    <p>Assets and guidelines for using the Simplicity brand. Use these resources as provided — don't modify the logos or colors.</p>
+  </div>
+
+  <div class="brand-photo">
+    <img src="/images/brand-signage.jpg" alt="The Simplicity dot-matrix wordmark applied as architectural signage" loading="lazy">
+  </div>
+  <p class="brand-photo-caption">The dot mark, applied as signage — same language, real space.</p>
+
+  <div class="brand-intro-copy">
+    <h2>One mark, built from points.</h2>
+    <p>Every asset on this page traces back to the same idea: small, deliberate dots that read clearly at any scale — on screen, on paper, or on a wall. What follows is how we keep that consistent.</p>
+  </div>
+
+  <section class="wordmark-band">
+    <div class="wordmark-band-inner">
+      <p class="wordmark-band-label">Wordmark &amp; Dot Mark</p>
+      <span class="mark-big">Simplicity</span>
+      <div class="dot-row">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="6"  r="3.2" fill="currentColor"/>
+          <circle cx="12" cy="12" r="2.8" fill="currentColor"/>
+          <circle cx="28" cy="12" r="2.8" fill="currentColor"/>
+          <circle cx="7"  cy="20" r="2.4" fill="currentColor"/>
+          <circle cx="33" cy="20" r="2.4" fill="currentColor"/>
+          <circle cx="20" cy="20" r="2.2" fill="currentColor"/>
+          <circle cx="20" cy="28" r="2"   fill="currentColor"/>
+          <circle cx="20" cy="34" r="1.8" fill="currentColor"/>
+        </svg>
+        <div class="dot-on-accent">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="6"  r="3.2" fill="#fff"/>
+            <circle cx="12" cy="12" r="2.8" fill="#fff" opacity="0.9"/>
+            <circle cx="28" cy="12" r="2.8" fill="#fff" opacity="0.9"/>
+            <circle cx="7"  cy="20" r="2.4" fill="#fff" opacity="0.8"/>
+            <circle cx="33" cy="20" r="2.4" fill="#fff" opacity="0.8"/>
+            <circle cx="20" cy="20" r="2.2" fill="#fff" opacity="0.7"/>
+            <circle cx="20" cy="28" r="2"   fill="#fff" opacity="0.6"/>
+            <circle cx="20" cy="34" r="1.8" fill="#fff" opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+      <a class="download-btn" href="/favicon.svg" download="simplicity-dot-mark.svg">Download dot mark SVG</a>
+    </div>
+  </section>
+
+  <section class="color-band">
+    <p class="color-band-label">Colors</p>
+    <div class="color-band-strip">
+      <div class="color-band-tile" style="background:#FF5A1F; color:#fff;">
+        <span class="color-band-name">Accent Orange</span>
+        <span class="color-band-hex">#FF5A1F</span>
+      </div>
+      <div class="color-band-tile" style="background:#F04E15; color:#fff;">
+        <span class="color-band-name">Accent Hover</span>
+        <span class="color-band-hex">#F04E15</span>
+      </div>
+      <div class="color-band-tile" style="background:#F3F1EC; color:#000;">
+        <span class="color-band-name">Light</span>
+        <span class="color-band-hex">#F3F1EC</span>
+      </div>
+      <div class="color-band-tile" style="background:#0A0A0A; color:#F3F1EC;">
+        <span class="color-band-name">Dark</span>
+        <span class="color-band-hex">#0A0A0A</span>
+      </div>
+      <div class="color-band-tile" style="background:#000000; color:#fff;">
+        <span class="color-band-name">Foreground</span>
+        <span class="color-band-hex">#000000</span>
+      </div>
+      <div class="color-band-tile" style="background:#6B6A63; color:#fff;">
+        <span class="color-band-name">Muted</span>
+        <span class="color-band-hex">#6B6A63</span>
+      </div>
+    </div>
+  </section>
 
   <div class="content">
-    <h1>Brand</h1>
-    <p class="subtitle">Assets and guidelines for using the Simplicity brand. Please use these resources as provided and don't modify the logos or colors.</p>
+    <section>
+      <div class="section-head"><h2>Typography</h2></div>
 
-    <!-- Wordmark -->
-    <h2>Wordmark</h2>
-    <div class="logo-grid">
-      <div class="logo-card light-card">
-        <svg viewBox="0 0 40 40" style="width:40px; display:none;"></svg>
-        <span style="font-size:2rem; font-weight:700; letter-spacing:-0.03em; color:#000;">Simplicity</span>
-        <span class="card-label">Light</span>
+      <div class="type-block">
+        <p class="type-label">Display</p>
+        <p class="type-display t-1">The easiest way to automate.</p>
       </div>
-      <div class="logo-card dark-card">
-        <span style="font-size:2rem; font-weight:700; letter-spacing:-0.03em; color:#F3F1EC;">Simplicity</span>
-        <span class="card-label">Dark</span>
-      </div>
-      <div class="logo-card accent-card">
-        <span style="font-size:2rem; font-weight:700; letter-spacing:-0.03em; color:#fff;">Simplicity</span>
-        <span class="card-label">Accent</span>
-      </div>
-    </div>
 
-    <!-- Dot Mark -->
-    <h2>Dot Mark</h2>
-    <div class="dot-logo-grid">
-      <div class="dot-card light-card">
-        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="6"  r="3.2" fill="#000"/>
-          <circle cx="12" cy="12" r="2.8" fill="#000"/>
-          <circle cx="28" cy="12" r="2.8" fill="#000"/>
-          <circle cx="7"  cy="20" r="2.4" fill="#000"/>
-          <circle cx="33" cy="20" r="2.4" fill="#000"/>
-          <circle cx="20" cy="20" r="2.2" fill="#000"/>
-          <circle cx="20" cy="28" r="2"   fill="#000"/>
-          <circle cx="20" cy="34" r="1.8" fill="#000"/>
-        </svg>
-        <span class="card-label">Light</span>
+      <div class="type-block">
+        <p class="type-label">Heading</p>
+        <p class="type-display t-2">Get it done, with Simplicity.</p>
       </div>
-      <div class="dot-card dark-card">
-        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="6"  r="3.2" fill="#F3F1EC"/>
-          <circle cx="12" cy="12" r="2.8" fill="#F3F1EC"/>
-          <circle cx="28" cy="12" r="2.8" fill="#F3F1EC"/>
-          <circle cx="7"  cy="20" r="2.4" fill="#F3F1EC"/>
-          <circle cx="33" cy="20" r="2.4" fill="#F3F1EC"/>
-          <circle cx="20" cy="20" r="2.2" fill="#F3F1EC"/>
-          <circle cx="20" cy="28" r="2"   fill="#F3F1EC"/>
-          <circle cx="20" cy="34" r="1.8" fill="#F3F1EC"/>
-        </svg>
-        <span class="card-label">Dark</span>
-      </div>
-      <div class="dot-card accent-card">
-        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="6"  r="3.2" fill="#fff"/>
-          <circle cx="12" cy="12" r="2.8" fill="#fff" opacity="0.9"/>
-          <circle cx="28" cy="12" r="2.8" fill="#fff" opacity="0.9"/>
-          <circle cx="7"  cy="20" r="2.4" fill="#fff" opacity="0.8"/>
-          <circle cx="33" cy="20" r="2.4" fill="#fff" opacity="0.8"/>
-          <circle cx="20" cy="20" r="2.2" fill="#fff" opacity="0.7"/>
-          <circle cx="20" cy="28" r="2"   fill="#fff" opacity="0.6"/>
-          <circle cx="20" cy="34" r="1.8" fill="#fff" opacity="0.5"/>
-        </svg>
-        <span class="card-label">Accent</span>
-      </div>
-    </div>
 
-    <a class="download-btn" href="/favicon.svg" download="simplicity-dot-mark.svg">Download dot mark SVG</a>
+      <div class="type-block">
+        <p class="type-label">Body</p>
+        <p class="type-body-sample">Enterprise-fast agentic automation. Set up in minutes, automate for years — docs, decks, sheets, code, research, and more.</p>
+      </div>
 
-    <!-- Colors -->
-    <h2>Colors</h2>
-    <div class="color-grid">
-      <div class="color-swatch">
-        <div class="swatch-block" style="background:#FF5A1F;"></div>
-        <div class="swatch-info">
-          <div class="swatch-name">Accent Orange</div>
-          <div class="swatch-hex">#FF5A1F</div>
+      <div class="type-block">
+        <p class="type-label">Font stack</p>
+        <p class="type-stack">'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Buttons</h2></div>
+      <div class="button-showcase">
+        <div class="button-group">
+          <button class="dot-send-btn" aria-label="Send">
+            <svg viewBox="0 0 18 18"><circle cx="3" cy="9" r="2"/><circle cx="9" cy="9" r="2"/><circle cx="15" cy="9" r="2"/></svg>
+          </button>
+          <span class="button-caption">Send</span>
+        </div>
+
+        <div class="button-group">
+          <button class="dot-icon-btn" aria-label="More options">
+            <svg viewBox="0 0 16 16"><circle cx="2" cy="8" r="1.8"/><circle cx="8" cy="8" r="1.8"/><circle cx="14" cy="8" r="1.8"/></svg>
+          </button>
+          <span class="button-caption">Icon</span>
+        </div>
+
+        <div class="button-group">
+          <button class="dot-text-btn">
+            <svg viewBox="0 0 14 14"><circle cx="2" cy="7" r="1.6"/><circle cx="7" cy="7" r="1.6"/><circle cx="12" cy="7" r="1.6"/></svg>
+            Continue
+          </button>
+          <span class="button-caption">Text + dots</span>
+        </div>
+
+        <div class="button-group">
+          <a class="btn btn-primary" href="#">
+            <svg class="btn-dot" viewBox="0 0 14 14">
+              <circle cx="7" cy="7" r="2.4" fill="#fff"/>
+              <circle cx="7" cy="1.4" r="1.5" fill="#fff" opacity="0.75"/>
+              <circle cx="12.6" cy="7" r="1.5" fill="#fff" opacity="0.75"/>
+              <circle cx="7" cy="12.6" r="1.5" fill="#fff" opacity="0.75"/>
+              <circle cx="1.4" cy="7" r="1.5" fill="#fff" opacity="0.75"/>
+            </svg>
+            Log in
+          </a>
+          <span class="button-caption">Primary</span>
+        </div>
+
+        <div class="button-group">
+          <a class="btn btn-outline" href="#">Register</a>
+          <span class="button-caption">Outline</span>
         </div>
       </div>
-      <div class="color-swatch">
-        <div class="swatch-block" style="background:#F04E15;"></div>
-        <div class="swatch-info">
-          <div class="swatch-name">Accent Hover</div>
-          <div class="swatch-hex">#F04E15</div>
-        </div>
-      </div>
-      <div class="color-swatch">
-        <div class="swatch-block" style="background:#F3F1EC;"></div>
-        <div class="swatch-info">
-          <div class="swatch-name">Light Background</div>
-          <div class="swatch-hex">#F3F1EC</div>
-        </div>
-      </div>
-      <div class="color-swatch">
-        <div class="swatch-block" style="background:#0A0A0A;"></div>
-        <div class="swatch-info">
-          <div class="swatch-name">Dark Background</div>
-          <div class="swatch-hex">#0A0A0A</div>
-        </div>
-      </div>
-      <div class="color-swatch">
-        <div class="swatch-block" style="background:#000000;"></div>
-        <div class="swatch-info">
-          <div class="swatch-name">Foreground</div>
-          <div class="swatch-hex">#000000</div>
-        </div>
-      </div>
-      <div class="color-swatch">
-        <div class="swatch-block" style="background:#6B6A63;"></div>
-        <div class="swatch-info">
-          <div class="swatch-name">Muted</div>
-          <div class="swatch-hex">#6B6A63</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Typography -->
-    <h2>Typography</h2>
-    <div class="type-sample">
-      <div class="type-name">System Font Stack</div>
-      <div class="type-display">The easiest way to automate.</div>
-      <p class="type-body">-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif</p>
-    </div>
-
-    <!-- Guidelines -->
-    <h2>Usage Guidelines</h2>
-    <div class="guidelines">
-      <p><strong>Do:</strong></p>
-      <ul>
-        <li>Use the logo on clean, uncluttered backgrounds</li>
-        <li>Maintain clear space around the logo</li>
-        <li>Use approved color combinations shown above</li>
-      </ul>
-      <p style="margin-top:1.25rem;"><strong>Don't:</strong></p>
-      <ul>
-        <li>Stretch, rotate, or distort the logo</li>
-        <li>Change the logo colors outside of approved palettes</li>
-        <li>Place the logo on busy or low-contrast backgrounds</li>
-        <li>Use the logo at sizes smaller than 24px</li>
-      </ul>
-    </div>
+    </section>
   </div>
+
+  <section class="identity-band">
+    <div class="identity-band-inner">
+      <p class="identity-copy">Simplicity is built like the mark itself: <strong>small, deliberate points that add up to something clear.</strong> No noise, no filler — just the work, finished.</p>
+
+      <div class="identity-traits">
+        <div class="identity-trait">
+          <h3>Direct</h3>
+          <p>We say what we mean and show, rather than describe.</p>
+        </div>
+        <div class="identity-trait">
+          <h3>Precise</h3>
+          <p>Every dot, every word is placed on purpose — nothing decorative.</p>
+        </div>
+        <div class="identity-trait">
+          <h3>Calm</h3>
+          <p>Automation should feel effortless, not loud. The product does the work quietly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="content">
+    <section>
+      <div class="section-head"><h2>Usage Guidelines</h2></div>
+      <div class="guidelines-grid">
+        <div class="guidelines-card">
+          <h3>Do</h3>
+          <ul>
+            <li>Use the logo on clean, uncluttered backgrounds</li>
+            <li>Maintain clear space around the logo</li>
+            <li>Use approved color combinations shown above</li>
+          </ul>
+        </div>
+        <div class="guidelines-card">
+          <h3>Don't</h3>
+          <ul>
+            <li>Stretch, rotate, or distort the logo</li>
+            <li>Change the logo colors outside of approved palettes</li>
+            <li>Place the logo on busy or low-contrast backgrounds</li>
+            <li>Use the logo at sizes smaller than 24px</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div data-footer></div>
+  <script src="/scripts/brand-loader.js"></script>
+  <script src="/scripts/nav-init.js"></script>
 </body>
 </html>

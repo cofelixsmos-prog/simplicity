@@ -12,71 +12,80 @@
       document.documentElement.setAttribute('data-theme', theme);
     })();
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="/style.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --bg: #F3F1EC;
-      --fg: #000000;
-      --fg-muted: #6B6A63;
-      --accent: #FF5A1F;
-      --accent-hover: #F04E15;
-    }
-    html[data-theme="dark"] {
-      --bg: #0A0A0A;
-      --fg: #F3F1EC;
-      --fg-muted: #9A968C;
-      --accent: #FF5A1F;
-      --accent-hover: #FF7440;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-      color: var(--fg);
-      background: var(--bg);
+    .error-wrap {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      min-height: 70vh;
       text-align: center;
       padding: 2rem;
-      transition: background 0.25s ease, color 0.25s ease;
+      overflow: hidden;
+    }
+
+    .error-dots {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 8px;
+    }
+
+    .error-dots circle {
+      fill: var(--fg);
+      opacity: 0.85;
     }
 
     .error-code {
       font-size: clamp(5rem, 15vw, 10rem);
-      font-weight: 700;
+      font-weight: 800;
       line-height: 1;
       letter-spacing: -0.04em;
-      color: var(--accent);
+      color: var(--fg);
     }
 
     .error-message {
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-size: clamp(1.05rem, 2.2vw, 1.25rem);
       color: var(--fg-muted);
       margin-top: 0.75rem;
-      max-width: 26ch;
+      max-width: 30ch;
+      line-height: 1.55;
     }
 
-    .back-link {
-      display: inline-block;
-      margin-top: 2.5rem;
-      padding: 0.75rem 2rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #fff;
-      background: var(--accent);
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background 0.15s ease;
+    .error-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 2.25rem;
     }
-    .back-link:hover { background: var(--accent-hover); }
   </style>
 </head>
 <body>
-  <p class="error-code">404</p>
-  <p class="error-message">This page doesn't exist. Let's head back home.</p>
-  <a class="back-link" href="/">Back to homepage</a>
+  <div class="error-wrap">
+    <svg class="error-dots" viewBox="0 0 40 40">
+      <circle cx="20" cy="6"  r="3.2"/>
+      <circle cx="12" cy="12" r="2.8"/>
+      <circle cx="28" cy="12" r="2.8"/>
+      <circle cx="7"  cy="20" r="2.4"/>
+      <circle cx="33" cy="20" r="2.4"/>
+      <circle cx="20" cy="20" r="2.2"/>
+      <circle cx="20" cy="28" r="2"/>
+      <circle cx="20" cy="34" r="1.8"/>
+    </svg>
+    <p class="error-code">404</p>
+    <p class="error-message">This page doesn't exist. Let's get you back to something that does.</p>
+    <div class="error-actions">
+      <a class="btn btn-primary" href="/">Back to homepage</a>
+      <a class="btn btn-outline" href="mailto:cofelixsmos@gmail.com">Contact us</a>
+    </div>
+  </div>
+  <div data-footer></div>
+  <script src="/scripts/nav-init.js"></script>
 </body>
 </html>

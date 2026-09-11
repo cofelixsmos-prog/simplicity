@@ -3,6 +3,7 @@
     ['nav', 'sections/nav.html'],
     ['hero', 'sections/hero.html'],
     ['works', 'sections/works.html'],
+    ['faq', 'sections/faq.html'],
     ['footer', 'sections/footer.html']
   ];
 
@@ -68,6 +69,35 @@
     });
   }
 
+  function setupFaq() {
+    var items = document.querySelectorAll('.faq-item');
+    if (!items.length) return;
+
+    function close(item) {
+      var answer = item.querySelector('.faq-answer');
+      item.classList.remove('is-open');
+      item.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+      answer.style.maxHeight = '0px';
+    }
+
+    function open(item) {
+      var answer = item.querySelector('.faq-answer');
+      item.classList.add('is-open');
+      item.querySelector('.faq-question').setAttribute('aria-expanded', 'true');
+      answer.style.maxHeight = answer.scrollHeight + 'px';
+    }
+
+    items.forEach(function (item) {
+      var answer = item.querySelector('.faq-answer');
+      answer.style.maxHeight = '0px';
+      item.querySelector('.faq-question').addEventListener('click', function () {
+        var isOpen = item.classList.contains('is-open');
+        items.forEach(close);
+        if (!isOpen) open(item);
+      });
+    });
+  }
+
   function setupReveal() {
     var elements = document.querySelectorAll('.reveal-on-scroll');
     if (!('IntersectionObserver' in window)) {
@@ -85,21 +115,28 @@
     elements.forEach(function (element) { observer.observe(element); });
   }
 
+  function safe(fn) {
+    try { fn(); } catch (error) { console.error(error); }
+  }
+
   Promise.all(sections.map(function (section) {
     return loadSection(section[1]);
   }))
     .then(function (markup) {
       insertSections(markup);
-      setupThemeToggle();
-      setupMobileMenu();
-      setupReveal();
+      safe(setupThemeToggle);
+      safe(setupMobileMenu);
+      safe(setupFaq);
+      safe(setupReveal);
+      loadScript('scripts/wordmark.js').catch(function (error) { console.error(error); });
+      loadScript('scripts/pixel-field.js').catch(function (error) { console.error(error); });
+      loadScript('scripts/footer-wordmark.js').catch(function (error) { console.error(error); });
       return loadScript('https://unpkg.com/lenis@1/dist/lenis.min.js')
         .then(function () {
-          return Promise.all([
-            loadScript('scripts/wordmark.js'),
-            loadScript('scripts/pixel-field.js'),
-            loadScript('scripts/lenis-init.js')
-          ]);
+          return loadScript('scripts/lenis-init.js');
+        })
+        .catch(function (error) {
+          console.error(error);
         });
     })
     .catch(function (error) {

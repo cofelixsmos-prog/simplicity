@@ -118,18 +118,4 @@
         });
         worksSvg.appendChild(frag);
       }
-
-      // ---------- Render the same dots, statically, big, inside the footer ----------
-      var footerSvg = document.getElementById('footer-wordmark');
-      if (footerSvg) {
-        var footerFrag = document.createDocumentFragment();
-        DOTS.forEach(function (d) {
-          var c = document.createElementNS(ns, 'circle');
-          c.setAttribute('cx', d[0]);
-          c.setAttribute('cy', d[1]);
-          c.setAttribute('r', d[2]);
-          footerFrag.appendChild(c);
-        });
-        footerSvg.appendChild(footerFrag);
-      }
     })();

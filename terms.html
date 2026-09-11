@@ -14,65 +14,163 @@
     document.documentElement.setAttribute('data-theme', theme);
   })();
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/style.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root {
-    --bg: #F3F1EC; --fg: #000000; --fg-muted: #6B6A63;
-    --accent: #FF5A1F; --accent-hover: #F04E15;
-    --nav-border: rgba(0,0,0,0.06);
+  .legal-hero {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: clamp(48px, 8vw, 90px) 24px 0;
   }
-  html[data-theme="dark"] {
-    --bg: #0A0A0A; --fg: #F3F1EC; --fg-muted: #9A968C;
-    --accent: #FF5A1F; --accent-hover: #FF7440;
-    --nav-border: rgba(255,255,255,0.08);
+
+  .legal-hero h1 {
+    font-size: clamp(2.5rem, 6vw, 3.75rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
   }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    color: var(--fg); background: var(--bg);
-    transition: background 0.25s ease, color 0.25s ease;
+
+  .legal-meta {
+    color: var(--fg-muted);
+    font-size: 0.95rem;
+    margin-top: 14px;
   }
-  .page-header {
-    padding: 26px 52px; border-bottom: 1px solid var(--nav-border);
-    display: flex; align-items: center; justify-content: space-between;
+
+  .legal-body {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: clamp(40px, 6vw, 64px) 24px clamp(90px, 10vw, 130px);
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: clamp(32px, 6vw, 72px);
+    align-items: start;
   }
-  .page-header a { color: var(--fg); text-decoration: none; font-weight: 600; font-size: 1rem; }
-  .page-header a:hover { color: var(--accent); }
-  .content {
-    max-width: 640px; margin: 0 auto; padding: 4rem 2rem 6rem;
-    line-height: 1.7;
+
+  .legal-index {
+    position: sticky;
+    top: 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
-  h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
-  .last-updated { color: var(--fg-muted); font-size: 0.875rem; margin-bottom: 2.5rem; }
-  h2 { font-size: 1.15rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.5rem; }
-  p { color: var(--fg-muted); margin-bottom: 1rem; }
-  a { color: var(--accent); }
+
+  .legal-index a {
+    color: var(--fg-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 4px 0;
+    transition: color 0.15s ease;
+  }
+
+  .legal-index a:hover {
+    color: var(--fg);
+  }
+
+  .legal-sections {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .legal-section {
+    padding: 28px 0;
+    border-top: 1px solid var(--nav-border);
+    scroll-margin-top: 96px;
+  }
+
+  .legal-section:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .legal-section h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+
+  .legal-section p {
+    color: var(--fg-muted);
+    line-height: 1.75;
+    font-size: 1rem;
+    max-width: 60ch;
+  }
+
+  .legal-section a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .legal-section a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 760px) {
+    .legal-body { grid-template-columns: 1fr; }
+    .legal-index {
+      position: static;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 6px 18px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--nav-border);
+      margin-bottom: 8px;
+    }
+  }
 </style>
 </head>
 <body>
-  <div class="page-header">
-    <a href="/">← Simplicity</a>
-  </div>
-  <div class="content">
+  <div class="legal-hero">
     <h1>Terms of Service</h1>
-    <p class="last-updated">Last updated: September 10, 2026</p>
-
-    <h2>Acceptance</h2>
-    <p>By accessing or using Simplicity, you agree to these terms. If you do not agree, please do not use the service.</p>
-
-    <h2>Use of service</h2>
-    <p>You may use Simplicity for lawful purposes only. You are responsible for all activity under your account.</p>
-
-    <h2>Intellectual property</h2>
-    <p>All content, design, and code on this site are owned by Simplicity. You may not copy, modify, or redistribute them without permission.</p>
-
-    <h2>Limitation of liability</h2>
-    <p>Simplicity is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the service.</p>
-
-    <h2>Changes</h2>
-    <p>We may update these terms at any time. Continued use of the service constitutes acceptance of the revised terms.</p>
-
-    <h2>Contact</h2>
-    <p>Questions? Reach out at <a href="mailto:cofelixsmos@gmail.com">cofelixsmos@gmail.com</a>.</p>
+    <p class="legal-meta">Last updated September 10, 2026</p>
   </div>
+
+  <div class="legal-body">
+    <nav class="legal-index" aria-label="Sections">
+      <a href="#acceptance">Acceptance</a>
+      <a href="#use">Use of service</a>
+      <a href="#ip">Intellectual property</a>
+      <a href="#liability">Limitation of liability</a>
+      <a href="#changes">Changes</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="legal-sections">
+      <div class="legal-section" id="acceptance">
+        <h2>Acceptance</h2>
+        <p>By accessing or using Simplicity, you agree to these terms. If you do not agree, please do not use the service.</p>
+      </div>
+
+      <div class="legal-section" id="use">
+        <h2>Use of service</h2>
+        <p>You may use Simplicity for lawful purposes only. You are responsible for all activity under your account.</p>
+      </div>
+
+      <div class="legal-section" id="ip">
+        <h2>Intellectual property</h2>
+        <p>All content, design, and code on this site are owned by Simplicity. You may not copy, modify, or redistribute them without permission.</p>
+      </div>
+
+      <div class="legal-section" id="liability">
+        <h2>Limitation of liability</h2>
+        <p>Simplicity is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the service.</p>
+      </div>
+
+      <div class="legal-section" id="changes">
+        <h2>Changes</h2>
+        <p>We may update these terms at any time. Continued use of the service constitutes acceptance of the revised terms.</p>
+      </div>
+
+      <div class="legal-section" id="contact">
+        <h2>Contact</h2>
+        <p>Questions? Reach out at <a href="mailto:cofelixsmos@gmail.com">cofelixsmos@gmail.com</a>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div data-footer></div>
+  <script src="/scripts/nav-init.js"></script>
 </body>
 </html>

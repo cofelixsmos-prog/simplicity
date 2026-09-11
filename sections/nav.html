@@ -1,5 +1,5 @@
   <nav>
-    <div class="nav-left">
+    <a class="nav-left" href="/" aria-label="Simplicity home">
       <svg class="nav-dot" viewBox="0 0 40 40">
         <circle cx="20" cy="6"  r="3.2"/>
         <circle cx="12" cy="12" r="2.8"/>
@@ -11,91 +11,75 @@
         <circle cx="20" cy="34" r="1.8"/>
       </svg>
       <span class="nav-wordmark">Simplicity</span>
-    </div>
+    </a>
 
     <div class="nav-links">
-      <a href="#works">Our Work</a>
-      <a href="/brand.html">Brand</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/terms.html">Terms</a>
-
-      <!--
-      <div class="nav-dropdown" id="pricing-dropdown">
-        <button class="nav-dropdown-trigger">Pricing</button>
+      <div class="nav-dropdown" id="work-dropdown">
+        <button class="nav-dropdown-trigger">Work</button>
         <div class="nav-dropdown-panel">
           <div>
-            <p class="dropdown-col-label">Plans</p>
+            <p class="dropdown-col-label">Explore</p>
             <div class="dropdown-links large">
-              <a href="#">Free</a>
-              <a href="#">Pro</a>
-              <a href="#">Team</a>
-              <a href="#">Enterprise</a>
+              <a href="/#works" data-nav-link="works">Our Work</a>
+              <a href="/#works" data-nav-link="works">Demo Collection</a>
             </div>
           </div>
 
           <div>
-            <p class="dropdown-col-label">Add ons</p>
+            <p class="dropdown-col-label">Made With Simplicity</p>
             <div class="dropdown-links small">
-              <a href="#">Harness credits</a>
-              <a href="#">Extra storage</a>
-              <a href="#">Priority support</a>
+              <a href="/#works" data-nav-link="works">Docs</a>
+              <a href="/#works" data-nav-link="works">Decks</a>
+              <a href="/#works" data-nav-link="works">Sheets</a>
+              <a href="/#works" data-nav-link="works">Code</a>
+              <a href="/#works" data-nav-link="works">Research</a>
             </div>
           </div>
         </div>
       </div>
-      -->
 
-      <!--
-      <div class="nav-dropdown" id="docs-dropdown">
-        <button class="nav-dropdown-trigger">Docs</button>
+      <div class="nav-dropdown" id="brand-dropdown">
+        <button class="nav-dropdown-trigger">Brand</button>
         <div class="nav-dropdown-panel">
           <div>
-            <p class="dropdown-col-label">Guides</p>
+            <p class="dropdown-col-label">Assets</p>
             <div class="dropdown-links large">
-              <a href="#">Getting Started</a>
-              <a href="#">Simplicity Work</a>
-              <a href="#">Harness</a>
-              <a href="#">API Reference</a>
+              <a href="/brand.html">Wordmark</a>
+              <a href="/brand.html">Dot Mark</a>
+              <a href="/brand.html">Colors</a>
             </div>
           </div>
 
           <div>
             <p class="dropdown-col-label">Resources</p>
             <div class="dropdown-links small">
-              <a href="#">Changelog</a>
-              <a href="#">Status</a>
-              <a href="#">Support</a>
+              <a href="/brand.html">Typography</a>
+              <a href="/brand.html">Usage Guidelines</a>
+              <a href="/favicon.svg" download="simplicity-dot-mark.svg">Download Dot Mark</a>
             </div>
           </div>
         </div>
       </div>
-      -->
 
-      <!--
-      <div class="nav-dropdown" id="about-dropdown">
-        <button class="nav-dropdown-trigger">About</button>
+      <div class="nav-dropdown" id="company-dropdown">
+        <button class="nav-dropdown-trigger">Company</button>
         <div class="nav-dropdown-panel">
           <div>
-            <p class="dropdown-col-label">Company</p>
+            <p class="dropdown-col-label">Legal</p>
             <div class="dropdown-links large">
-              <a href="#">Our Story</a>
-              <a href="#">Careers</a>
-              <a href="#">Blog</a>
-              <a href="#">Contact</a>
+              <a href="/privacy.html">Privacy</a>
+              <a href="/terms.html">Terms</a>
             </div>
           </div>
 
           <div>
-            <p class="dropdown-col-label">Legal</p>
+            <p class="dropdown-col-label">Contact</p>
             <div class="dropdown-links small">
-              <a href="#">Privacy</a>
-              <a href="#">Terms</a>
-              <a href="#">Security</a>
+              <a href="mailto:cofelixsmos@gmail.com">Email us</a>
             </div>
           </div>
         </div>
       </div>
-      -->
     </div>
 
     <div class="nav-actions">
@@ -115,10 +99,11 @@
     </div>
 
     <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
-      <a href="#works">Our Work</a>
+      <a href="/#works" data-nav-link="works">Our Work</a>
       <a href="/brand.html">Brand</a>
       <a href="/privacy.html">Privacy</a>
       <a href="/terms.html">Terms</a>
+      <a href="mailto:cofelixsmos@gmail.com">Contact</a>
       <div class="mobile-menu-divider"></div>
       <button class="mobile-theme-toggle" id="mobile-theme-toggle" aria-label="Theme">
         <span>Theme</span>
