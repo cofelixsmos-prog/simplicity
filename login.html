@@ -16,6 +16,11 @@
     window.simplicitySetThemeCookie = function (value) {
       var consentMatch = document.cookie.match(/(?:^|; )simplicity-consent=([^;]*)/);
       var consent = consentMatch ? decodeURIComponent(consentMatch[1]) : null;
+      try {
+        if (sessionStorage.getItem('simplicity-consent') === 'rejected') return;
+      } catch (error) {
+        // Continue with the cookie check if session storage is unavailable.
+      }
       if (consent === 'rejected') return;
       var date = new Date();
       date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
@@ -198,10 +203,7 @@
   }
 
   .auth-home {
-    position: fixed;
-    top: 24px;
-    left: 24px;
-    z-index: 5;
+    display: none;
   }
 
   .auth-home svg {
@@ -284,5 +286,6 @@
       <p class="auth-footer">Don't have an account? <a href="/register.html">Register</a></p>
     </div>
   </div>
+  <script src="/scripts/nav-init.js"></script>
 </body>
 </html>

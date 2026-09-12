@@ -36,6 +36,11 @@
     window.simplicitySetThemeCookie = function (value) {
       var consentMatch = document.cookie.match(/(?:^|; )simplicity-consent=([^;]*)/);
       var consent = consentMatch ? decodeURIComponent(consentMatch[1]) : null;
+      try {
+        if (sessionStorage.getItem('simplicity-consent') === 'rejected') return;
+      } catch (error) {
+        // Continue with the cookie check if session storage is unavailable.
+      }
       if (consent === 'rejected') return;
       var date = new Date();
       date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);

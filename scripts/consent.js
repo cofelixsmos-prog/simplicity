@@ -23,13 +23,40 @@
   }
 
   function getConsent() {
-    return getCookie(CONSENT_COOKIE);
+    var cookieConsent = getCookie(CONSENT_COOKIE);
+    if (cookieConsent === 'rejected') {
+      deleteCookie(CONSENT_COOKIE);
+      try {
+        sessionStorage.setItem(CONSENT_COOKIE, 'rejected');
+      } catch (error) {
+        // Consent remains unset if session storage is unavailable.
+      }
+      return 'rejected';
+    }
+    if (cookieConsent) return cookieConsent;
+    try {
+      return sessionStorage.getItem(CONSENT_COOKIE);
+    } catch (error) {
+      return null;
+    }
   }
 
   function setConsent(value) {
-    setCookie(CONSENT_COOKIE, value, COOKIE_DAYS);
     if (value === 'rejected') {
       deleteCookie(THEME_COOKIE);
+      deleteCookie(CONSENT_COOKIE);
+      try {
+        sessionStorage.setItem(CONSENT_COOKIE, 'rejected');
+      } catch (error) {
+        // Consent remains unset if session storage is unavailable.
+      }
+      return;
+    }
+    setCookie(CONSENT_COOKIE, value, COOKIE_DAYS);
+    try {
+      sessionStorage.removeItem(CONSENT_COOKIE);
+    } catch (error) {
+      // Persistent consent still works if session storage is unavailable.
     }
   }
 
@@ -57,6 +84,35 @@
 
     var acceptBtn = document.getElementById('cookie-accept');
     var rejectBtn = document.getElementById('cookie-reject');
+    var closeBtn = document.getElementById('cookie-banner-close');
+    var reopenBtn = document.getElementById('cookie-reopen');
+    var inactivityTimer;
+
+    function minimize() {
+      banner.classList.remove('is-visible');
+      banner.classList.add('is-minimized');
+      if (reopenBtn) reopenBtn.classList.add('is-visible');
+    }
+
+    function reject() {
+      setConsent('rejected');
+      minimize();
+    }
+
+    function resetTimer() {
+      window.clearTimeout(inactivityTimer);
+      inactivityTimer = window.setTimeout(minimize, 5000);
+    }
+
+    function minimizeOnActivity(event) {
+      if (!banner.contains(event.target)) minimize();
+    }
+
+    resetTimer();
+    window.addEventListener('scroll', minimize, { passive: true, once: true });
+    document.addEventListener('pointerover', minimizeOnActivity, { once: true });
+    document.addEventListener('pointerdown', minimizeOnActivity, { once: true });
+    document.addEventListener('keydown', minimizeOnActivity, { once: true });
 
     if (acceptBtn) {
       acceptBtn.addEventListener('click', function () {
@@ -64,14 +120,22 @@
         var theme = document.documentElement.getAttribute('data-theme');
         if (theme) window.simplicitySetThemeCookie(theme);
         banner.classList.remove('is-visible');
+        banner.classList.remove('is-minimized');
+        if (reopenBtn) reopenBtn.classList.remove('is-visible');
       });
     }
     if (rejectBtn) {
       rejectBtn.addEventListener('click', function () {
-        setConsent('rejected');
-        banner.classList.remove('is-visible');
+        reject();
       });
     }
+    if (closeBtn) closeBtn.addEventListener('click', reject);
+    if (reopenBtn) reopenBtn.addEventListener('click', function () {
+      banner.classList.remove('is-minimized');
+      banner.classList.add('is-visible');
+      reopenBtn.classList.remove('is-visible');
+      resetTimer();
+    });
   }
 
   function setupModal() {
@@ -84,6 +148,7 @@
     var status = document.getElementById('cookie-status');
     var saveBtn = document.getElementById('cookie-save');
     var banner = document.getElementById('cookie-banner');
+    var lastFocusedElement;
 
     function refresh() {
       if (!toggle || !status) return;
@@ -102,16 +167,19 @@
 
     function open(event) {
       if (event) event.preventDefault();
+      lastFocusedElement = event ? event.currentTarget : document.activeElement;
       refresh();
       overlay.classList.add('is-visible');
       var settingsDropdown = document.getElementById('settings-dropdown');
       var settingsToggle = document.getElementById('settings-toggle');
       if (settingsDropdown) settingsDropdown.classList.remove('is-open');
       if (settingsToggle) settingsToggle.setAttribute('aria-expanded', 'false');
+      if (closeBtn) closeBtn.focus();
     }
 
     function close() {
       overlay.classList.remove('is-visible');
+      if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus();
     }
 
     openBtns.forEach(function (btn) {
@@ -122,7 +190,23 @@
       if (event.target === overlay) close();
     });
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') close();
+      if (!overlay.classList.contains('is-visible')) return;
+      if (event.key === 'Escape') {
+        close();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      var focusable = overlay.querySelectorAll('button:not([disabled]), a[href], input:not([disabled])');
+      if (!focusable.length) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     });
 
     if (saveBtn) {
