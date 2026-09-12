@@ -4,7 +4,9 @@
     ['hero', 'sections/hero.html'],
     ['works', 'sections/works.html'],
     ['faq', 'sections/faq.html'],
-    ['footer', 'sections/footer.html']
+    ['footer', 'sections/footer.html'],
+    ['cookie-banner', 'sections/cookie-banner.html'],
+    ['cookie-modal', 'sections/cookie-modal.html']
   ];
 
   function loadSection(path) {
@@ -33,6 +35,15 @@
     });
   }
 
+  function writeThemeCookie(value) {
+    var consentMatch = document.cookie.match(/(?:^|; )simplicity-consent=([^;]*)/);
+    var consent = consentMatch ? decodeURIComponent(consentMatch[1]) : null;
+    if (consent === 'rejected') return;
+    var date = new Date();
+    date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
+    document.cookie = 'simplicity-theme=' + encodeURIComponent(value) + '; expires=' + date.toUTCString() + '; path=/; SameSite=Lax';
+  }
+
   function setupThemeToggle() {
     var buttons = document.querySelectorAll('#theme-toggle, #mobile-theme-toggle');
     if (!buttons.length) return;
@@ -41,8 +52,30 @@
       var root = document.documentElement;
       var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', next);
-      localStorage.setItem('simplicity-theme', next);
+      writeThemeCookie(next);
       });
+    });
+  }
+
+  function setupSettingsDropdown() {
+    var wrap = document.getElementById('settings-dropdown');
+    var toggle = document.getElementById('settings-toggle');
+    if (!wrap || !toggle) return;
+
+    function setOpen(isOpen) {
+      wrap.classList.toggle('is-open', isOpen);
+      toggle.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    toggle.addEventListener('click', function (event) {
+      event.stopPropagation();
+      setOpen(!wrap.classList.contains('is-open'));
+    });
+    document.addEventListener('click', function (event) {
+      if (!wrap.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') setOpen(false);
     });
   }
 
@@ -126,11 +159,13 @@
       insertSections(markup);
       safe(setupThemeToggle);
       safe(setupMobileMenu);
+      safe(setupSettingsDropdown);
       safe(setupFaq);
       safe(setupReveal);
       loadScript('scripts/wordmark.js').catch(function (error) { console.error(error); });
       loadScript('scripts/pixel-field.js').catch(function (error) { console.error(error); });
       loadScript('scripts/footer-wordmark.js').catch(function (error) { console.error(error); });
+      loadScript('scripts/consent.js').catch(function (error) { console.error(error); });
       return loadScript('https://unpkg.com/lenis@1/dist/lenis.min.js')
         .then(function () {
           return loadScript('scripts/lenis-init.js');

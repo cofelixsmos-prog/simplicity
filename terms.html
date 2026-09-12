@@ -8,21 +8,34 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <script>
   (function () {
-    var saved = localStorage.getItem('simplicity-theme');
-    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var theme = saved || (prefersDark ? 'dark' : 'light');
+    var match = document.cookie.match(/(?:^|; )simplicity-theme=([^;]*)/);
+    var saved = match ? decodeURIComponent(match[1]) : null;
+    var theme = saved || 'light';
     document.documentElement.setAttribute('data-theme', theme);
+
+    window.simplicitySetThemeCookie = function (value) {
+      var consentMatch = document.cookie.match(/(?:^|; )simplicity-consent=([^;]*)/);
+      var consent = consentMatch ? decodeURIComponent(consentMatch[1]) : null;
+      if (consent === 'rejected') return;
+      var date = new Date();
+      date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
+      document.cookie = 'simplicity-theme=' + encodeURIComponent(value) + '; expires=' + date.toUTCString() + '; path=/; SameSite=Lax';
+    };
   })();
 </script>
+<style>
+  html[data-theme="light"] { background: #F3F1EC; color: #000; }
+  html[data-theme="dark"] { background: #0A0A0A; color: #F3F1EC; }
+</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="/style.css">
 <style>
   .legal-hero {
-    max-width: 1080px;
+    max-width: 800px;
     margin: 0 auto;
-    padding: clamp(48px, 8vw, 90px) 24px 0;
+    padding: clamp(48px, 8vw, 90px) 24px clamp(32px, 5vw, 56px);
   }
 
   .legal-hero h1 {
@@ -39,85 +52,59 @@
   }
 
   .legal-body {
-    max-width: 1080px;
+    max-width: 800px;
     margin: 0 auto;
-    padding: clamp(40px, 6vw, 64px) 24px clamp(90px, 10vw, 130px);
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: clamp(32px, 6vw, 72px);
-    align-items: start;
-  }
-
-  .legal-index {
-    position: sticky;
-    top: 96px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .legal-index a {
-    color: var(--fg-muted);
-    text-decoration: none;
-    font-size: 0.9rem;
-    padding: 4px 0;
-    transition: color 0.15s ease;
-  }
-
-  .legal-index a:hover {
-    color: var(--fg);
-  }
-
-  .legal-sections {
-    display: flex;
-    flex-direction: column;
+    padding: 0 24px clamp(90px, 10vw, 130px);
   }
 
   .legal-section {
-    padding: 28px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding: 32px 0;
     border-top: 1px solid var(--nav-border);
-    scroll-margin-top: 96px;
   }
 
   .legal-section:first-child {
     border-top: none;
-    padding-top: 0;
   }
 
-  .legal-section h2 {
-    font-size: 1.35rem;
+  .legal-section-number {
+    flex-shrink: 0;
+    width: 20px;
+    height: auto;
+  }
+
+  .legal-section-number circle {
+    fill: var(--fg-muted);
+  }
+
+  .legal-section-body h2 {
+    font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: -0.01em;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
-  .legal-section p {
+  .legal-section-body p {
     color: var(--fg-muted);
     line-height: 1.75;
     font-size: 1rem;
     max-width: 60ch;
   }
 
-  .legal-section a {
+  .legal-section-body a {
     color: var(--accent);
     text-decoration: none;
   }
 
-  .legal-section a:hover {
+  .legal-section-body a:hover {
     text-decoration: underline;
   }
 
-  @media (max-width: 760px) {
-    .legal-body { grid-template-columns: 1fr; }
-    .legal-index {
-      position: static;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 6px 18px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--nav-border);
-      margin-bottom: 8px;
-    }
+  @media (max-width: 480px) {
+    .legal-section { gap: 14px; }
+    .legal-section-number { width: 16px; }
   }
 </style>
 </head>
@@ -128,42 +115,49 @@
   </div>
 
   <div class="legal-body">
-    <nav class="legal-index" aria-label="Sections">
-      <a href="#acceptance">Acceptance</a>
-      <a href="#use">Use of service</a>
-      <a href="#ip">Intellectual property</a>
-      <a href="#liability">Limitation of liability</a>
-      <a href="#changes">Changes</a>
-      <a href="#contact">Contact</a>
-    </nav>
-
-    <div class="legal-sections">
-      <div class="legal-section" id="acceptance">
+    <div class="legal-section" id="acceptance">
+      <svg class="legal-section-number" data-dot-number="1"></svg>
+      <div class="legal-section-body">
         <h2>Acceptance</h2>
         <p>By accessing or using Simplicity, you agree to these terms. If you do not agree, please do not use the service.</p>
       </div>
+    </div>
 
-      <div class="legal-section" id="use">
+    <div class="legal-section" id="use">
+      <svg class="legal-section-number" data-dot-number="2"></svg>
+      <div class="legal-section-body">
         <h2>Use of service</h2>
         <p>You may use Simplicity for lawful purposes only. You are responsible for all activity under your account.</p>
       </div>
+    </div>
 
-      <div class="legal-section" id="ip">
+    <div class="legal-section" id="ip">
+      <svg class="legal-section-number" data-dot-number="3"></svg>
+      <div class="legal-section-body">
         <h2>Intellectual property</h2>
         <p>All content, design, and code on this site are owned by Simplicity. You may not copy, modify, or redistribute them without permission.</p>
       </div>
+    </div>
 
-      <div class="legal-section" id="liability">
+    <div class="legal-section" id="liability">
+      <svg class="legal-section-number" data-dot-number="4"></svg>
+      <div class="legal-section-body">
         <h2>Limitation of liability</h2>
         <p>Simplicity is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the service.</p>
       </div>
+    </div>
 
-      <div class="legal-section" id="changes">
+    <div class="legal-section" id="changes">
+      <svg class="legal-section-number" data-dot-number="5"></svg>
+      <div class="legal-section-body">
         <h2>Changes</h2>
         <p>We may update these terms at any time. Continued use of the service constitutes acceptance of the revised terms.</p>
       </div>
+    </div>
 
-      <div class="legal-section" id="contact">
+    <div class="legal-section" id="contact">
+      <svg class="legal-section-number" data-dot-number="6"></svg>
+      <div class="legal-section-body">
         <h2>Contact</h2>
         <p>Questions? Reach out at <a href="mailto:cofelixsmos@gmail.com">cofelixsmos@gmail.com</a>.</p>
       </div>
@@ -172,5 +166,6 @@
 
   <div data-footer></div>
   <script src="/scripts/nav-init.js"></script>
+  <script src="/scripts/dot-digits.js"></script>
 </body>
 </html>

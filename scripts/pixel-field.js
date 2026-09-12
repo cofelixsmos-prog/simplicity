@@ -1,4 +1,4 @@
-﻿    // ---------- Background pixel colonies (growth = "processing") ----------
+    // ---------- Background pixel colonies (growth = "processing") ----------
     (function () {
       var canvas = document.getElementById('pixel-field');
       var ctx = canvas.getContext('2d');

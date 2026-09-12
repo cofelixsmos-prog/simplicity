@@ -1,4 +1,4 @@
-﻿  * {
+  * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -222,19 +222,21 @@
     pointer-events: none;
   }
 
-  /* ---------- Theme toggle ---------- */
+  /* ---------- Theme toggle (dot switch) ---------- */
 
   .theme-toggle {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    justify-content: space-between;
+    width: 52px;
+    height: 28px;
+    padding: 0 7px;
+    border-radius: 999px;
     border: 1px solid var(--btn-outline-border);
     background: transparent;
     cursor: pointer;
     flex-shrink: 0;
+    position: relative;
     transition: background 0.15s ease, border-color 0.25s ease;
   }
 
@@ -242,32 +244,32 @@
     background: var(--btn-outline-hover);
   }
 
-  .theme-toggle svg {
-    width: 16px;
-    height: 16px;
+  .theme-toggle-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--fg-muted);
+    transition: background 0.25s ease, opacity 0.25s ease;
   }
 
-  .theme-toggle circle,
-  .theme-toggle path {
-    fill: var(--fg);
-    stroke: var(--fg);
-    transition: fill 0.25s ease, stroke 0.25s ease;
+  .theme-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--fg);
+    transition: transform 0.25s cubic-bezier(0.65, 0, 0.35, 1);
   }
 
-  .theme-toggle .sun-rays path {
-    fill: none;
+  html[data-theme="dark"] .theme-toggle-thumb {
+    transform: translateX(24px);
   }
 
-  .theme-toggle .sun-rays {
-    display: none;
-  }
-
-  html[data-theme="dark"] .theme-toggle .moon {
-    display: none;
-  }
-
-  html[data-theme="dark"] .theme-toggle .sun-rays {
-    display: block;
+  html[data-theme="light"] .theme-toggle-dot.dot-light,
+  html[data-theme="dark"] .theme-toggle-dot.dot-dark {
+    opacity: 0;
   }
 
   /* ---------- Buttons ---------- */
@@ -285,6 +287,7 @@
     cursor: pointer;
     border: none;
     white-space: nowrap;
+    text-decoration: none;
     transition: opacity 0.15s ease, background 0.15s ease, transform 0.15s ease;
   }
 
@@ -499,34 +502,16 @@
       text-align: left;
     }
 
-    .mobile-theme-icon {
-      display: inline-flex;
-      width: 22px;
-      height: 22px;
+    .mobile-theme-toggle + .mobile-theme-toggle {
+      margin-top: 16px;
     }
 
-    .mobile-theme-icon svg {
-      width: 100%;
-      height: 100%;
+    .mobile-theme-toggle .cookie-btn {
+      pointer-events: none;
     }
 
-    .mobile-theme-icon circle,
-    .mobile-theme-icon path {
-      fill: var(--fg);
-      stroke: var(--fg);
-    }
-
-    .mobile-theme-icon .sun-rays path {
-      fill: none;
-    }
-
-    .mobile-theme-icon .sun-rays,
-    html[data-theme="dark"] .mobile-theme-icon .moon {
-      display: none;
-    }
-
-    html[data-theme="dark"] .mobile-theme-icon .sun-rays {
-      display: block;
+    .mobile-theme-toggle .theme-toggle {
+      pointer-events: none;
     }
     .hero-grid { padding: 32px 20px 64px; }
     .hero-right h1 { font-size: 28px; }
@@ -962,6 +947,365 @@
 
   .brand-loader-grid circle {
     fill: var(--fg);
+  }
+
+  /* ---------- Cookie banner ---------- */
+
+  .cookie-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 500;
+    padding: max(16px, env(safe-area-inset-bottom)) 16px 16px;
+    transform: translateY(120%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.35s ease, opacity 0.3s ease;
+  }
+
+  .cookie-banner.is-visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .cookie-banner-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: var(--bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .cookie-banner-text {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--fg-muted);
+    flex: 1 1 320px;
+  }
+
+  .cookie-banner-text a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .cookie-banner-text a:hover {
+    text-decoration: underline;
+  }
+
+  .cookie-banner-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 560px) {
+    .cookie-banner-inner { padding: 18px; }
+    .cookie-banner-actions { width: 100%; }
+    .cookie-banner-actions .btn { flex: 1 1 0; }
+  }
+
+  /* ---------- Cookie button (nav) ---------- */
+
+  .cookie-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--btn-outline-border);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, border-color 0.25s ease;
+  }
+
+  .cookie-btn:hover {
+    background: var(--btn-outline-hover);
+  }
+
+  .cookie-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .cookie-btn circle {
+    fill: var(--fg);
+  }
+
+  .cookie-btn .cookie-btn-hole {
+    fill: var(--bg);
+  }
+
+  /* ---------- Settings dropdown (nav) ---------- */
+
+  .settings-dropdown {
+    position: relative;
+  }
+
+  .settings-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--btn-outline-border);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, border-color 0.25s ease;
+  }
+
+  .settings-btn:hover {
+    background: var(--btn-outline-hover);
+  }
+
+  .settings-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .settings-btn circle,
+  .settings-btn path {
+    stroke: var(--fg);
+    transition: stroke 0.15s ease;
+  }
+
+  .settings-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 220px;
+    background: var(--bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.14);
+    padding: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+    z-index: 50;
+  }
+
+  .settings-dropdown.is-open .settings-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  .settings-row.is-button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+  }
+
+  .settings-row.is-button:hover {
+    background: var(--btn-outline-hover);
+  }
+
+  /* ---------- Cookie modal ---------- */
+
+  .cookie-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s;
+  }
+
+  .cookie-modal-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .cookie-modal {
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+    padding: 28px;
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.25s ease;
+  }
+
+  .cookie-modal-overlay.is-visible .cookie-modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .cookie-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .cookie-modal-head h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .cookie-modal-close {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .cookie-modal-close:hover {
+    background: var(--btn-outline-hover);
+    color: var(--fg);
+  }
+
+  .cookie-modal-close svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .cookie-modal-desc {
+    margin-top: 10px;
+    color: var(--fg-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .cookie-modal .cookie-row {
+    padding: 18px 0;
+    border-top: 1px solid var(--nav-border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .cookie-modal .cookie-row:first-of-type {
+    margin-top: 18px;
+  }
+
+  .cookie-modal .cookie-row-text h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .cookie-modal .cookie-row-text p {
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-width: 38ch;
+  }
+
+  .cookie-switch {
+    flex-shrink: 0;
+    position: relative;
+    width: 42px;
+    height: 24px;
+  }
+
+  .cookie-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .cookie-switch-track {
+    position: absolute;
+    inset: 0;
+    background: var(--btn-outline-border);
+    border-radius: 999px;
+    transition: background 0.2s ease;
+  }
+
+  .cookie-switch-track::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    transition: transform 0.2s ease;
+  }
+
+  .cookie-switch input:checked ~ .cookie-switch-track {
+    background: var(--accent);
+  }
+
+  .cookie-switch input:checked ~ .cookie-switch-track::after {
+    transform: translateX(18px);
+  }
+
+  .cookie-switch input:disabled ~ .cookie-switch-track {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .cookie-status {
+    margin-top: 20px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: var(--card-bg, var(--nav-border));
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+  }
+
+  .cookie-modal-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 480px) {
+    .cookie-modal { padding: 22px; }
   }
 
   .brand-loader-dot {

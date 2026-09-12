@@ -1,4 +1,13 @@
 (function () {
+  function writeThemeCookie(value) {
+    var consentMatch = document.cookie.match(/(?:^|; )simplicity-consent=([^;]*)/);
+    var consent = consentMatch ? decodeURIComponent(consentMatch[1]) : null;
+    if (consent === 'rejected') return;
+    var date = new Date();
+    date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
+    document.cookie = 'simplicity-theme=' + encodeURIComponent(value) + '; expires=' + date.toUTCString() + '; path=/; SameSite=Lax';
+  }
+
   function setupThemeToggle() {
     var buttons = document.querySelectorAll('#theme-toggle, #mobile-theme-toggle');
     buttons.forEach(function (button) {
@@ -6,8 +15,30 @@
         var root = document.documentElement;
         var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         root.setAttribute('data-theme', next);
-        localStorage.setItem('simplicity-theme', next);
+        writeThemeCookie(next);
       });
+    });
+  }
+
+  function setupSettingsDropdown() {
+    var wrap = document.getElementById('settings-dropdown');
+    var toggle = document.getElementById('settings-toggle');
+    if (!wrap || !toggle) return;
+
+    function setOpen(isOpen) {
+      wrap.classList.toggle('is-open', isOpen);
+      toggle.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    toggle.addEventListener('click', function (event) {
+      event.stopPropagation();
+      setOpen(!wrap.classList.contains('is-open'));
+    });
+    document.addEventListener('click', function (event) {
+      if (!wrap.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') setOpen(false);
     });
   }
 
@@ -56,6 +87,7 @@
       .then(function () {
         setupThemeToggle();
         setupMobileMenu();
+        setupSettingsDropdown();
       })
       .catch(function (error) {
         console.error(error);
@@ -89,9 +121,27 @@
       });
   }
 
+  function loadCookieUI() {
+    var tasks = [];
+    if (!document.getElementById('cookie-banner')) {
+      tasks.push(loadInto('/sections/cookie-banner.html', 'end'));
+    }
+    if (!document.getElementById('cookie-modal-overlay')) {
+      tasks.push(loadInto('/sections/cookie-modal.html', 'end'));
+    }
+    return Promise.all(tasks)
+      .then(function () {
+        return loadScript('/scripts/consent.js');
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
+  }
+
   function init() {
     loadNav();
     loadFooter();
+    loadCookieUI();
   }
 
   if (document.readyState === 'loading') {
