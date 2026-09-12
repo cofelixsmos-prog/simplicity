@@ -214,6 +214,32 @@
   .auth-home circle {
     fill: var(--fg);
   }
+
+  @media (min-width: 861px) {
+    .auth-wrap {
+      height: calc(100dvh - 98px);
+      min-height: 0;
+      padding: clamp(12px, 3vh, 48px) 24px;
+      overflow: hidden;
+    }
+
+    .auth-mark {
+      margin-bottom: clamp(10px, 2vh, 28px);
+    }
+
+    .auth-form {
+      margin-top: clamp(14px, 2.5vh, 32px);
+      gap: clamp(8px, 1.5vh, 16px);
+    }
+
+    .auth-divider {
+      margin: clamp(12px, 2vh, 26px) 0;
+    }
+
+    .auth-footer {
+      margin-top: clamp(12px, 2vh, 28px);
+    }
+  }
 </style>
 </head>
 <body>
