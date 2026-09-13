@@ -915,7 +915,6 @@
     max-width: 1400px;
     margin: 56px auto 0;
     padding-top: 24px;
-    border-top: 1px solid rgba(255,255,255,0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
