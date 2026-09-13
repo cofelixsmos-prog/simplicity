@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://simplicity.bonto.run/sitemap.xml
+Sitemap: https://simplicity-india.com/sitemap.xml

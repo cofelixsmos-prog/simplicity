@@ -1,0 +1,60 @@
+<style>
+  .identity-band {
+    padding: clamp(64px, 10vw, 120px) 24px;
+    border-top: 1px solid var(--nav-border);
+  }
+  .identity-band-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .identity-copy {
+    font-size: clamp(1.5rem, 3.2vw, 2.25rem);
+    line-height: 1.45;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+  .identity-copy strong { font-weight: 800; }
+  .identity-traits {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 28px;
+    margin-top: 52px;
+    text-align: left;
+  }
+  .identity-trait {
+    border-top: 1px solid var(--nav-border);
+    padding-top: 16px;
+  }
+  .identity-trait h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .identity-trait p {
+    font-size: 0.95rem;
+    color: var(--fg-muted);
+    line-height: 1.6;
+  }
+</style>
+<section class="identity-band">
+  <div class="identity-band-inner">
+    <p class="identity-copy">Simplicity is built like the mark itself: <strong>small, deliberate points that add up to something clear.</strong> No noise, no filler — just the work, finished.</p>
+    <div class="identity-traits">
+      <div class="identity-trait">
+        <h3>Direct</h3>
+        <p>We say what we mean and show, rather than describe.</p>
+      </div>
+      <div class="identity-trait">
+        <h3>Precise</h3>
+        <p>Every dot, every word is placed on purpose — nothing decorative.</p>
+      </div>
+      <div class="identity-trait">
+        <h3>Calm</h3>
+        <p>Automation should feel effortless, not loud. The product does the work quietly.</p>
+      </div>
+    </div>
+  </div>
+</section>

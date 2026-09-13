@@ -86,27 +86,6 @@
     color: var(--fg-muted);
   }
 
-  .brand-intro-copy {
-    max-width: 1120px;
-    margin: clamp(48px, 8vw, 80px) auto 0;
-    padding: 0 24px;
-  }
-
-  .brand-intro-copy h2 {
-    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-    font-weight: 700;
-    letter-spacing: -0.015em;
-    line-height: 1.2;
-  }
-
-  .brand-intro-copy p {
-    margin-top: 18px;
-    font-size: 1.05rem;
-    line-height: 1.7;
-    color: var(--fg-muted);
-    max-width: 60ch;
-  }
-
   @media (max-width: 700px) {
     .brand-photo { aspect-ratio: 4 / 5; }
   }
@@ -279,120 +258,6 @@
     margin-top: 10px;
   }
 
-  /* Buttons showcase, dot language */
-  .button-showcase {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: center;
-  }
-
-  .dot-send-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--accent);
-    border: none;
-    cursor: pointer;
-    transition: background 0.15s ease, transform 0.15s ease;
-  }
-  .dot-send-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
-  .dot-send-btn svg { width: 18px; height: 18px; }
-  .dot-send-btn circle { fill: #fff; }
-
-  .dot-icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: transparent;
-    border: 1px solid var(--btn-outline-border);
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-  .dot-icon-btn:hover { background: var(--btn-outline-hover); }
-  .dot-icon-btn svg { width: 16px; height: 16px; }
-  .dot-icon-btn circle { fill: var(--fg); }
-
-  .dot-text-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 22px 11px 18px;
-    border-radius: 24px;
-    background: transparent;
-    border: 1px solid var(--btn-outline-border);
-    color: var(--fg);
-    font-size: 14.5px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-  .dot-text-btn:hover { background: var(--btn-outline-hover); }
-  .dot-text-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-  .dot-text-btn circle { fill: var(--fg); }
-
-  .button-caption {
-    font-size: 0.8rem;
-    color: var(--fg-muted);
-    margin-top: 10px;
-  }
-
-  .button-group { display: flex; flex-direction: column; align-items: flex-start; }
-
-  /* Our Identity */
-  .identity-band {
-    padding: clamp(64px, 10vw, 120px) 24px;
-    border-top: 1px solid var(--nav-border);
-  }
-
-  .identity-band-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  .identity-copy {
-    font-size: clamp(1.5rem, 3.2vw, 2.25rem);
-    line-height: 1.45;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    color: var(--fg);
-  }
-
-  .identity-copy strong { font-weight: 800; }
-
-  .identity-traits {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 28px;
-    margin-top: 52px;
-    text-align: left;
-  }
-
-  .identity-trait {
-    border-top: 1px solid var(--nav-border);
-    padding-top: 16px;
-  }
-
-  .identity-trait h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--fg);
-    margin-bottom: 8px;
-  }
-
-  .identity-trait p {
-    font-size: 0.95rem;
-    color: var(--fg-muted);
-    line-height: 1.6;
-  }
-
   /* Guidelines */
   .guidelines-grid {
     display: grid;
@@ -428,14 +293,9 @@
   </div>
 
   <div class="brand-photo">
-    <img src="https://github.com/cofelixsmos-prog/simplicity/releases/download/clouds/idk.jpg" alt="The Simplicity dot-matrix wordmark applied as architectural signage" loading="lazy">
+    <img src="https://github.com/cofelixsmos-prog/simplicity/releases/download/clouds/idk.jpg" alt="Illustrative image" loading="lazy">
   </div>
-  <p class="brand-photo-caption">The dot mark, applied as signage — same language, real space.</p>
-
-  <div class="brand-intro-copy">
-    <h2>One mark, built from points.</h2>
-    <p>Every asset on this page traces back to the same idea: small, deliberate dots that read clearly at any scale — on screen, on paper, or on a wall. What follows is how we keep that consistent.</p>
-  </div>
+  <p class="brand-photo-caption">Illustrative image</p>
 
   <section class="wordmark-band">
     <div class="wordmark-band-inner">
@@ -523,74 +383,7 @@
         <p class="type-stack">'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif</p>
       </div>
     </section>
-
-    <section>
-      <div class="section-head"><h2>Buttons</h2></div>
-      <div class="button-showcase">
-        <div class="button-group">
-          <button class="dot-send-btn" aria-label="Send">
-            <svg viewBox="0 0 18 18"><circle cx="3" cy="9" r="2"/><circle cx="9" cy="9" r="2"/><circle cx="15" cy="9" r="2"/></svg>
-          </button>
-          <span class="button-caption">Send</span>
-        </div>
-
-        <div class="button-group">
-          <button class="dot-icon-btn" aria-label="More options">
-            <svg viewBox="0 0 16 16"><circle cx="2" cy="8" r="1.8"/><circle cx="8" cy="8" r="1.8"/><circle cx="14" cy="8" r="1.8"/></svg>
-          </button>
-          <span class="button-caption">Icon</span>
-        </div>
-
-        <div class="button-group">
-          <button class="dot-text-btn">
-            <svg viewBox="0 0 14 14"><circle cx="2" cy="7" r="1.6"/><circle cx="7" cy="7" r="1.6"/><circle cx="12" cy="7" r="1.6"/></svg>
-            Continue
-          </button>
-          <span class="button-caption">Text + dots</span>
-        </div>
-
-        <div class="button-group">
-          <a class="btn btn-primary" href="#">
-            <svg class="btn-dot" viewBox="0 0 14 14">
-              <circle cx="7" cy="7" r="2.4" fill="#fff"/>
-              <circle cx="7" cy="1.4" r="1.5" fill="#fff" opacity="0.75"/>
-              <circle cx="12.6" cy="7" r="1.5" fill="#fff" opacity="0.75"/>
-              <circle cx="7" cy="12.6" r="1.5" fill="#fff" opacity="0.75"/>
-              <circle cx="1.4" cy="7" r="1.5" fill="#fff" opacity="0.75"/>
-            </svg>
-            Log in
-          </a>
-          <span class="button-caption">Primary</span>
-        </div>
-
-        <div class="button-group">
-          <a class="btn btn-outline" href="#">Register</a>
-          <span class="button-caption">Outline</span>
-        </div>
-      </div>
-    </section>
   </div>
-
-  <section class="identity-band">
-    <div class="identity-band-inner">
-      <p class="identity-copy">Simplicity is built like the mark itself: <strong>small, deliberate points that add up to something clear.</strong> No noise, no filler — just the work, finished.</p>
-
-      <div class="identity-traits">
-        <div class="identity-trait">
-          <h3>Direct</h3>
-          <p>We say what we mean and show, rather than describe.</p>
-        </div>
-        <div class="identity-trait">
-          <h3>Precise</h3>
-          <p>Every dot, every word is placed on purpose — nothing decorative.</p>
-        </div>
-        <div class="identity-trait">
-          <h3>Calm</h3>
-          <p>Automation should feel effortless, not loud. The product does the work quietly.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <div class="content">
     <section>
