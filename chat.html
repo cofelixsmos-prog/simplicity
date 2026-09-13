@@ -100,8 +100,13 @@
     padding: 24px 20px 20px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 16px;
-    min-height: calc(100dvh - 53px);
+    min-height: 100dvh;
+  }
+
+  .chat-wrap.has-messages {
+    justify-content: flex-end;
   }
 
   .chat-messages {
@@ -112,7 +117,7 @@
     justify-content: center;
   }
 
-  .chat-messages.has-messages {
+  .chat-wrap.has-messages .chat-messages {
     justify-content: flex-start;
   }
 
@@ -353,16 +358,16 @@
   }
 
   .chat-send svg {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
   }
 
-  .chat-send path {
-    stroke: #fff;
+  .chat-send circle {
+    fill: #fff;
   }
 </style>
 </head>
-<body>
+<body data-no-nav>
   <main class="chat-wrap">
     <div class="chat-messages" id="chat-messages">
       <div class="chat-empty" id="chat-empty">
@@ -386,8 +391,15 @@
     <form class="chat-form" id="chat-form">
       <input type="text" id="chat-input" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message">
       <button type="submit" class="chat-send" aria-label="Send">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="6"  r="3.2"/>
+          <circle cx="12" cy="12" r="2.8"/>
+          <circle cx="28" cy="12" r="2.8"/>
+          <circle cx="7"  cy="20" r="2.4"/>
+          <circle cx="33" cy="20" r="2.4"/>
+          <circle cx="20" cy="20" r="2.2"/>
+          <circle cx="20" cy="28" r="2"/>
+          <circle cx="20" cy="34" r="1.8"/>
         </svg>
       </button>
     </form>
@@ -400,6 +412,7 @@
       var input = document.getElementById('chat-input');
       var messages = document.getElementById('chat-messages');
       var empty = document.getElementById('chat-empty');
+      var chatWrap = document.querySelector('.chat-wrap');
 
       var BOT_LOGO_SVG = '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="6" r="3.2"/><circle cx="12" cy="12" r="2.8"/><circle cx="28" cy="12" r="2.8"/><circle cx="7" cy="20" r="2.4"/><circle cx="33" cy="20" r="2.4"/><circle cx="20" cy="20" r="2.2"/><circle cx="20" cy="28" r="2"/><circle cx="20" cy="34" r="1.8"/></svg>';
 
@@ -529,7 +542,7 @@
 
       function addBubble(text, who) {
         if (empty) empty.remove();
-        messages.classList.add('has-messages');
+        chatWrap.classList.add('has-messages');
         var time = formatTime(new Date());
         if (who === 'bot') {
           var row = document.createElement('div');
@@ -565,7 +578,7 @@
 
       function runTimeToolFlow() {
         if (empty) empty.remove();
-        messages.classList.add('has-messages');
+        chatWrap.classList.add('has-messages');
         hideFollowup();
 
         var row = document.createElement('div');
