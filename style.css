@@ -1253,24 +1253,18 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 1px solid var(--btn-outline-border);
-    background: transparent;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 650;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background 0.15s ease, border-color 0.25s ease;
+    transition: background 0.15s ease;
   }
 
   .account-btn:hover {
-    background: var(--btn-outline-hover);
-  }
-
-  .account-btn svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .account-btn circle {
-    fill: var(--fg);
+    background: var(--accent-hover);
   }
 
   .account-panel {
