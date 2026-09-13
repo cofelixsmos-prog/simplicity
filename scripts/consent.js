@@ -24,15 +24,6 @@
 
   function getConsent() {
     var cookieConsent = getCookie(CONSENT_COOKIE);
-    if (cookieConsent === 'rejected') {
-      deleteCookie(CONSENT_COOKIE);
-      try {
-        sessionStorage.setItem(CONSENT_COOKIE, 'rejected');
-      } catch (error) {
-        // Consent remains unset if session storage is unavailable.
-      }
-      return 'rejected';
-    }
     if (cookieConsent) return cookieConsent;
     try {
       return sessionStorage.getItem(CONSENT_COOKIE);
@@ -44,11 +35,11 @@
   function setConsent(value) {
     if (value === 'rejected') {
       deleteCookie(THEME_COOKIE);
-      deleteCookie(CONSENT_COOKIE);
+      setCookie(CONSENT_COOKIE, 'rejected', COOKIE_DAYS);
       try {
-        sessionStorage.setItem(CONSENT_COOKIE, 'rejected');
+        sessionStorage.removeItem(CONSENT_COOKIE);
       } catch (error) {
-        // Consent remains unset if session storage is unavailable.
+        // Session storage error ignored.
       }
       return;
     }
@@ -60,15 +51,10 @@
     }
   }
 
-  // simplicitySetThemeCookie is already defined inline in <head> on every
-  // page (before paint) so the theme toggle works even if this script
-  // hasn't loaded yet. Fall back to defining it here only if that's missing.
-  if (!window.simplicitySetThemeCookie) {
-    window.simplicitySetThemeCookie = function (theme) {
-      if (getConsent() === 'rejected') return;
-      setCookie(THEME_COOKIE, theme, COOKIE_DAYS);
-    };
-  }
+  window.simplicitySetThemeCookie = function (theme) {
+    if (getConsent() !== 'accepted') return;
+    setCookie(THEME_COOKIE, theme, COOKIE_DAYS);
+  };
 
   window.simplicityGetConsent = getConsent;
   window.simplicitySetConsent = setConsent;
@@ -86,7 +72,6 @@
     var rejectBtn = document.getElementById('cookie-reject');
     var closeBtn = document.getElementById('cookie-banner-close');
     var reopenBtn = document.getElementById('cookie-reopen');
-    var inactivityTimer;
 
     function minimize() {
       banner.classList.remove('is-visible');
@@ -98,21 +83,6 @@
       setConsent('rejected');
       minimize();
     }
-
-    function resetTimer() {
-      window.clearTimeout(inactivityTimer);
-      inactivityTimer = window.setTimeout(minimize, 5000);
-    }
-
-    function minimizeOnActivity(event) {
-      if (!banner.contains(event.target)) minimize();
-    }
-
-    resetTimer();
-    window.addEventListener('scroll', minimize, { passive: true, once: true });
-    document.addEventListener('pointerover', minimizeOnActivity, { once: true });
-    document.addEventListener('pointerdown', minimizeOnActivity, { once: true });
-    document.addEventListener('keydown', minimizeOnActivity, { once: true });
 
     if (acceptBtn) {
       acceptBtn.addEventListener('click', function () {
@@ -134,7 +104,6 @@
       banner.classList.remove('is-minimized');
       banner.classList.add('is-visible');
       reopenBtn.classList.remove('is-visible');
-      resetTimer();
     });
   }
 
