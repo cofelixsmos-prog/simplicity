@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat — Simplicity</title>
+<meta name="description" content="Chat with Simplicity.">
+<link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+<script>
+  (function () {
+    var match = document.cookie.match(/(?:^|; )simplicity-theme=([^;]*)/);
+    var saved = match ? decodeURIComponent(match[1]) : null;
+    var theme = saved || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+
+    window.simplicitySetThemeCookie = function (value) {
+      var consentMatch = document.cookie.match(/(?:^|; )simplicity-consent=([^;]*)/);
+      var consent = consentMatch ? decodeURIComponent(consentMatch[1]) : null;
+      if (consent !== 'accepted') return;
+      var date = new Date();
+      date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
+      document.cookie = 'simplicity-theme=' + encodeURIComponent(value) + '; expires=' + date.toUTCString() + '; path=/; SameSite=Lax';
+    };
+  })();
+</script>
+<style>
+  html[data-theme="light"] { background: #F3F1EC; color: #000; }
+  html[data-theme="dark"] { background: #0A0A0A; color: #F3F1EC; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/style.css">
+<style>
+  /* ---------- Minimized nav (internal override only, style.css untouched) ---------- */
+  nav {
+    padding: 10px 16px;
+    min-height: 0;
+  }
+  nav .nav-dot {
+    width: 16px;
+    height: 16px;
+  }
+  nav .nav-wordmark {
+    font-size: 13px;
+  }
+  nav .nav-links {
+    gap: 20px;
+  }
+  nav .nav-links a,
+  nav .nav-dropdown-trigger {
+    font-size: 13px;
+  }
+  nav .nav-dropdown-panel {
+    padding: 20px 24px;
+  }
+  nav .dropdown-links.large a {
+    font-size: 20px;
+  }
+  nav .btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  nav .settings-btn {
+    width: 30px;
+    height: 30px;
+  }
+  nav .theme-toggle {
+    width: 46px;
+    height: 24px;
+  }
+  nav .theme-toggle-thumb {
+    width: 16px;
+    height: 16px;
+  }
+  html[data-theme="dark"] nav .theme-toggle-thumb {
+    transform: translateX(22px);
+  }
+
+  /* ---------- Brand application (from brand.html) ----------
+     Brand colors: Accent #FF5A1F, Hover #F04E15, Light #F3F1EC,
+     Dark #0A0A0A, Muted #6B6A63. Poppins + dot-mark language. */
+  ::selection {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* ---------- Very simple chat layout ---------- */
+  body {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chat-wrap {
+    flex: 1;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: calc(100dvh - 53px);
+  }
+
+  .chat-messages {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .chat-messages.has-messages {
+    justify-content: flex-start;
+  }
+
+  .chat-empty {
+    text-align: center;
+    color: var(--fg-muted);
+    font-size: 15px;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .chat-mark {
+    display: inline-flex;
+    margin-bottom: 18px;
+  }
+
+  .chat-mark svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-mark circle {
+    fill: var(--fg);
+  }
+
+  .chat-empty strong {
+    display: block;
+    color: var(--fg);
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .chat-bubble {
+    max-width: 100%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+
+  .chat-bubble.user {
+    background: transparent;
+    color: var(--fg);
+    border: 1.5px dashed rgba(255, 90, 31, 0.55);
+  }
+
+  .chat-bubble.bot {
+    background: transparent;
+    color: var(--fg);
+    border: none;
+    padding: 2px 0;
+    max-width: 100%;
+  }
+
+  .msg-user {
+    align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    max-width: 75%;
+  }
+
+  .bot-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    align-self: flex-start;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .bot-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bot-logo {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    margin-top: 2px;
+  }
+
+  .bot-logo circle {
+    fill: var(--fg);
+  }
+
+  .msg-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 6px;
+    font-size: 11.5px;
+    line-height: 1;
+    color: var(--fg-muted);
+    opacity: 0.7;
+  }
+
+  .msg-user .msg-meta {
+    justify-content: flex-end;
+  }
+
+  .meta-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .meta-btn:hover {
+    color: var(--fg);
+    opacity: 1;
+    text-decoration: underline;
+  }
+
+  .followup-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 2px 0 0 32px;
+    align-self: flex-start;
+  }
+
+  .followup-chip {
+    border: 1px solid var(--btn-outline-border);
+    background: transparent;
+    color: var(--fg);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .followup-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .tool-trace {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 2px 0 8px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--fg-muted);
+  }
+
+  .tool-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tool-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    opacity: 0.35;
+  }
+
+  .tool-step.is-active .tool-dot {
+    opacity: 0.7;
+  }
+
+  .tool-step.is-done .tool-dot {
+    opacity: 1;
+  }
+
+  .tool-step.is-done .tool-label::after {
+    content: " ✓";
+    color: var(--accent);
+  }
+
+  .chat-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 999px;
+    padding: 6px 6px 6px 18px;
+    background: transparent;
+    transition: border-color 0.15s ease;
+  }
+
+  .chat-form:focus-within {
+    border-color: var(--accent);
+  }
+
+  .chat-form input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 14.5px;
+  }
+
+  .chat-form input::placeholder {
+    color: var(--fg-muted);
+  }
+
+  .chat-send {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .chat-send:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .chat-send svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .chat-send path {
+    stroke: #fff;
+  }
+</style>
+</head>
+<body>
+  <main class="chat-wrap">
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-empty" id="chat-empty">
+        <span class="chat-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="6"  r="3.2"/>
+            <circle cx="12" cy="12" r="2.8"/>
+            <circle cx="28" cy="12" r="2.8"/>
+            <circle cx="7"  cy="20" r="2.4"/>
+            <circle cx="33" cy="20" r="2.4"/>
+            <circle cx="20" cy="20" r="2.2"/>
+            <circle cx="20" cy="28" r="2"/>
+            <circle cx="20" cy="34" r="1.8"/>
+          </svg>
+        </span>
+        <strong>What can I help with?</strong>
+        Ask anything to get started.
+      </div>
+    </div>
+
+    <form class="chat-form" id="chat-form">
+      <input type="text" id="chat-input" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message">
+      <button type="submit" class="chat-send" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </form>
+  </main>
+
+  <script src="/scripts/nav-init.js"></script>
+  <script>
+    (function () {
+      var form = document.getElementById('chat-form');
+      var input = document.getElementById('chat-input');
+      var messages = document.getElementById('chat-messages');
+      var empty = document.getElementById('chat-empty');
+
+      var BOT_LOGO_SVG = '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="6" r="3.2"/><circle cx="12" cy="12" r="2.8"/><circle cx="28" cy="12" r="2.8"/><circle cx="7" cy="20" r="2.4"/><circle cx="33" cy="20" r="2.4"/><circle cx="20" cy="20" r="2.2"/><circle cx="20" cy="28" r="2"/><circle cx="20" cy="34" r="1.8"/></svg>';
+
+      function formatTime(date) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      function copyText(text, btn) {
+        function done() {
+          var original = btn.getAttribute('data-label') || 'Copy';
+          btn.textContent = 'Copied';
+          setTimeout(function () { btn.textContent = original; }, 1200);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(done);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(ta);
+          done();
+        }
+      }
+
+      function isTimeQuestion(text) {
+        return text.toLowerCase().replace(/[?！？.!\s]+$/, '').trim().endsWith('what is the time') ||
+          text.toLowerCase().includes('what is the time');
+      }
+
+      function getTimeTool() {
+        return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      var followupRow = document.createElement('div');
+      followupRow.className = 'followup-row';
+      var followupBtn = document.createElement('button');
+      followupBtn.type = 'button';
+      followupBtn.className = 'followup-chip';
+      followupBtn.textContent = 'What is the time?';
+      followupBtn.setAttribute('aria-label', 'Ask what is the time');
+      followupBtn.addEventListener('click', function () {
+        handleUserMessage('What is the time?');
+      });
+      followupRow.appendChild(followupBtn);
+
+      function hideFollowup() {
+        if (followupRow.parentNode) followupRow.parentNode.removeChild(followupRow);
+      }
+
+      function showFollowup() {
+        hideFollowup();
+        var rows = messages.querySelectorAll('.bot-row');
+        if (!rows.length) return;
+        var last = rows[rows.length - 1];
+        last.parentNode.insertBefore(followupRow, last.nextSibling);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function makeMeta(text, time, showRetry, onRetry) {
+        var meta = document.createElement('div');
+        meta.className = 'msg-meta';
+        var timeEl = document.createElement('span');
+        timeEl.className = 'msg-time';
+        timeEl.textContent = time;
+        meta.appendChild(timeEl);
+        var copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'meta-btn';
+        copyBtn.textContent = 'Copy';
+        copyBtn.setAttribute('data-label', 'Copy');
+        copyBtn.setAttribute('aria-label', 'Copy message');
+        copyBtn.addEventListener('click', function () { copyText(text, copyBtn); });
+        meta.appendChild(copyBtn);
+        if (showRetry) {
+          var retryBtn = document.createElement('button');
+          retryBtn.type = 'button';
+          retryBtn.className = 'meta-btn meta-retry';
+          retryBtn.textContent = 'Retry';
+          retryBtn.setAttribute('aria-label', 'Retry response');
+          retryBtn.addEventListener('click', onRetry);
+          meta.appendChild(retryBtn);
+        }
+        return meta;
+      }
+
+      function refreshRetry() {
+        var rows = messages.querySelectorAll('.bot-row');
+        rows.forEach(function (row, i) {
+          var old = row.querySelector('.meta-retry');
+          if (old) old.remove();
+          if (i === rows.length - 1) {
+            var meta = row.querySelector('.msg-meta');
+            var bubble = row.querySelector('.chat-bubble.bot');
+            if (meta && bubble) {
+              var retryBtn = document.createElement('button');
+              retryBtn.type = 'button';
+              retryBtn.className = 'meta-btn meta-retry';
+              retryBtn.textContent = 'Retry';
+              retryBtn.setAttribute('aria-label', 'Retry response');
+              retryBtn.addEventListener('click', function () { retryResponse(row); });
+              meta.appendChild(retryBtn);
+            }
+          }
+        });
+      }
+
+      function retryResponse(row) {
+        var bubble = row.querySelector('.chat-bubble.bot');
+        if (!bubble) return;
+        // If this was a tool-call answer, re-run get_time tool
+        if (row.querySelector('.tool-trace')) {
+          var currentTime = getTimeTool();
+          bubble.textContent = "It's " + currentTime + ' right now.';
+          var traceTime = row.querySelectorAll('.tool-step .tool-label')[1];
+          if (traceTime) traceTime.textContent = 'get_time → ' + currentTime;
+        } else {
+          bubble.textContent = 'This is a placeholder reply.';
+        }
+        var meta = row.querySelector('.msg-meta');
+        if (meta) {
+          var timeEl = meta.querySelector('.msg-time');
+          if (timeEl) timeEl.textContent = formatTime(new Date());
+        }
+      }
+
+      function addBubble(text, who) {
+        if (empty) empty.remove();
+        messages.classList.add('has-messages');
+        var time = formatTime(new Date());
+        if (who === 'bot') {
+          var row = document.createElement('div');
+          row.className = 'bot-row';
+          var logo = document.createElement('span');
+          logo.className = 'bot-logo';
+          logo.setAttribute('aria-hidden', 'true');
+          logo.innerHTML = BOT_LOGO_SVG;
+          var content = document.createElement('div');
+          content.className = 'bot-content';
+          var div = document.createElement('div');
+          div.className = 'chat-bubble bot';
+          div.textContent = text;
+          content.appendChild(div);
+          content.appendChild(makeMeta(text, time, false, null));
+          row.appendChild(logo);
+          row.appendChild(content);
+          messages.appendChild(row);
+          refreshRetry();
+          showFollowup();
+        } else {
+          var wrap = document.createElement('div');
+          wrap.className = 'msg-user';
+          var userDiv = document.createElement('div');
+          userDiv.className = 'chat-bubble user';
+          userDiv.textContent = text;
+          wrap.appendChild(userDiv);
+          wrap.appendChild(makeMeta(text, time, false, null));
+          messages.appendChild(wrap);
+        }
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function runTimeToolFlow() {
+        if (empty) empty.remove();
+        messages.classList.add('has-messages');
+        hideFollowup();
+
+        var row = document.createElement('div');
+        row.className = 'bot-row';
+        var logo = document.createElement('span');
+        logo.className = 'bot-logo';
+        logo.setAttribute('aria-hidden', 'true');
+        logo.innerHTML = BOT_LOGO_SVG;
+        var content = document.createElement('div');
+        content.className = 'bot-content';
+
+        var trace = document.createElement('div');
+        trace.className = 'tool-trace';
+        trace.setAttribute('aria-live', 'polite');
+
+        var step1 = document.createElement('div');
+        step1.className = 'tool-step is-active';
+        step1.innerHTML = '<span class="tool-dot"></span><span class="tool-label">Selecting easy mode</span>';
+
+        var step2 = document.createElement('div');
+        step2.className = 'tool-step';
+        step2.innerHTML = '<span class="tool-dot"></span><span class="tool-label">Calling get_time tool</span>';
+
+        trace.appendChild(step1);
+        trace.appendChild(step2);
+        content.appendChild(trace);
+
+        var div = document.createElement('div');
+        div.className = 'chat-bubble bot';
+        div.textContent = '…';
+        content.appendChild(div);
+        row.appendChild(logo);
+        row.appendChild(content);
+        messages.appendChild(row);
+        messages.scrollTop = messages.scrollHeight;
+
+        // Tool call 1: select easy mode
+        setTimeout(function () {
+          step1.classList.remove('is-active');
+          step1.classList.add('is-done');
+          step1.querySelector('.tool-label').textContent = 'Easy mode selected';
+          step2.classList.add('is-active');
+          messages.scrollTop = messages.scrollHeight;
+        }, 500);
+
+        // Tool call 2: get_time tool, then answer
+        setTimeout(function () {
+          var currentTime = getTimeTool();
+          step2.classList.remove('is-active');
+          step2.classList.add('is-done');
+          step2.querySelector('.tool-label').textContent = 'get_time → ' + currentTime;
+          var answer = "It's " + currentTime + ' right now.';
+          div.textContent = answer;
+          var meta = makeMeta(answer, formatTime(new Date()), false, null);
+          content.appendChild(meta);
+          refreshRetry();
+          showFollowup();
+          messages.scrollTop = messages.scrollHeight;
+        }, 1100);
+      }
+
+      function handleUserMessage(value) {
+        addBubble(value, 'user');
+        input.value = '';
+        hideFollowup();
+        if (isTimeQuestion(value)) {
+          setTimeout(runTimeToolFlow, 350);
+        } else {
+          setTimeout(function () {
+            addBubble('This is a placeholder reply.', 'bot');
+          }, 400);
+        }
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var value = input.value.trim();
+        if (!value) return;
+        handleUserMessage(value);
+      });
+    })();
+  </script>
+</body>
+</html>
