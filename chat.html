@@ -85,6 +85,16 @@
   }
 
   /* ---------- Very simple chat layout ---------- */
+  html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
   body {
     min-height: 100dvh;
     display: flex;
@@ -388,7 +398,7 @@
     bottom: 70px;
     z-index: 19;
     background: var(--bg);
-    border: 1.5px solid #3b82f6;
+    border: 1.5px solid #55534e;
     border-radius: 16px;
     padding: 10px 12px;
     display: flex;
@@ -434,6 +444,12 @@
     gap: 6px;
     max-height: 140px;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .queue-list::-webkit-scrollbar {
+    display: none;
   }
 
   .queue-item {
@@ -469,8 +485,8 @@
   }
 
   .queue-actions button:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
+    border-color: #55534e;
+    color: #55534e;
   }
 
   .chat-top {
@@ -526,6 +542,36 @@
     border-color: var(--accent);
     color: var(--accent);
   }
+
+  .scroll-bottom {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 88px;
+    z-index: 30;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--btn-outline-border);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .scroll-bottom:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .scroll-bottom[hidden] {
+    display: none;
+  }
+
 </style>
 </head>
 <body data-no-nav>
@@ -592,6 +638,7 @@
         </svg>
       </button>
     </form>
+    <button class="scroll-bottom" id="scroll-bottom" type="button" aria-label="Scroll to bottom" hidden>↓</button>
   </main>
 
   <script src="/scripts/nav-init.js"></script>
@@ -622,6 +669,7 @@
           item.textContent = text;
           queueList.appendChild(item);
         });
+        positionScrollBtn();
       }
 
       function enqueueMessage(text) {
@@ -635,12 +683,16 @@
           var next = queue.shift();
           renderQueue();
           handleUserMessage(next);
+        } else {
+          if (followOutput) scrollPageBottom(false);
+          updateScrollBtn();
         }
       }
 
       queueToggle.addEventListener('click', function () {
         var collapsed = queueBar.classList.toggle('is-collapsed');
         queueToggle.setAttribute('aria-expanded', String(!collapsed));
+        positionScrollBtn();
       });
 
       queueEdit.addEventListener('click', function () {
@@ -688,10 +740,100 @@
         input.value = '';
         autosizeInput();
         input.focus();
+        followOutput = false;
+        if (followTimer) {
+          clearInterval(followTimer);
+          followTimer = null;
+        }
         window.scrollTo(0, 0);
+        updateScrollBtn();
       });
 
       autosizeInput();
+
+      var scrollBtn = document.getElementById('scroll-bottom');
+      var followOutput = false;
+      var followTimer = null;
+      var lastY = window.scrollY;
+      var lastMove = Date.now();
+
+      function distFromBottom() {
+        return document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+      }
+
+      function isAtBottom() {
+        return distFromBottom() < 120;
+      }
+
+      function scrollPageBottom(smooth) {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+      }
+
+      function updateScrollBtn() {
+        scrollBtn.hidden = isAtBottom();
+      }
+
+      function positionScrollBtn() {
+        if (queueBar.hidden) {
+          scrollBtn.style.bottom = '';
+        } else {
+          scrollBtn.style.bottom = (70 + queueBar.offsetHeight + 12) + 'px';
+        }
+      }
+
+      function ensureFollowLoop() {
+        if (followTimer) return;
+        lastY = window.scrollY;
+        lastMove = Date.now();
+        followTimer = setInterval(function () {
+          if (!isResponding || !followOutput) {
+            clearInterval(followTimer);
+            followTimer = null;
+            return;
+          }
+          var y = window.scrollY;
+          if (y !== lastY) {
+            lastY = y;
+            lastMove = Date.now();
+          }
+          if (Date.now() - lastMove > 1000) {
+            clearInterval(followTimer);
+            followTimer = null;
+            return;
+          }
+          scrollPageBottom(false);
+        }, 100);
+      }
+
+      function noteUserScroll() {
+        followOutput = false;
+        if (followTimer) {
+          clearInterval(followTimer);
+          followTimer = null;
+        }
+        updateScrollBtn();
+      }
+
+      window.addEventListener('scroll', function () {
+        updateScrollBtn();
+      }, { passive: true });
+      window.addEventListener('resize', function () {
+        positionScrollBtn();
+      });
+      window.addEventListener('wheel', noteUserScroll, { passive: true });
+      window.addEventListener('touchmove', noteUserScroll, { passive: true });
+      window.addEventListener('keydown', function (e) {
+        if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].indexOf(e.key) !== -1) noteUserScroll();
+      });
+
+      scrollBtn.addEventListener('click', function () {
+        followOutput = true;
+        scrollPageBottom(true);
+        updateScrollBtn();
+        if (isResponding) ensureFollowLoop();
+      });
+
+      updateScrollBtn();
 
       var BOT_LOGO_SVG = '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="6" r="3.2"/><circle cx="12" cy="12" r="2.8"/><circle cx="28" cy="12" r="2.8"/><circle cx="7" cy="20" r="2.4"/><circle cx="33" cy="20" r="2.4"/><circle cx="20" cy="20" r="2.2"/><circle cx="20" cy="28" r="2"/><circle cx="20" cy="34" r="1.8"/></svg>';
 
@@ -734,6 +876,10 @@
           i++;
           el.textContent = fullText.slice(0, i);
           messages.scrollTop = messages.scrollHeight;
+          if (isResponding && followOutput) {
+            scrollPageBottom(false);
+            ensureFollowLoop();
+          }
           if (i >= fullText.length) {
             clearInterval(timer);
             if (done) done();
@@ -920,6 +1066,7 @@
           step1.querySelector('.tool-label').textContent = 'Easy mode selected';
           step2.classList.add('is-active');
           messages.scrollTop = messages.scrollHeight;
+          if (isResponding && followOutput) scrollPageBottom(false);
         }, 500);
 
         // Tool call 2: get_time tool, then answer
@@ -951,6 +1098,8 @@
         addBubble(value, 'user');
         input.value = '';
         autosizeInput();
+        scrollPageBottom(false);
+        updateScrollBtn();
         hideFollowup();
         if (isTimeQuestion(value)) {
           setTimeout(runTimeToolFlow, 350);
