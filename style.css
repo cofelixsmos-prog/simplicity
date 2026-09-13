@@ -117,7 +117,7 @@
     right: 0;
     background: var(--bg);
     border-top: 1px solid var(--nav-border);
-    padding: 56px 52px;
+    padding: 16px 52px;
     display: flex;
     gap: 90px;
     opacity: 0;
@@ -170,9 +170,8 @@
   }
 
   .dropdown-links.large a {
-    font-size: 30px;
+    font-size: 20px;
     font-weight: 600;
-    letter-spacing: -0.01em;
   }
 
   .dropdown-links.small {
