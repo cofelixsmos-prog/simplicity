@@ -187,7 +187,7 @@
   }
 
   function init() {
-    if (!document.body.hasAttribute('data-no-nav')) loadNav();
+    loadNav();
     loadFooter();
     loadCookieUI();
   }
