@@ -83,6 +83,28 @@
     });
   }
 
+  function setupAccountDropdown() {
+    var wrap = document.getElementById('account-dropdown');
+    var toggle = document.getElementById('account-toggle');
+    if (!wrap || !toggle) return;
+
+    function setOpen(isOpen) {
+      wrap.classList.toggle('is-open', isOpen);
+      toggle.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    toggle.addEventListener('click', function (event) {
+      event.stopPropagation();
+      setOpen(!wrap.classList.contains('is-open'));
+    });
+    document.addEventListener('click', function (event) {
+      if (!wrap.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') setOpen(false);
+    });
+  }
+
   function setupMobileMenu() {
     var toggle = document.getElementById('mobile-menu-toggle');
     var menu = document.getElementById('mobile-menu');
@@ -136,6 +158,7 @@
         setupNavDropdowns();
         setupMobileMenu();
         setupSettingsDropdown();
+        setupAccountDropdown();
       })
       .catch(function (error) {
         console.error(error);

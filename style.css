@@ -444,6 +444,7 @@
     }
     .nav-links { display: none; }
     .settings-dropdown { display: none; }
+    .account-dropdown { display: none; }
     .nav-actions .theme-toggle { display: none; }
     .mobile-menu-toggle {
       display: inline-flex;
@@ -1235,6 +1236,81 @@
   }
 
   .settings-row.is-button:hover {
+    background: var(--btn-outline-hover);
+  }
+
+  /* ---------- Account dropdown (nav) ---------- */
+
+  .account-dropdown {
+    position: relative;
+  }
+
+  .account-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--btn-outline-border);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, border-color 0.25s ease;
+  }
+
+  .account-btn:hover {
+    background: var(--btn-outline-hover);
+  }
+
+  .account-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .account-btn circle {
+    fill: var(--fg);
+  }
+
+  .account-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 180px;
+    background: var(--bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.14);
+    padding: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+    z-index: 50;
+  }
+
+  .account-dropdown.is-open .account-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .account-row {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--fg);
+    text-decoration: none;
+    text-align: left;
+    background: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .account-row:hover {
     background: var(--btn-outline-hover);
   }
 
