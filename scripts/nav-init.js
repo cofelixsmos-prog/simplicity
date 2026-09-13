@@ -192,6 +192,22 @@
       });
   }
 
+  function loadBrandMark() {
+    var mount = document.querySelector('[data-brand-mark]');
+    if (!mount) return Promise.resolve();
+    return fetch('/sections/logo.html')
+      .then(function (response) {
+        if (!response.ok) throw new Error('Could not load brand mark');
+        return response.text();
+      })
+      .then(function (html) {
+        mount.innerHTML = html;
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
+  }
+
   function loadCookieUI() {
     var tasks = [];
     if (!document.getElementById('cookie-banner')) {
@@ -211,6 +227,7 @@
 
   function init() {
     if (!document.body.hasAttribute('data-no-nav')) loadNav();
+    loadBrandMark();
     loadFooter();
     loadCookieUI();
   }
