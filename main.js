@@ -172,8 +172,11 @@
       answer.style.maxHeight = '0px';
       item.querySelector('.faq-question').addEventListener('click', function () {
         var isOpen = item.classList.contains('is-open');
-        items.forEach(close);
-        if (!isOpen) open(item);
+        if (isOpen) {
+          close(item);
+        } else {
+          open(item);
+        }
       });
     });
   }
