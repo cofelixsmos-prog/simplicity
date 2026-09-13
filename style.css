@@ -418,7 +418,6 @@
     }
     .nav-links { display: none; }
     .settings-dropdown { display: none; }
-    .account-dropdown { display: none; }
     .nav-actions .theme-toggle { display: none; }
     .mobile-menu-toggle {
       display: inline-flex;

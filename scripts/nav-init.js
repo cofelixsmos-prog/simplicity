@@ -158,7 +158,6 @@
         setupNavDropdowns();
         setupMobileMenu();
         setupSettingsDropdown();
-        setupAccountDropdown();
       })
       .catch(function (error) {
         console.error(error);
@@ -230,6 +229,7 @@
     loadBrandMark();
     loadFooter();
     loadCookieUI();
+    setupAccountDropdown();
   }
 
   if (document.readyState === 'loading') {

@@ -372,10 +372,39 @@
     left: 24px;
     z-index: 10;
   }
+
+  .chat-account-mount {
+    position: fixed;
+    top: 16px;
+    right: 20px;
+    z-index: 10;
+  }
 </style>
 </head>
 <body data-no-nav>
   <div class="chat-brand-mount" data-brand-mark></div>
+
+  <div class="chat-account-mount">
+    <div class="account-dropdown" id="account-dropdown">
+      <button class="account-btn" id="account-toggle" aria-label="Account" aria-expanded="false" aria-controls="account-panel">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="6"  r="3.2"/>
+          <circle cx="12" cy="12" r="2.8"/>
+          <circle cx="28" cy="12" r="2.8"/>
+          <circle cx="7"  cy="20" r="2.4"/>
+          <circle cx="33" cy="20" r="2.4"/>
+          <circle cx="20" cy="20" r="2.2"/>
+          <circle cx="20" cy="28" r="2"/>
+          <circle cx="20" cy="34" r="1.8"/>
+        </svg>
+      </button>
+      <div class="account-panel" id="account-panel">
+        <a class="account-row" href="/profile.html">Profile</a>
+        <a class="account-row" href="/settings.html">Settings</a>
+        <button class="account-row is-button" id="account-logout" type="button">Log out</button>
+      </div>
+    </div>
+  </div>
   <main class="chat-wrap">
     <div class="chat-messages" id="chat-messages">
       <div class="chat-empty" id="chat-empty">
