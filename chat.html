@@ -365,9 +365,49 @@
   .chat-send circle {
     fill: #fff;
   }
+
+  .chat-brand {
+    position: fixed;
+    top: 20px;
+    left: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    z-index: 10;
+  }
+
+  .chat-brand svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .chat-brand circle {
+    fill: var(--fg);
+  }
+
+  .chat-brand span {
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
 </style>
 </head>
 <body data-no-nav>
+  <a class="chat-brand" href="/" aria-label="Simplicity home">
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="6"  r="3.2"/>
+      <circle cx="12" cy="12" r="2.8"/>
+      <circle cx="28" cy="12" r="2.8"/>
+      <circle cx="7"  cy="20" r="2.4"/>
+      <circle cx="33" cy="20" r="2.4"/>
+      <circle cx="20" cy="20" r="2.2"/>
+      <circle cx="20" cy="28" r="2"/>
+      <circle cx="20" cy="34" r="1.8"/>
+    </svg>
+    <span>Simplicity</span>
+  </a>
   <main class="chat-wrap">
     <div class="chat-messages" id="chat-messages">
       <div class="chat-empty" id="chat-empty">
