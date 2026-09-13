@@ -96,12 +96,12 @@
     width: 100%;
     max-width: 760px;
     margin: 0 auto;
-    padding: 24px 20px 20px;
+    padding: 12px 20px 16px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 16px;
-    min-height: 100dvh;
+    min-height: calc(100dvh - 57px);
   }
 
   .chat-wrap.has-messages {
@@ -160,6 +160,8 @@
     border-radius: 16px;
     font-size: 14.5px;
     line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 
   .chat-bubble.user {
@@ -307,13 +309,16 @@
   }
 
   .chat-form {
+    position: sticky;
+    bottom: 12px;
+    z-index: 20;
     display: flex;
     gap: 10px;
-    align-items: center;
+    align-items: flex-end;
     border: 1px solid var(--btn-outline-border);
-    border-radius: 999px;
-    padding: 6px 6px 6px 18px;
-    background: transparent;
+    border-radius: 24px;
+    padding: 8px 8px 8px 18px;
+    background: var(--bg);
     transition: border-color 0.15s ease;
   }
 
@@ -321,7 +326,7 @@
     border-color: var(--accent);
   }
 
-  .chat-form input {
+  .chat-form textarea {
     flex: 1;
     min-width: 0;
     border: none;
@@ -330,10 +335,23 @@
     color: var(--fg);
     font: inherit;
     font-size: 14.5px;
+    line-height: 1.5;
+    resize: none;
+    overflow-y: auto;
+    max-height: 140px;
+    padding: 10px 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  .chat-form input::placeholder {
+  .chat-form textarea::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chat-form textarea::placeholder {
     color: var(--fg-muted);
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .chat-send {
@@ -365,33 +383,168 @@
     fill: #fff;
   }
 
-  .chat-brand-mount {
-    position: fixed;
-    top: 20px;
-    left: 24px;
-    z-index: 10;
+  .queue-bar {
+    position: sticky;
+    bottom: 70px;
+    z-index: 19;
+    background: var(--bg);
+    border: 1.5px solid #3b82f6;
+    border-radius: 16px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
+  .queue-bar[hidden] {
+    display: none;
+  }
+
+  .queue-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    cursor: pointer;
+  }
+
+  .queue-caret {
+    transition: transform 0.15s ease;
+  }
+
+  .queue-bar.is-collapsed .queue-caret {
+    transform: rotate(-90deg);
+  }
+
+  .queue-bar.is-collapsed .queue-list,
+  .queue-bar.is-collapsed .queue-actions {
+    display: none;
+  }
+
+  .queue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 140px;
+    overflow-y: auto;
+  }
+
+  .queue-item {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--fg-muted);
+    border-top: 1px solid var(--btn-outline-border);
+    padding-top: 6px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+
+  .queue-item:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .queue-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .queue-actions button {
+    flex: 1;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--btn-outline-border);
+  }
+
+  .queue-actions button:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+
+  .chat-top {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 20px;
+    background: var(--bg);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .chat-brand-mount,
   .chat-account-mount {
-    position: fixed;
-    top: 16px;
-    right: 20px;
-    z-index: 10;
+    position: static;
+    display: flex;
+    align-items: center;
+  }
+
+  .chat-top a.brand-mark {
+    line-height: 1;
+  }
+
+  .chat-top .account-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .chat-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .chat-clear {
+    border: 1px solid var(--btn-outline-border);
+    background: transparent;
+    color: var(--fg-muted);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .chat-clear:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
 </style>
 </head>
 <body data-no-nav>
-  <div class="chat-brand-mount" data-brand-mark></div>
+  <header class="chat-top">
+    <div class="chat-brand-mount" data-brand-mark></div>
 
-  <div class="chat-account-mount">
-    <div class="account-dropdown" id="account-dropdown">
-      <button class="account-btn" id="account-toggle" aria-label="Account" aria-expanded="false" aria-controls="account-panel">F</button>
-      <div class="account-panel" id="account-panel">
-        <a class="account-row" href="/settings.html">Settings</a>
-        <button class="account-row is-button" id="account-logout" type="button">Log out</button>
+    <div class="chat-top-actions">
+      <button class="chat-clear" id="chat-clear" type="button">Clear chat</button>
+      <div class="chat-account-mount">
+      <div class="account-dropdown" id="account-dropdown">
+        <button class="account-btn" id="account-toggle" aria-label="Account" aria-expanded="false" aria-controls="account-panel">F</button>
+        <div class="account-panel" id="account-panel">
+          <a class="account-row" href="/settings.html">Settings</a>
+          <button class="account-row is-button" id="account-logout" type="button">Log out</button>
+        </div>
+      </div>
       </div>
     </div>
-  </div>
+  </header>
   <main class="chat-wrap">
     <div class="chat-messages" id="chat-messages">
       <div class="chat-empty" id="chat-empty">
@@ -412,8 +565,20 @@
       </div>
     </div>
 
+    <div class="queue-bar" id="queue-bar" hidden>
+      <button class="queue-head" id="queue-toggle" type="button" aria-expanded="true" aria-controls="queue-list">
+        <span>Queued (<span id="queue-count">0</span>) — waiting for reply</span>
+        <span class="queue-caret" aria-hidden="true">▾</span>
+      </button>
+      <div class="queue-list" id="queue-list"></div>
+      <div class="queue-actions">
+        <button type="button" id="queue-edit">Edit</button>
+        <button type="button" id="queue-forget">Forget</button>
+      </div>
+    </div>
+
     <form class="chat-form" id="chat-form">
-      <input type="text" id="chat-input" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message">
+      <textarea id="chat-input" rows="1" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message"></textarea>
       <button type="submit" class="chat-send" aria-label="Send">
         <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
           <circle cx="20" cy="6"  r="3.2"/>
@@ -437,6 +602,96 @@
       var messages = document.getElementById('chat-messages');
       var empty = document.getElementById('chat-empty');
       var chatWrap = document.querySelector('.chat-wrap');
+      var queueBar = document.getElementById('queue-bar');
+      var queueList = document.getElementById('queue-list');
+      var queueCount = document.getElementById('queue-count');
+      var queueToggle = document.getElementById('queue-toggle');
+      var queueEdit = document.getElementById('queue-edit');
+      var queueForget = document.getElementById('queue-forget');
+
+      var isResponding = false;
+      var queue = [];
+
+      function renderQueue() {
+        queueCount.textContent = String(queue.length);
+        queueBar.hidden = queue.length === 0;
+        while (queueList.firstChild) queueList.removeChild(queueList.firstChild);
+        queue.forEach(function (text) {
+          var item = document.createElement('div');
+          item.className = 'queue-item';
+          item.textContent = text;
+          queueList.appendChild(item);
+        });
+      }
+
+      function enqueueMessage(text) {
+        queue.push(text);
+        renderQueue();
+      }
+
+      function onBotDone() {
+        isResponding = false;
+        if (queue.length) {
+          var next = queue.shift();
+          renderQueue();
+          handleUserMessage(next);
+        }
+      }
+
+      queueToggle.addEventListener('click', function () {
+        var collapsed = queueBar.classList.toggle('is-collapsed');
+        queueToggle.setAttribute('aria-expanded', String(!collapsed));
+      });
+
+      queueEdit.addEventListener('click', function () {
+        if (!queue.length) return;
+        input.value = queue.join('\n');
+        queue = [];
+        renderQueue();
+        autosizeInput();
+        input.focus();
+      });
+
+      queueForget.addEventListener('click', function () {
+        queue = [];
+        renderQueue();
+      });
+
+      function autosizeInput() {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+      }
+
+      input.addEventListener('input', autosizeInput);
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          form.requestSubmit();
+        }
+      });
+
+      var emptyInner = empty ? empty.innerHTML : '';
+      var clearBtn = document.getElementById('chat-clear');
+      clearBtn.addEventListener('click', function () {
+        messages.innerHTML = '';
+        var d = document.createElement('div');
+        d.className = 'chat-empty';
+        d.id = 'chat-empty';
+        d.innerHTML = emptyInner;
+        messages.appendChild(d);
+        empty = d;
+        chatWrap.classList.remove('has-messages');
+        hideFollowup();
+        queue = [];
+        renderQueue();
+        input.value = '';
+        autosizeInput();
+        input.focus();
+        window.scrollTo(0, 0);
+      });
+
+      autosizeInput();
 
       var BOT_LOGO_SVG = '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="6" r="3.2"/><circle cx="12" cy="12" r="2.8"/><circle cx="28" cy="12" r="2.8"/><circle cx="7" cy="20" r="2.4"/><circle cx="33" cy="20" r="2.4"/><circle cx="20" cy="20" r="2.2"/><circle cx="20" cy="28" r="2"/><circle cx="20" cy="34" r="1.8"/></svg>';
 
@@ -470,6 +725,20 @@
 
       function getTimeTool() {
         return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      function typewriteText(el, fullText, done) {
+        var i = 0;
+        el.textContent = '';
+        var timer = setInterval(function () {
+          i++;
+          el.textContent = fullText.slice(0, i);
+          messages.scrollTop = messages.scrollHeight;
+          if (i >= fullText.length) {
+            clearInterval(timer);
+            if (done) done();
+          }
+        }, 55);
       }
 
       var followupRow = document.createElement('div');
@@ -579,14 +848,19 @@
           content.className = 'bot-content';
           var div = document.createElement('div');
           div.className = 'chat-bubble bot';
-          div.textContent = text;
+          div.textContent = '';
           content.appendChild(div);
-          content.appendChild(makeMeta(text, time, false, null));
           row.appendChild(logo);
           row.appendChild(content);
           messages.appendChild(row);
-          refreshRetry();
-          showFollowup();
+          messages.scrollTop = messages.scrollHeight;
+          typewriteText(div, text, function () {
+            content.appendChild(makeMeta(text, time, false, null));
+            refreshRetry();
+            showFollowup();
+            messages.scrollTop = messages.scrollHeight;
+            onBotDone();
+          });
         } else {
           var wrap = document.createElement('div');
           wrap.className = 'msg-user';
@@ -655,18 +929,28 @@
           step2.classList.add('is-done');
           step2.querySelector('.tool-label').textContent = 'get_time → ' + currentTime;
           var answer = "It's " + currentTime + ' right now.';
-          div.textContent = answer;
-          var meta = makeMeta(answer, formatTime(new Date()), false, null);
-          content.appendChild(meta);
-          refreshRetry();
-          showFollowup();
-          messages.scrollTop = messages.scrollHeight;
+          typewriteText(div, answer, function () {
+            var meta = makeMeta(answer, formatTime(new Date()), false, null);
+            content.appendChild(meta);
+            refreshRetry();
+            showFollowup();
+            messages.scrollTop = messages.scrollHeight;
+            onBotDone();
+          });
         }, 1100);
       }
 
       function handleUserMessage(value) {
+        if (isResponding) {
+          enqueueMessage(value);
+          input.value = '';
+          autosizeInput();
+          return;
+        }
+        isResponding = true;
         addBubble(value, 'user');
         input.value = '';
+        autosizeInput();
         hideFollowup();
         if (isTimeQuestion(value)) {
           setTimeout(runTimeToolFlow, 350);
