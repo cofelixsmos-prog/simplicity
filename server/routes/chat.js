@@ -6,5 +6,8 @@ const { chatLimiter } = require('../middleware/rateLimit');
 const router = express.Router();
 
 router.post('/message', requireAuth, chatLimiter, chatController.sendMessage);
+router.get('/conversations', requireAuth, chatController.listConversations);
+router.get('/conversations/:id', requireAuth, chatController.getConversation);
+router.delete('/conversations/:id', requireAuth, chatController.deleteConversation);
 
 module.exports = router;

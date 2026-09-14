@@ -128,10 +128,18 @@
         if (!data || !dropdown) return;
 
         var toggle = document.getElementById('account-toggle');
+        var avatar = document.getElementById('account-avatar');
+        var sidebarName = document.getElementById('sidebar-account-name');
         var panelName = document.getElementById('account-panel-username');
         var logoutBtn = document.getElementById('account-logout');
 
-        if (toggle) toggle.textContent = data.username.charAt(0).toUpperCase();
+        var initial = data.username.charAt(0).toUpperCase();
+        if (avatar) {
+          avatar.textContent = initial;
+        } else if (toggle) {
+          toggle.textContent = initial;
+        }
+        if (sidebarName) sidebarName.textContent = data.username;
         if (panelName) panelName.textContent = data.username;
         if (logoutBtn) logoutBtn.addEventListener('click', performLogout);
       })
