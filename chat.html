@@ -96,23 +96,28 @@
   }
 
   body {
-    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   .chat-shell {
     display: flex;
-    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   .chat-main {
     flex: 1;
     min-width: 0;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   .chat-wrap {
     flex: 1;
+    min-height: 0;
     width: 100%;
     max-width: 760px;
     margin: 0 auto;
@@ -121,7 +126,13 @@
     flex-direction: column;
     justify-content: center;
     gap: 16px;
-    min-height: calc(100dvh - 57px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .chat-wrap::-webkit-scrollbar {
+    display: none;
   }
 
   .chat-wrap.has-messages {
@@ -546,12 +557,14 @@
   .chat-sidebar {
     flex-shrink: 0;
     width: 264px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 16px 12px;
     border-right: 1px solid var(--nav-border);
     background: var(--bg);
+    overflow: hidden;
     transition: margin-left 0.25s ease;
   }
 
@@ -753,8 +766,7 @@
 
   /* ---------- Chat top bar ---------- */
   .chat-top {
-    position: sticky;
-    top: 0;
+    flex-shrink: 0;
     z-index: 20;
     display: flex;
     align-items: center;
@@ -1275,7 +1287,7 @@
             }
             setActiveHistoryItem(conversationId);
             closeMobileSidebar();
-            messages.scrollTop = messages.scrollHeight;
+            chatWrap.scrollTop = chatWrap.scrollHeight;
             setLastConversationCookie(conversationId);
           })
           .catch(function (error) {
@@ -1399,7 +1411,7 @@
           clearInterval(followTimer);
           followTimer = null;
         }
-        window.scrollTo(0, 0);
+        chatWrap.scrollTop = 0;
         updateScrollBtn();
       }
 
@@ -1421,11 +1433,11 @@
       var scrollBtn = document.getElementById('scroll-bottom');
       var followOutput = false;
       var followTimer = null;
-      var lastY = window.scrollY;
+      var lastY = chatWrap.scrollTop;
       var lastMove = Date.now();
 
       function distFromBottom() {
-        return document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+        return chatWrap.scrollHeight - (chatWrap.scrollTop + chatWrap.clientHeight);
       }
 
       function isAtBottom() {
@@ -1433,7 +1445,7 @@
       }
 
       function scrollPageBottom(smooth) {
-        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+        chatWrap.scrollTo({ top: chatWrap.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
       }
 
       function updateScrollBtn() {
@@ -1450,7 +1462,7 @@
 
       function ensureFollowLoop() {
         if (followTimer) return;
-        lastY = window.scrollY;
+        lastY = chatWrap.scrollTop;
         lastMove = Date.now();
         followTimer = setInterval(function () {
           if (!isResponding || !followOutput) {
@@ -1458,7 +1470,7 @@
             followTimer = null;
             return;
           }
-          var y = window.scrollY;
+          var y = chatWrap.scrollTop;
           if (y !== lastY) {
             lastY = y;
             lastMove = Date.now();
@@ -1481,15 +1493,15 @@
         updateScrollBtn();
       }
 
-      window.addEventListener('scroll', function () {
+      chatWrap.addEventListener('scroll', function () {
         updateScrollBtn();
       }, { passive: true });
       window.addEventListener('resize', function () {
         positionScrollBtn();
       });
-      window.addEventListener('wheel', noteUserScroll, { passive: true });
-      window.addEventListener('touchmove', noteUserScroll, { passive: true });
-      window.addEventListener('keydown', function (e) {
+      chatWrap.addEventListener('wheel', noteUserScroll, { passive: true });
+      chatWrap.addEventListener('touchmove', noteUserScroll, { passive: true });
+      chatWrap.addEventListener('keydown', function (e) {
         if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].indexOf(e.key) !== -1) noteUserScroll();
       });
 
@@ -1533,7 +1545,7 @@
         var timer = setInterval(function () {
           i++;
           el.textContent = fullText.slice(0, i);
-          messages.scrollTop = messages.scrollHeight;
+          chatWrap.scrollTop = chatWrap.scrollHeight;
           if (isResponding && followOutput) {
             scrollPageBottom(false);
             ensureFollowLoop();
@@ -1567,7 +1579,7 @@
         if (!rows.length) return;
         var last = rows[rows.length - 1];
         last.parentNode.insertBefore(followupRow, last.nextSibling);
-        messages.scrollTop = messages.scrollHeight;
+        chatWrap.scrollTop = chatWrap.scrollHeight;
       }
 
       function makeMeta(text, time, showRetry, onRetry) {
@@ -1640,7 +1652,7 @@
         wrap.appendChild(userDiv);
         wrap.appendChild(makeMeta(text, time, false, null));
         messages.appendChild(wrap);
-        messages.scrollTop = messages.scrollHeight;
+        chatWrap.scrollTop = chatWrap.scrollHeight;
       }
 
       function requestFailedMessage(error) {
@@ -1680,7 +1692,7 @@
         row.appendChild(logo);
         row.appendChild(content);
         messages.appendChild(row);
-        messages.scrollTop = messages.scrollHeight;
+        chatWrap.scrollTop = chatWrap.scrollHeight;
 
         fetch('/api/chat/message', {
           method: 'POST',
@@ -1715,7 +1727,7 @@
                 step.innerHTML = '<span class="tool-dot"></span><span class="tool-label">' + label + '</span>';
                 trace.appendChild(step);
               });
-              messages.scrollTop = messages.scrollHeight;
+              chatWrap.scrollTop = chatWrap.scrollHeight;
             }
 
             var answer = data.reply || "I don't have a response for that.";
@@ -1727,7 +1739,7 @@
               content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
               refreshRetry();
               showFollowup();
-              messages.scrollTop = messages.scrollHeight;
+              chatWrap.scrollTop = chatWrap.scrollHeight;
               onBotDone();
             });
           })
@@ -1740,7 +1752,7 @@
             typewriteText(div, message, function () {
               content.appendChild(makeMeta(message, formatTime(new Date()), false, null));
               refreshRetry();
-              messages.scrollTop = messages.scrollHeight;
+              chatWrap.scrollTop = chatWrap.scrollHeight;
               onBotDone();
             });
           });
