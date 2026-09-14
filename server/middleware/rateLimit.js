@@ -8,4 +8,12 @@ const authLimiter = rateLimit({
   message: { error: 'Too many attempts. Please try again later.' },
 });
 
-module.exports = { authLimiter };
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'You are sending messages too quickly. Please slow down.' },
+});
+
+module.exports = { authLimiter, chatLimiter };

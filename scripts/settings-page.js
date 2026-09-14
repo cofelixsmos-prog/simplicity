@@ -42,10 +42,28 @@
   }
 
   var navItems = document.querySelectorAll('.settings-nav-item');
+  var navItemById = {};
   navItems.forEach(function (item) {
+    var id = item.getAttribute('href').slice(1);
+    navItemById[id] = item;
     item.addEventListener('click', function () {
       navItems.forEach(function (i) { i.classList.remove('is-active'); });
       item.classList.add('is-active');
     });
   });
+
+  var sections = document.querySelectorAll('.settings-section');
+  if (sections.length && 'IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var item = navItemById[entry.target.id];
+        if (!item) return;
+        navItems.forEach(function (i) { i.classList.remove('is-active'); });
+        item.classList.add('is-active');
+      });
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+
+    sections.forEach(function (section) { observer.observe(section); });
+  }
 })();
