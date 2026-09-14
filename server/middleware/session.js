@@ -19,7 +19,10 @@ async function attachSession(req, res, next) {
     });
 
     const row = result.rows[0];
-    if (!row || new Date(row.expires_at) < new Date()) {
+    if (!row) return next();
+
+    if (new Date(row.expires_at) < new Date()) {
+      await db.execute({ sql: 'DELETE FROM sessions WHERE id = ?', args: [sessionId] });
       return next();
     }
 

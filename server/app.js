@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const { attachSession } = require('./middleware/session');
+const pageGuard = require('./middleware/pageGuard');
 const authRoutes = require('./routes/auth');
 
 const ROOT_DIR = path.join(__dirname, '..');
@@ -16,6 +17,7 @@ function createApp() {
 
   app.use('/api/auth', authRoutes);
 
+  app.use(pageGuard);
   app.use(express.static(ROOT_DIR, { extensions: ['html'] }));
 
   app.use((err, req, res, next) => {
