@@ -16,14 +16,14 @@ function validateMessage(message) {
 }
 
 async function sendMessage(req, res, next) {
+  const { message, conversationId } = req.body || {};
+  const validationError = validateMessage(message);
+  if (validationError) return res.status(400).json({ error: validationError });
+
+  const trimmedMessage = message.trim();
+  let activeConversationId = conversationId;
+
   try {
-    const { message, conversationId } = req.body || {};
-    const validationError = validateMessage(message);
-    if (validationError) return res.status(400).json({ error: validationError });
-
-    const trimmedMessage = message.trim();
-    let activeConversationId = conversationId;
-
     if (activeConversationId) {
       const owns = await conversations.ownsConversation(req.user.id, activeConversationId);
       if (!owns) return res.status(404).json({ error: 'Conversation not found.' });
@@ -94,16 +94,37 @@ async function sendMessage(req, res, next) {
     await conversations.touchConversation(activeConversationId);
     return res.json({ reply: fallbackReply, toolCalls, conversationId: activeConversationId });
   } catch (error) {
+    let statusCode = 500;
+    let errorMessage = 'Something went wrong.';
+
     if (error.upstreamStatus === 429 || error.upstreamStatus === 503) {
-      return res.status(503).json({ error: 'The assistant is busy right now. Please try again in a moment.' });
+      statusCode = 503;
+      errorMessage = 'The assistant is busy right now. Please try again in a moment.';
+    } else if (error.upstreamStatus >= 400 && error.upstreamStatus < 500) {
+      statusCode = 502;
+      errorMessage = 'The assistant could not process that message.';
+    } else if (error.upstreamStatus >= 500) {
+      statusCode = 502;
+      errorMessage = 'The assistant is temporarily unavailable. Please try again shortly.';
+    } else {
+      console.error(error);
     }
-    if (error.upstreamStatus >= 400 && error.upstreamStatus < 500) {
-      return res.status(502).json({ error: 'The assistant could not process that message.' });
+
+    // The user's message may already be saved by this point (it's saved before
+    // the model call). Leaving it with no reply makes the conversation look
+    // like it silently lost data on reload, so always pair it with something,
+    // even on failure. This save is best-effort: a DB hiccup here must not
+    // mask the original error.
+    if (activeConversationId) {
+      try {
+        await conversations.saveMessage(activeConversationId, 'assistant', errorMessage, null);
+        await conversations.touchConversation(activeConversationId);
+      } catch (saveError) {
+        console.error('Failed to save error reply:', saveError);
+      }
     }
-    if (error.upstreamStatus >= 500) {
-      return res.status(502).json({ error: 'The assistant is temporarily unavailable. Please try again shortly.' });
-    }
-    next(error);
+
+    return res.status(statusCode).json({ error: errorMessage, conversationId: activeConversationId || null });
   }
 }
 

@@ -1702,7 +1702,9 @@
           .then(function (response) {
             if (response.status === 429) return Promise.reject(new Error('rate_limited'));
             if (!response.ok) return response.json().then(function (data) {
-              return Promise.reject(new Error(data.error || 'request_failed'));
+              var err = new Error(data.error || 'request_failed');
+              err.conversationId = data.conversationId || null;
+              return Promise.reject(err);
             });
             return response.json();
           })
@@ -1747,6 +1749,12 @@
             if (requestGeneration !== viewGeneration) {
               onBotDone();
               return;
+            }
+            if (error && error.conversationId && error.conversationId !== currentConversationId) {
+              currentConversationId = error.conversationId;
+              if (chatTopTitle) chatTopTitle.textContent = sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage;
+              loadHistoryList(currentConversationId);
+              setLastConversationCookie(currentConversationId);
             }
             var message = requestFailedMessage(error);
             typewriteText(div, message, function () {
