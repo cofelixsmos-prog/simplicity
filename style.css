@@ -1269,7 +1269,7 @@
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    min-width: 180px;
+    min-width: 200px;
     background: var(--bg);
     border: 1px solid var(--nav-border);
     border-radius: 14px;
@@ -1286,6 +1286,21 @@
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+  }
+
+  .account-panel-head {
+    padding: 10px 12px 12px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--nav-border);
+  }
+
+  .account-panel-name {
+    font-size: 13.5px;
+    font-weight: 650;
+    color: var(--fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .account-row {
@@ -1485,6 +1500,120 @@
 
   @media (max-width: 480px) {
     .cookie-modal { padding: 22px; }
+  }
+
+  /* ---------- Settings modal ---------- */
+
+  .settings-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s;
+  }
+
+  .settings-modal-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .settings-modal {
+    width: 100%;
+    max-width: 440px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+    padding: 28px;
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.25s ease;
+  }
+
+  .settings-modal-overlay.is-visible .settings-modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .settings-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .settings-modal-head h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .settings-modal-close {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .settings-modal-close:hover {
+    background: var(--btn-outline-hover);
+    color: var(--fg);
+  }
+
+  .settings-modal-close svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .settings-modal-row {
+    padding: 18px 0;
+    border-top: 1px solid var(--nav-border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .settings-modal-row:first-of-type {
+    margin-top: 18px;
+  }
+
+  .settings-modal-row-text h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .settings-modal-row-text p {
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-width: 38ch;
+  }
+
+  .settings-modal-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 480px) {
+    .settings-modal { padding: 22px; }
   }
 
   .brand-loader-dot {

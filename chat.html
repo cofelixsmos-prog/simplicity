@@ -574,7 +574,7 @@
 
 </style>
 </head>
-<body data-no-nav>
+<body data-no-nav data-require-auth>
   <header class="chat-top">
     <div class="chat-brand-mount" data-brand-mark></div>
 
@@ -582,9 +582,12 @@
       <button class="chat-clear" id="chat-clear" type="button">Clear chat</button>
       <div class="chat-account-mount">
       <div class="account-dropdown" id="account-dropdown">
-        <button class="account-btn" id="account-toggle" aria-label="Account" aria-expanded="false" aria-controls="account-panel">F</button>
+        <button class="account-btn" id="account-toggle" aria-label="Account" aria-expanded="false" aria-controls="account-panel">?</button>
         <div class="account-panel" id="account-panel">
-          <a class="account-row" href="/settings.html">Settings</a>
+          <div class="account-panel-head">
+            <p class="account-panel-name" id="account-panel-username">—</p>
+          </div>
+          <button class="account-row is-button" id="settings-open" type="button">Settings</button>
           <button class="account-row is-button" id="account-logout" type="button">Log out</button>
         </div>
       </div>
