@@ -118,10 +118,12 @@
       var closeBtn = document.getElementById('settings-modal-close');
       var logoutBtn = document.getElementById('settings-logout');
       var usernameEl = document.getElementById('settings-username');
+      var avatarEl = document.getElementById('settings-avatar');
       var modalThemeToggle = document.getElementById('modal-theme-toggle');
       if (!overlay) return;
 
       if (usernameEl) usernameEl.textContent = username;
+      if (avatarEl) avatarEl.textContent = username.charAt(0).toUpperCase();
 
       if (modalThemeToggle) {
         modalThemeToggle.setAttribute('aria-pressed', document.documentElement.getAttribute('data-theme') === 'dark' ? 'true' : 'false');

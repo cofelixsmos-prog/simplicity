@@ -1579,6 +1579,49 @@
     height: 13px;
   }
 
+  .settings-identity {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 14px;
+    background: var(--btn-outline-hover);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .settings-identity-avatar {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 17px;
+    font-weight: 650;
+  }
+
+  .settings-identity-text {
+    min-width: 0;
+  }
+
+  .settings-identity-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .settings-identity-label {
+    margin-top: 2px;
+    font-size: 12.5px;
+    color: var(--fg-muted);
+  }
+
   .settings-modal-row {
     padding: 18px 0;
     border-top: 1px solid var(--nav-border);
@@ -1589,7 +1632,7 @@
   }
 
   .settings-modal-row:first-of-type {
-    margin-top: 18px;
+    margin-top: 4px;
   }
 
   .settings-modal-row-text h3 {

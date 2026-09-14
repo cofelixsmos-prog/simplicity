@@ -138,6 +138,41 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: opacity 0.28s ease, transform 0.28s ease;
+  }
+
+  .chat-empty.is-leaving {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+
+  @keyframes chat-form-settle {
+    from {
+      transform: translateY(-18px);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .chat-form.is-settling {
+    animation: chat-form-settle 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes chat-bubble-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .msg-user,
+  .bot-row {
+    animation: chat-bubble-in 0.32s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .chat-mark {
@@ -659,6 +694,26 @@
       var queueEdit = document.getElementById('queue-edit');
       var queueForget = document.getElementById('queue-forget');
 
+      var hasEnteredChatMode = false;
+
+      function enterChatMode() {
+        if (empty && !empty.classList.contains('is-leaving')) {
+          empty.classList.add('is-leaving');
+          setTimeout(function () {
+            if (empty && empty.parentNode) empty.remove();
+          }, 280);
+        }
+        if (!hasEnteredChatMode) {
+          hasEnteredChatMode = true;
+          chatWrap.classList.add('has-messages');
+          form.classList.add('is-settling');
+          form.addEventListener('animationend', function handler() {
+            form.classList.remove('is-settling');
+            form.removeEventListener('animationend', handler);
+          });
+        }
+      }
+
       var isResponding = false;
       var queue = [];
 
@@ -737,6 +792,7 @@
         messages.appendChild(d);
         empty = d;
         chatWrap.classList.remove('has-messages');
+        hasEnteredChatMode = false;
         hideFollowup();
         queue = [];
         renderQueue();
@@ -983,8 +1039,7 @@
       }
 
       function addBubble(text, who) {
-        if (empty) empty.remove();
-        chatWrap.classList.add('has-messages');
+        enterChatMode();
         var time = formatTime(new Date());
         if (who === 'bot') {
           var row = document.createElement('div');
@@ -1024,8 +1079,7 @@
       }
 
       function runTimeToolFlow() {
-        if (empty) empty.remove();
-        chatWrap.classList.add('has-messages');
+        enterChatMode();
         hideFollowup();
 
         var row = document.createElement('div');
