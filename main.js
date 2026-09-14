@@ -215,6 +215,7 @@
       safe(setupReveal);
       loadScript('scripts/wordmark.js').catch(function (error) { console.error(error); });
       loadScript('scripts/pixel-field.js').catch(function (error) { console.error(error); });
+      loadScript('scripts/cloud-field.js').catch(function (error) { console.error(error); });
       loadScript('scripts/footer-wordmark.js').catch(function (error) { console.error(error); });
       loadScript('scripts/consent.js').catch(function (error) { console.error(error); });
       return loadScript('https://unpkg.com/lenis@1/dist/lenis.min.js')

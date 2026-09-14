@@ -566,8 +566,23 @@
   /* ---------- Works section ---------- */
 
   .works {
+    position: relative;
     padding: 90px 52px 110px;
     scroll-margin-top: 96px;
+    overflow: hidden;
+  }
+
+  .works-cloud-field {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .works-header,
+  .works-card {
+    position: relative;
+    z-index: 1;
   }
 
   .works-header {
@@ -890,10 +905,25 @@
   /* ---------- Footer ---------- */
 
   .site-footer {
+    position: relative;
     background: var(--bg);
     padding: 120px 24px 40px;
     border-top: 1px solid var(--nav-border);
     transition: background 0.25s ease, border-color 0.25s ease;
+    overflow: hidden;
+  }
+
+  .footer-cloud-field {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .footer-top,
+  .footer-bottom {
+    position: relative;
+    z-index: 1;
   }
 
 
