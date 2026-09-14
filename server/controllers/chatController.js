@@ -46,9 +46,20 @@ async function sendMessage(req, res, next) {
   let activeConversationId = conversationId;
   const isNewConversation = !conversationId;
 
+  function sendEvent(event) {
+    if (!res.writableEnded) res.write(JSON.stringify(event) + '\n');
+  }
+
   async function finishTurn(replyText, toolCalls) {
     await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null);
     await conversations.touchConversation(activeConversationId);
+
+    sendEvent({
+      type: 'reply',
+      reply: replyText,
+      toolCalls,
+      conversationId: activeConversationId,
+    });
 
     // Best-effort: the reply itself is already saved by this point, so a
     // title-generation or title-write failure must never turn into an error
@@ -64,7 +75,8 @@ async function sendMessage(req, res, next) {
       }
     }
 
-    return res.json({ reply: replyText, toolCalls, conversationId: activeConversationId, title: title || undefined });
+    sendEvent({ type: 'done', conversationId: activeConversationId, title: title || undefined });
+    return res.end();
   }
 
   try {
@@ -74,6 +86,12 @@ async function sendMessage(req, res, next) {
     } else {
       activeConversationId = await conversations.createConversation(req.user.id, trimmedMessage);
     }
+
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    if (typeof res.flushHeaders === 'function') res.flushHeaders();
 
     const history = await conversations.getConversationHistory(activeConversationId);
     await conversations.saveMessage(activeConversationId, 'user', trimmedMessage, null);
@@ -89,6 +107,7 @@ async function sendMessage(req, res, next) {
     let forceFinalAnswer = false;
 
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+      sendEvent({ type: 'thinking', phase: round + 1, label: 'Simplifying' });
       const reply = await createChatCompletion({
         messages: modelMessages,
         tools: forceFinalAnswer ? undefined : TOOL_DEFINITIONS,
@@ -106,14 +125,23 @@ async function sendMessage(req, res, next) {
       });
 
       let sawRepeat = false;
-      for (const call of reply.tool_calls) {
+      for (const [index, call] of reply.tool_calls.entries()) {
         const args = call.function.arguments ? JSON.parse(call.function.arguments) : {};
         const callKey = call.function.name + ':' + JSON.stringify(args);
         if (seenCalls.has(callKey)) sawRepeat = true;
         seenCalls.add(callKey);
 
+        sendEvent({ type: 'tool_start', index, name: call.function.name, args, round: round + 1 });
+        const toolStartedAt = Date.now();
         const result = await runTool(call.function.name, args);
-        toolCalls.push({ name: call.function.name, result });
+        const toolCall = {
+          name: call.function.name,
+          args,
+          result,
+          durationMs: Date.now() - toolStartedAt,
+        };
+        toolCalls.push(toolCall);
+        sendEvent({ type: 'tool_done', index, round: round + 1, ...toolCall });
         modelMessages.push({
           role: 'tool',
           tool_call_id: call.id,
@@ -164,6 +192,10 @@ async function sendMessage(req, res, next) {
       }
     }
 
+    if (res.headersSent) {
+      sendEvent({ type: 'error', error: errorMessage, conversationId: activeConversationId || null });
+      return res.end();
+    }
     return res.status(statusCode).json({ error: errorMessage, conversationId: activeConversationId || null });
   }
 }

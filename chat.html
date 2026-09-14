@@ -116,6 +116,7 @@
   }
 
   .chat-wrap {
+    position: relative;
     flex: 1;
     min-height: 0;
     width: 100%;
@@ -150,6 +151,31 @@
   .chat-wrap.has-messages .chat-messages {
     flex: 1;
     justify-content: flex-start;
+  }
+
+  .chat-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-bottom: 90px;
+    background: var(--bg);
+    color: var(--fg-muted);
+    font-size: 14px;
+  }
+
+  .chat-loading[hidden] {
+    display: none;
+  }
+
+  .chat-loading strong {
+    color: var(--fg);
+    font-size: 18px;
+    font-weight: 500;
   }
 
   .chat-empty {
@@ -354,9 +380,41 @@
   }
 
   .tool-step {
+    display: block;
+  }
+
+  .tool-summary {
     display: flex;
     align-items: center;
     gap: 8px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .tool-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .tool-summary::after {
+    content: "+";
+    margin-left: auto;
+    color: var(--fg-muted);
+    font-size: 14px;
+  }
+
+  .tool-step[open] .tool-summary::after {
+    content: "−";
+  }
+
+  .tool-details {
+    margin: 7px 0 2px 20px;
+    padding: 8px 10px;
+    border-left: 1px solid var(--btn-outline-border);
+    color: var(--fg-muted);
+    font-size: 11.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 
   .tool-dot {
@@ -373,12 +431,32 @@
   }
 
   .tool-step.is-done .tool-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    background: transparent;
     opacity: 1;
   }
 
-  .tool-step.is-done .tool-label::after {
-    content: " ✓";
+  .tool-step.is-done .tool-dot::after {
+    content: "✓";
     color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .thinking-indicator {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+    color: var(--fg-muted);
+  }
+
+  .thinking-dots {
+    letter-spacing: 0;
   }
 
   .chat-form {
@@ -1066,6 +1144,22 @@
         <button class="chat-clear" id="chat-clear" type="button">Clear chat</button>
       </header>
       <main class="chat-wrap">
+    <div class="chat-loading" id="chat-loading" aria-live="polite">
+      <span class="chat-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="6"  r="3.2"/>
+          <circle cx="12" cy="12" r="2.8"/>
+          <circle cx="28" cy="12" r="2.8"/>
+          <circle cx="7"  cy="20" r="2.4"/>
+          <circle cx="33" cy="20" r="2.4"/>
+          <circle cx="20" cy="20" r="2.2"/>
+          <circle cx="20" cy="28" r="2"/>
+          <circle cx="20" cy="34" r="1.8"/>
+        </svg>
+      </span>
+      <strong>Loading your chat</strong>
+      <span>Getting things ready</span>
+    </div>
     <div class="chat-messages" id="chat-messages">
       <div class="chat-empty" id="chat-empty">
         <span class="chat-mark" aria-hidden="true">
@@ -1170,6 +1264,7 @@
       var input = document.getElementById('chat-input');
       var messages = document.getElementById('chat-messages');
       var empty = document.getElementById('chat-empty');
+      var chatLoading = document.getElementById('chat-loading');
       var chatWrap = document.querySelector('.chat-wrap');
       var queueBar = document.getElementById('queue-bar');
       var queueList = document.getElementById('queue-list');
@@ -1249,14 +1344,65 @@
             historyList.innerHTML = '';
             if (!list.length) {
               historyList.appendChild(historyEmpty);
+              if (!activeId) setChatLoading(false);
               return;
             }
             list.forEach(function (conversation) {
               historyList.appendChild(buildHistoryItem(conversation));
             });
             if (activeId) setActiveHistoryItem(activeId);
+            if (!activeId) setChatLoading(false);
           })
-          .catch(function (error) { console.error(error); });
+          .catch(function (error) {
+            if (!activeId) setChatLoading(false);
+            console.error(error);
+          });
+      }
+
+      function toolLabel(call) {
+        var label = TOOL_LABELS[call.name] || call.name;
+        if (call.name === 'get_time' && call.result && call.result.time) {
+          label += ' → ' + call.result.time;
+        }
+        return label;
+      }
+
+      function toolDetails(call) {
+        var args = call.args || {};
+        var result = call.result || {};
+        var duration = typeof call.durationMs === 'number' ? (call.durationMs / 1000).toFixed(2) + ' sec' : '—';
+        return 'Arguments\n' + JSON.stringify(args, null, 2) + '\n\nResult\n' + JSON.stringify(result, null, 2) + '\n\nElapsed\n' + duration;
+      }
+
+      function createToolStep(call, isActive) {
+        var step = document.createElement('details');
+        step.className = 'tool-step' + (isActive ? ' is-active' : ' is-done');
+        step.open = Boolean(isActive);
+
+        var summary = document.createElement('summary');
+        summary.className = 'tool-summary';
+        var dot = document.createElement('span');
+        dot.className = 'tool-dot';
+        var label = document.createElement('span');
+        label.className = 'tool-label';
+        label.textContent = isActive ? (TOOL_LABELS[call.name] || call.name) + '...' : toolLabel(call);
+        summary.appendChild(dot);
+        summary.appendChild(label);
+        step.appendChild(summary);
+
+        var detail = document.createElement('div');
+        detail.className = 'tool-details';
+        detail.textContent = isActive ? 'Waiting for result...' : toolDetails(call);
+        step.appendChild(detail);
+        return step;
+      }
+
+      function finishToolStep(step, call) {
+        step.classList.remove('is-active');
+        step.classList.add('is-done');
+        step.open = false;
+        step.querySelector('.tool-label').textContent = toolLabel(call);
+        step.querySelector('.tool-details').textContent = toolDetails(call);
       }
 
       function deleteConversation(conversationId) {
@@ -1289,14 +1435,7 @@
           var trace = document.createElement('div');
           trace.className = 'tool-trace';
           msg.toolCalls.forEach(function (call) {
-            var step = document.createElement('div');
-            step.className = 'tool-step is-done';
-            var label = TOOL_LABELS[call.name] || call.name;
-            if (call.name === 'get_time' && call.result && call.result.time) {
-              label = 'get_time → ' + call.result.time;
-            }
-            step.innerHTML = '<span class="tool-dot"></span><span class="tool-label">' + label + '</span>';
-            trace.appendChild(step);
+            trace.appendChild(createToolStep(call, false));
           });
           content.appendChild(trace);
         }
@@ -1314,6 +1453,7 @@
       function openConversation(conversationId) {
         viewGeneration++;
         var requestGeneration = viewGeneration;
+        setChatLoading(true);
 
         fetch('/api/chat/conversations/' + conversationId)
           .then(function (response) {
@@ -1322,6 +1462,7 @@
           })
           .then(function (data) {
             if (requestGeneration !== viewGeneration) return;
+            setChatLoading(false);
             currentConversationId = data.id;
             if (chatTopTitle) chatTopTitle.textContent = data.title;
             resetChatView();
@@ -1337,6 +1478,7 @@
             setLastConversationCookie(conversationId);
           })
           .catch(function (error) {
+            setChatLoading(false);
             if (error && error.message === 'not_found') clearLastConversationCookie();
             console.error(error);
           });
@@ -1430,6 +1572,11 @@
       });
 
       var emptyInner = empty ? empty.innerHTML : '';
+
+      function setChatLoading(isLoading) {
+        if (chatLoading) chatLoading.hidden = !isLoading;
+      }
+
       var clearBtn = document.getElementById('chat-clear');
       var newChatBtn = document.getElementById('new-chat-btn');
       var chatTopTitle = document.getElementById('chat-top-title');
@@ -1711,6 +1858,38 @@
         return "Something went wrong reaching Simplicity. Please try again.";
       }
 
+      function readMessageStream(response, onEvent) {
+        if (!response.body || !response.body.getReader) {
+          return response.text().then(function (text) {
+            text.split('\n').forEach(function (line) {
+              if (line.trim()) onEvent(JSON.parse(line));
+            });
+          });
+        }
+
+        var reader = response.body.getReader();
+        var decoder = new TextDecoder();
+        var buffer = '';
+
+        function readNext() {
+          return reader.read().then(function (part) {
+            buffer += decoder.decode(part.value || new Uint8Array(), { stream: !part.done });
+            var lines = buffer.split('\n');
+            buffer = lines.pop();
+            lines.forEach(function (line) {
+              if (line.trim()) onEvent(JSON.parse(line));
+            });
+            if (part.done) {
+              if (buffer.trim()) onEvent(JSON.parse(buffer));
+              return;
+            }
+            return readNext();
+          });
+        }
+
+        return readNext();
+      }
+
       function sendBotReply(sourceMessage) {
         hideFollowup();
         var requestGeneration = viewGeneration;
@@ -1733,12 +1912,92 @@
 
         var div = document.createElement('div');
         div.className = 'chat-bubble bot';
-        div.textContent = '…';
+        div.innerHTML = '<span class="thinking-indicator"><span class="thinking-phase">1. Simplifying...</span><span class="thinking-elapsed">0 sec</span></span>';
         content.appendChild(div);
         row.appendChild(logo);
         row.appendChild(content);
         messages.appendChild(row);
         chatWrap.scrollTop = chatWrap.scrollHeight;
+
+        var thinkingPhase = div.querySelector('.thinking-phase');
+        var thinkingElapsed = div.querySelector('.thinking-elapsed');
+        var thinkingStartedAt = Date.now();
+        var thinkingTimer = setInterval(function () {
+          thinkingElapsed.textContent = Math.floor((Date.now() - thinkingStartedAt) / 1000) + ' sec';
+        }, 1000);
+        function stopThinking() {
+          clearInterval(thinkingTimer);
+        }
+        function setThinkingPhase(number, label) {
+          thinkingPhase.textContent = number + '. ' + label + '...';
+        }
+
+        var toolSteps = {};
+        var replyReceived = false;
+
+        function handleEvent(event) {
+          if (requestGeneration !== viewGeneration) return;
+          if (event.type === 'thinking') {
+            setThinkingPhase(event.phase || 1, event.label || 'Simplifying');
+            return;
+          }
+          if (event.type === 'tool_start') {
+            trace.hidden = false;
+            setThinkingPhase((event.round || 1) + 1, TOOL_LABELS[event.name] || event.name);
+            var key = String(event.round || 1) + ':' + String(event.index || 0);
+            var call = { name: event.name, args: event.args || {} };
+            var step = createToolStep(call, true);
+            toolSteps[key] = step;
+            trace.appendChild(step);
+            chatWrap.scrollTop = chatWrap.scrollHeight;
+            return;
+          }
+          if (event.type === 'tool_done') {
+            var doneKey = String(event.round || 1) + ':' + String(event.index || 0);
+            var doneStep = toolSteps[doneKey];
+            if (!doneStep) {
+              trace.hidden = false;
+              doneStep = createToolStep(event, false);
+              trace.appendChild(doneStep);
+            } else {
+              finishToolStep(doneStep, event);
+            }
+            chatWrap.scrollTop = chatWrap.scrollHeight;
+            return;
+          }
+          if (event.type === 'reply') {
+            replyReceived = true;
+            stopThinking();
+            if (event.conversationId && event.conversationId !== currentConversationId) {
+              currentConversationId = event.conversationId;
+              if (chatTopTitle) chatTopTitle.textContent = sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage;
+              loadHistoryList(currentConversationId);
+              setLastConversationCookie(currentConversationId);
+            }
+            if (event.toolCalls && event.toolCalls.length && !trace.childNodes.length) {
+              trace.hidden = false;
+              event.toolCalls.forEach(function (call) { trace.appendChild(createToolStep(call, false)); });
+            }
+            var answer = event.reply || "I don't have a response for that.";
+            typewriteText(div, answer, function () {
+              content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
+              refreshRetry();
+              showFollowup();
+              chatWrap.scrollTop = chatWrap.scrollHeight;
+              onBotDone();
+            });
+            return;
+          }
+          if (event.type === 'done') {
+            if (event.title && chatTopTitle) chatTopTitle.textContent = event.title;
+            return;
+          }
+          if (event.type === 'error') {
+            var streamError = new Error(event.error || 'request_failed');
+            streamError.conversationId = event.conversationId || null;
+            throw streamError;
+          }
+        }
 
         fetch('/api/chat/message', {
           method: 'POST',
@@ -1752,48 +2011,15 @@
               err.conversationId = data.conversationId || null;
               return Promise.reject(err);
             });
-            return response.json();
+            return readMessageStream(response, handleEvent);
           })
-          .then(function (data) {
-            if (requestGeneration !== viewGeneration) return;
-            if (data.conversationId && data.conversationId !== currentConversationId) {
-              currentConversationId = data.conversationId;
-              if (chatTopTitle) {
-                chatTopTitle.textContent = data.title || (sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage);
-              }
-              loadHistoryList(currentConversationId);
-              setLastConversationCookie(currentConversationId);
+          .then(function () {
+            if (!replyReceived && requestGeneration === viewGeneration) {
+              throw new Error('request_failed');
             }
-            var toolCalls = data.toolCalls || [];
-            if (toolCalls.length) {
-              trace.hidden = false;
-              toolCalls.forEach(function (call) {
-                var step = document.createElement('div');
-                step.className = 'tool-step is-done';
-                var label = TOOL_LABELS[call.name] || call.name;
-                if (call.name === 'get_time' && call.result && call.result.time) {
-                  label = 'get_time → ' + call.result.time;
-                }
-                step.innerHTML = '<span class="tool-dot"></span><span class="tool-label">' + label + '</span>';
-                trace.appendChild(step);
-              });
-              chatWrap.scrollTop = chatWrap.scrollHeight;
-            }
-
-            var answer = data.reply || "I don't have a response for that.";
-            if (requestGeneration !== viewGeneration) {
-              onBotDone();
-              return;
-            }
-            typewriteText(div, answer, function () {
-              content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
-              refreshRetry();
-              showFollowup();
-              chatWrap.scrollTop = chatWrap.scrollHeight;
-              onBotDone();
-            });
           })
           .catch(function (error) {
+            stopThinking();
             if (requestGeneration !== viewGeneration) {
               onBotDone();
               return;
@@ -1908,6 +2134,7 @@
       }
 
       var lastConversationId = getLastConversationCookie();
+      setChatLoading(true);
       loadHistoryList(lastConversationId);
       if (lastConversationId) openConversation(lastConversationId);
     })();
