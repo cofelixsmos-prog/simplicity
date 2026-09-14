@@ -890,9 +890,10 @@
   /* ---------- Footer ---------- */
 
   .site-footer {
-    background: #0A0A0A;
+    background: var(--bg);
     padding: 120px 24px 40px;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    border-top: 1px solid var(--nav-border);
+    transition: background 0.25s ease, border-color 0.25s ease;
   }
 
 
@@ -908,7 +909,8 @@
   }
 
   .footer-wordmark circle {
-    fill: #F3F1EC;
+    fill: var(--fg);
+    transition: fill 0.25s ease;
   }
 
   .footer-bottom {
@@ -924,7 +926,7 @@
 
   .footer-copy {
     font-size: 13.5px;
-    color: rgba(255,255,255,0.4);
+    color: var(--fg-muted);
   }
 
   .footer-links {
@@ -934,13 +936,13 @@
 
   .footer-links a {
     font-size: 13.5px;
-    color: rgba(255,255,255,0.55);
+    color: var(--fg-muted);
     text-decoration: none;
     transition: color 0.2s ease;
   }
 
   .footer-links a:hover {
-    color: #FF7440;
+    color: var(--accent-hover);
   }
 
   @media (max-width: 560px) {
