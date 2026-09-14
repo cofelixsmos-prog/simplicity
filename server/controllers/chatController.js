@@ -7,12 +7,34 @@ const SYSTEM_PROMPT = 'You are Simplicity, a helpful, concise assistant. Keep an
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_TOOL_ROUNDS = 3;
 
+const TITLE_SYSTEM_PROMPT = 'Summarize the following exchange as a short chat title: 3-6 words, no quotes, no trailing punctuation, no prefix like "Title:". Reply with only the title.';
+
 function validateMessage(message) {
   if (typeof message !== 'string') return 'Message is required.';
   const trimmed = message.trim();
   if (!trimmed) return 'Message cannot be empty.';
   if (trimmed.length > MAX_MESSAGE_LENGTH) return `Message is too long (max ${MAX_MESSAGE_LENGTH} characters).`;
   return null;
+}
+
+async function generateTitle(userMessage, assistantReply) {
+  try {
+    const reply = await createChatCompletion({
+      messages: [
+        { role: 'system', content: TITLE_SYSTEM_PROMPT },
+        { role: 'user', content: `User: ${userMessage}\nAssistant: ${assistantReply}` },
+      ],
+      // Some models (e.g. ling-3.0-flash-fin-free) emit an internal
+      // "reasoning" pass before the final content — a small token budget
+      // gets exhausted there and content ends up empty. 200 gives enough
+      // headroom for that plus a short title.
+      maxTokens: 200,
+    });
+    return reply.content ? reply.content.trim() : null;
+  } catch (error) {
+    console.error('Title generation failed:', error.message);
+    return null;
+  }
 }
 
 async function sendMessage(req, res, next) {
@@ -22,6 +44,28 @@ async function sendMessage(req, res, next) {
 
   const trimmedMessage = message.trim();
   let activeConversationId = conversationId;
+  const isNewConversation = !conversationId;
+
+  async function finishTurn(replyText, toolCalls) {
+    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null);
+    await conversations.touchConversation(activeConversationId);
+
+    // Best-effort: the reply itself is already saved by this point, so a
+    // title-generation or title-write failure must never turn into an error
+    // response for a turn that actually succeeded.
+    let title;
+    if (isNewConversation) {
+      try {
+        title = await generateTitle(trimmedMessage, replyText);
+        if (title) await conversations.updateTitle(activeConversationId, title);
+      } catch (titleError) {
+        console.error('Failed to save generated title:', titleError);
+        title = null;
+      }
+    }
+
+    return res.json({ reply: replyText, toolCalls, conversationId: activeConversationId, title: title || undefined });
+  }
 
   try {
     if (activeConversationId) {
@@ -52,9 +96,7 @@ async function sendMessage(req, res, next) {
 
       if (!reply.tool_calls || reply.tool_calls.length === 0) {
         const replyText = reply.content || "I don't have a response for that.";
-        await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null);
-        await conversations.touchConversation(activeConversationId);
-        return res.json({ reply: replyText, toolCalls, conversationId: activeConversationId });
+        return await finishTurn(replyText, toolCalls);
       }
 
       modelMessages.push({
@@ -90,9 +132,7 @@ async function sendMessage(req, res, next) {
 
     const finalReply = await createChatCompletion({ messages: modelMessages, tools: undefined });
     const fallbackReply = finalReply.content || "I wasn't able to finish that — could you try asking again?";
-    await conversations.saveMessage(activeConversationId, 'assistant', fallbackReply, toolCalls.length ? toolCalls : null);
-    await conversations.touchConversation(activeConversationId);
-    return res.json({ reply: fallbackReply, toolCalls, conversationId: activeConversationId });
+    return await finishTurn(fallbackReply, toolCalls);
   } catch (error) {
     let statusCode = 500;
     let errorMessage = 'Something went wrong.';

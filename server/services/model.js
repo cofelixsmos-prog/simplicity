@@ -15,7 +15,7 @@ if (!API_KEY) {
 const OPENCODE_SESSION_ID = crypto.randomUUID();
 const REQUEST_TIMEOUT_MS = 30000;
 
-async function createChatCompletion({ messages, tools }) {
+async function createChatCompletion({ messages, tools, maxTokens }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -32,6 +32,7 @@ async function createChatCompletion({ messages, tools }) {
         model: MODEL_ID,
         messages,
         tools,
+        max_tokens: maxTokens,
       }),
       signal: controller.signal,
     });

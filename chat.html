@@ -1758,7 +1758,9 @@
             if (requestGeneration !== viewGeneration) return;
             if (data.conversationId && data.conversationId !== currentConversationId) {
               currentConversationId = data.conversationId;
-              if (chatTopTitle) chatTopTitle.textContent = sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage;
+              if (chatTopTitle) {
+                chatTopTitle.textContent = data.title || (sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage);
+              }
               loadHistoryList(currentConversationId);
               setLastConversationCookie(currentConversationId);
             }

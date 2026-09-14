@@ -3,8 +3,8 @@ const db = require('../db/client');
 
 const TITLE_MAX_LENGTH = 60;
 
-function deriveTitle(firstMessage) {
-  const trimmed = firstMessage.trim().replace(/\s+/g, ' ');
+function deriveTitle(text) {
+  const trimmed = text.trim().replace(/\s+/g, ' ').replace(/^["'“”]+|["'“”]+$/g, '');
   if (trimmed.length <= TITLE_MAX_LENGTH) return trimmed;
   return trimmed.slice(0, TITLE_MAX_LENGTH - 1) + '…';
 }
@@ -59,6 +59,13 @@ async function touchConversation(conversationId) {
   });
 }
 
+async function updateTitle(conversationId, title) {
+  await db.execute({
+    sql: 'UPDATE conversations SET title = ? WHERE id = ?',
+    args: [deriveTitle(title), conversationId],
+  });
+}
+
 async function getConversationHistory(conversationId) {
   const result = await db.execute({
     sql: 'SELECT role, content FROM messages WHERE conversation_id = ? ORDER BY created_at ASC',
@@ -101,6 +108,7 @@ module.exports = {
   getConversation,
   createConversation,
   touchConversation,
+  updateTitle,
   getConversationHistory,
   saveMessage,
   deleteConversation,
