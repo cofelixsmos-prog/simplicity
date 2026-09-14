@@ -111,56 +111,6 @@
     });
   }
 
-  function setupSettingsModal(username) {
-    return loadInto('/sections/settings-modal.html', 'end').then(function () {
-      var overlay = document.getElementById('settings-modal-overlay');
-      var openBtn = document.getElementById('settings-open');
-      var closeBtn = document.getElementById('settings-modal-close');
-      var logoutBtn = document.getElementById('settings-logout');
-      var usernameEl = document.getElementById('settings-username');
-      var avatarEl = document.getElementById('settings-avatar');
-      var modalThemeToggle = document.getElementById('modal-theme-toggle');
-      if (!overlay) return;
-
-      if (usernameEl) usernameEl.textContent = username;
-      if (avatarEl) avatarEl.textContent = username.charAt(0).toUpperCase();
-
-      if (modalThemeToggle) {
-        modalThemeToggle.setAttribute('aria-pressed', document.documentElement.getAttribute('data-theme') === 'dark' ? 'true' : 'false');
-        modalThemeToggle.addEventListener('click', function () {
-          var root = document.documentElement;
-          var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-          root.setAttribute('data-theme', next);
-          modalThemeToggle.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
-          writeThemeCookie(next);
-        });
-      }
-
-      function open() {
-        var accountDropdown = document.getElementById('account-dropdown');
-        var accountToggle = document.getElementById('account-toggle');
-        if (accountDropdown) accountDropdown.classList.remove('is-open');
-        if (accountToggle) accountToggle.setAttribute('aria-expanded', 'false');
-        overlay.classList.add('is-visible');
-        if (closeBtn) closeBtn.focus();
-      }
-
-      function close() {
-        overlay.classList.remove('is-visible');
-      }
-
-      if (openBtn) openBtn.addEventListener('click', open);
-      if (closeBtn) closeBtn.addEventListener('click', close);
-      if (logoutBtn) logoutBtn.addEventListener('click', performLogout);
-      overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) close();
-      });
-      document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && overlay.classList.contains('is-visible')) close();
-      });
-    });
-  }
-
   function loadAccountState() {
     var dropdown = document.getElementById('account-dropdown');
     var requiresAuth = document.body.hasAttribute('data-require-auth');
@@ -184,8 +134,6 @@
         if (toggle) toggle.textContent = data.username.charAt(0).toUpperCase();
         if (panelName) panelName.textContent = data.username;
         if (logoutBtn) logoutBtn.addEventListener('click', performLogout);
-
-        return setupSettingsModal(data.username);
       })
       .catch(function (error) {
         console.error(error);

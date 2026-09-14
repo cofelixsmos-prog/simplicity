@@ -1,4 +1,4 @@
-const PROTECTED_PAGES = new Set(['/chat.html', '/chat']);
+const PROTECTED_PAGES = new Set(['/chat.html', '/chat', '/settings.html', '/settings']);
 const GUEST_ONLY_PAGES = new Set([
   '/login.html', '/login',
   '/register.html', '/register',
