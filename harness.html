@@ -127,14 +127,20 @@
     transition: r 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* ---------- Harness hero ---------- */
+  /* ---------- Harness hero + scroll-driven zoom-out reveal ---------- */
   .harness-hero {
     position: relative;
+    height: 340vh;
+    background: #0A0A0A;
+  }
+
+  .harness-hero-stage {
+    position: sticky;
+    top: 0;
     width: 100%;
     height: 100vh;
     min-height: 560px;
     overflow: hidden;
-    background: #0A0A0A;
   }
 
   .harness-video {
@@ -144,7 +150,9 @@
     height: 100%;
     object-fit: cover;
     opacity: 0;
+    transform: scale(1);
     transition: opacity 1.6s ease;
+    will-change: transform;
   }
 
   .harness-video.is-visible {
@@ -156,16 +164,18 @@
     inset: 0;
     background: radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 100%);
     pointer-events: none;
+    transition: background 0.4s ease;
   }
 
   .harness-hero-text {
-    position: relative;
+    position: absolute;
+    inset: 0;
     z-index: 2;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 clamp(16px, 3vw, 40px);
+    will-change: opacity;
   }
 
   .harness-word {
@@ -189,13 +199,50 @@
     transition-delay: 0.15s;
   }
 
+  .harness-reveal-copy {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 24px;
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity, transform;
+  }
+
+  .harness-reveal-copy-inner {
+    max-width: 620px;
+  }
+
+  .harness-reveal-copy h2 {
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    color: #F3F1EC;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .harness-reveal-copy p {
+    font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+    line-height: 1.65;
+    color: rgba(243,241,236,0.75);
+  }
+
   @media (max-width: 640px) {
-    .harness-hero { height: 80vh; min-height: 460px; }
+    .harness-hero-stage { min-height: 460px; }
     .harness-word { font-size: 1.5rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .harness-video, .harness-word, .harness-loader { transition: none; }
+    .harness-hero { height: auto; }
+    .harness-hero-stage { position: relative; height: 100vh; }
+    .harness-hero-text { display: none; }
+    .harness-reveal-copy { position: relative; opacity: 1; pointer-events: auto; padding: 80px 24px; }
   }
 </style>
 </head>
@@ -204,18 +251,27 @@
     <svg class="harness-loader-grid" id="harness-loader-grid" viewBox="0 0 80 112"></svg>
   </div>
 
-  <section class="harness-hero">
-    <video class="harness-video" id="harness-video" src="/videos/singularity.mp4" autoplay muted loop playsinline></video>
-    <div class="harness-hero-scrim"></div>
-    <div class="harness-hero-text">
-      <span class="harness-word word-left" id="harness-word-left">Simplicity</span>
-      <span class="harness-word word-right" id="harness-word-right">Harness</span>
+  <section class="harness-hero" id="harness-hero">
+    <div class="harness-hero-stage">
+      <video class="harness-video" id="harness-video" src="/videos/singularity.mp4" autoplay muted loop playsinline></video>
+      <div class="harness-hero-scrim" id="harness-hero-scrim"></div>
+      <div class="harness-hero-text" id="harness-hero-text">
+        <span class="harness-word word-left" id="harness-word-left">Simplicity</span>
+        <span class="harness-word word-right" id="harness-word-right">Harness</span>
+      </div>
+      <div class="harness-reveal-copy" id="harness-reveal-copy">
+        <div class="harness-reveal-copy-inner">
+          <h2>So what is Harness?</h2>
+          <p>It's the thing that actually does the work. You describe the task, Harness plans it, uses the tools it needs, and hands you a finished result — not a draft, not a to-do list. No setup, no babysitting.</p>
+        </div>
+      </div>
     </div>
   </section>
 
   <div data-footer></div>
 
   <script src="/scripts/harness-loader.js"></script>
+  <script src="/scripts/harness-reveal.js"></script>
   <script src="/scripts/nav-init.js"></script>
 </body>
 </html>
