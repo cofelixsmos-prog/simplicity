@@ -116,17 +116,17 @@
     width: 100%;
     max-width: 760px;
     margin: 0 auto;
-    padding: 12px 20px 16px;
+    padding: 12px 20px calc(16px + clamp(60px, 18vh, 140px));
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 16px;
     min-height: calc(100dvh - 57px);
-    padding-bottom: clamp(60px, 18vh, 140px);
   }
 
   .chat-wrap.has-messages {
     justify-content: flex-end;
+    padding-bottom: 16px;
   }
 
   .chat-messages {
@@ -1254,12 +1254,16 @@
       }
 
       function openConversation(conversationId) {
+        viewGeneration++;
+        var requestGeneration = viewGeneration;
+
         fetch('/api/chat/conversations/' + conversationId)
           .then(function (response) {
             if (!response.ok) throw new Error('not_found');
             return response.json();
           })
           .then(function (data) {
+            if (requestGeneration !== viewGeneration) return;
             currentConversationId = data.id;
             if (chatTopTitle) chatTopTitle.textContent = data.title;
             resetChatView();
@@ -1272,8 +1276,12 @@
             setActiveHistoryItem(conversationId);
             closeMobileSidebar();
             messages.scrollTop = messages.scrollHeight;
+            setLastConversationCookie(conversationId);
           })
-          .catch(function (error) { console.error(error); });
+          .catch(function (error) {
+            if (error && error.message === 'not_found') clearLastConversationCookie();
+            console.error(error);
+          });
       }
 
       var hasEnteredChatMode = false;
@@ -1368,6 +1376,7 @@
       var newChatBtn = document.getElementById('new-chat-btn');
       var chatTopTitle = document.getElementById('chat-top-title');
       var currentConversationId = null;
+      var viewGeneration = 0;
 
       function resetChatView() {
         messages.innerHTML = '';
@@ -1395,11 +1404,13 @@
       }
 
       function startNewChat() {
+        viewGeneration++;
         currentConversationId = null;
         if (chatTopTitle) chatTopTitle.textContent = 'New chat';
         resetChatView();
         setActiveHistoryItem(null);
         closeMobileSidebar();
+        clearLastConversationCookie();
       }
 
       clearBtn.addEventListener('click', startNewChat);
@@ -1644,6 +1655,7 @@
 
       function sendBotReply(sourceMessage) {
         hideFollowup();
+        var requestGeneration = viewGeneration;
 
         var row = document.createElement('div');
         row.className = 'bot-row';
@@ -1683,10 +1695,12 @@
             return response.json();
           })
           .then(function (data) {
+            if (requestGeneration !== viewGeneration) return;
             if (data.conversationId && data.conversationId !== currentConversationId) {
               currentConversationId = data.conversationId;
               if (chatTopTitle) chatTopTitle.textContent = sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage;
               loadHistoryList(currentConversationId);
+              setLastConversationCookie(currentConversationId);
             }
             var toolCalls = data.toolCalls || [];
             if (toolCalls.length) {
@@ -1705,6 +1719,10 @@
             }
 
             var answer = data.reply || "I don't have a response for that.";
+            if (requestGeneration !== viewGeneration) {
+              onBotDone();
+              return;
+            }
             typewriteText(div, answer, function () {
               content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
               refreshRetry();
@@ -1714,6 +1732,10 @@
             });
           })
           .catch(function (error) {
+            if (requestGeneration !== viewGeneration) {
+              onBotDone();
+              return;
+            }
             var message = requestFailedMessage(error);
             typewriteText(div, message, function () {
               content.appendChild(makeMeta(message, formatTime(new Date()), false, null));
@@ -1798,7 +1820,26 @@
         });
       }
 
-      loadHistoryList(null);
+      var LAST_CONVERSATION_COOKIE = 'simplicity-last-conversation';
+
+      function setLastConversationCookie(conversationId) {
+        var date = new Date();
+        date.setTime(date.getTime() + 30 * 24 * 60 * 60 * 1000);
+        document.cookie = LAST_CONVERSATION_COOKIE + '=' + encodeURIComponent(conversationId) + '; expires=' + date.toUTCString() + '; path=/; SameSite=Lax';
+      }
+
+      function getLastConversationCookie() {
+        var match = document.cookie.match(new RegExp('(?:^|; )' + LAST_CONVERSATION_COOKIE + '=([^;]*)'));
+        return match ? decodeURIComponent(match[1]) : null;
+      }
+
+      function clearLastConversationCookie() {
+        document.cookie = LAST_CONVERSATION_COOKIE + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+      }
+
+      var lastConversationId = getLastConversationCookie();
+      loadHistoryList(lastConversationId);
+      if (lastConversationId) openConversation(lastConversationId);
     })();
   </script>
 

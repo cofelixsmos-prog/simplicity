@@ -41,14 +41,20 @@ async function sendMessage(req, res, next) {
     ];
 
     const toolCalls = [];
+    const seenCalls = new Set();
+    let forceFinalAnswer = false;
 
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-      const reply = await createChatCompletion({ messages: modelMessages, tools: TOOL_DEFINITIONS });
+      const reply = await createChatCompletion({
+        messages: modelMessages,
+        tools: forceFinalAnswer ? undefined : TOOL_DEFINITIONS,
+      });
 
       if (!reply.tool_calls || reply.tool_calls.length === 0) {
-        await conversations.saveMessage(activeConversationId, 'assistant', reply.content, toolCalls.length ? toolCalls : null);
+        const replyText = reply.content || "I don't have a response for that.";
+        await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null);
         await conversations.touchConversation(activeConversationId);
-        return res.json({ reply: reply.content, toolCalls, conversationId: activeConversationId });
+        return res.json({ reply: replyText, toolCalls, conversationId: activeConversationId });
       }
 
       modelMessages.push({
@@ -57,8 +63,13 @@ async function sendMessage(req, res, next) {
         tool_calls: reply.tool_calls,
       });
 
+      let sawRepeat = false;
       for (const call of reply.tool_calls) {
         const args = call.function.arguments ? JSON.parse(call.function.arguments) : {};
+        const callKey = call.function.name + ':' + JSON.stringify(args);
+        if (seenCalls.has(callKey)) sawRepeat = true;
+        seenCalls.add(callKey);
+
         const result = await runTool(call.function.name, args);
         toolCalls.push({ name: call.function.name, result });
         modelMessages.push({
@@ -67,9 +78,21 @@ async function sendMessage(req, res, next) {
           content: JSON.stringify(result),
         });
       }
+
+      if (sawRepeat) {
+        forceFinalAnswer = true;
+        modelMessages.push({
+          role: 'system',
+          content: "You already have the result of that tool call above. Answer the user's question now using it.",
+        });
+      }
     }
 
-    res.status(502).json({ error: 'The assistant could not produce a response.' });
+    const finalReply = await createChatCompletion({ messages: modelMessages, tools: undefined });
+    const fallbackReply = finalReply.content || "I wasn't able to finish that — could you try asking again?";
+    await conversations.saveMessage(activeConversationId, 'assistant', fallbackReply, toolCalls.length ? toolCalls : null);
+    await conversations.touchConversation(activeConversationId);
+    return res.json({ reply: fallbackReply, toolCalls, conversationId: activeConversationId });
   } catch (error) {
     if (error.upstreamStatus === 429 || error.upstreamStatus === 503) {
       return res.status(503).json({ error: 'The assistant is busy right now. Please try again in a moment.' });
