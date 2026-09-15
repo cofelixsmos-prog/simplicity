@@ -2,11 +2,12 @@ const helmet = require('helmet');
 
 const cspDirectives = {
   defaultSrc: ["'self'"],
-  scriptSrc: ["'self'", "'unsafe-inline'"],
+  scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
   styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
   fontSrc: ["'self'", 'https://fonts.gstatic.com'],
   imgSrc: ["'self'", 'data:', 'https://github.com'],
-  connectSrc: ["'self'"],
+  mediaSrc: ["'self'", 'https://github.com', 'https://release-assets.githubusercontent.com'],
+  connectSrc: ["'self'", 'https://unpkg.com'],
   objectSrc: ["'none'"],
   baseUri: ["'self'"],
   frameAncestors: ["'self'"],
