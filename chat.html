@@ -122,7 +122,7 @@
     width: 100%;
     max-width: 760px;
     margin: 0 auto;
-    padding: 12px 20px calc(16px + clamp(60px, 18vh, 140px));
+    padding: 48px 20px calc(16px + clamp(60px, 18vh, 140px));
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -137,7 +137,8 @@
   }
 
   .chat-wrap.has-messages {
-    justify-content: flex-end;
+    justify-content: flex-start;
+    padding-top: 48px;
     padding-bottom: 16px;
   }
 
@@ -151,6 +152,7 @@
   .chat-wrap.has-messages .chat-messages {
     flex: 1;
     justify-content: flex-start;
+    padding-bottom: 28vh;
   }
 
   .chat-loading {
@@ -170,6 +172,12 @@
 
   .chat-loading[hidden] {
     display: none;
+  }
+
+  .chat-wrap.is-loading .chat-form,
+  .chat-wrap.is-loading .queue-bar,
+  .chat-wrap.is-loading .scroll-bottom {
+    visibility: hidden;
   }
 
   .chat-loading strong {
@@ -694,6 +702,12 @@
     display: none;
   }
 
+  /* Desktop: the collapse button lives inside the sidebar, so it slides
+     away with it. Reuse the top-bar button as the reopen control. */
+  .chat-sidebar.is-collapsed ~ .chat-main .sidebar-toggle-mobile {
+    display: inline-flex;
+  }
+
   .new-chat-btn {
     display: flex;
     align-items: center;
@@ -1147,7 +1161,7 @@
         <span class="chat-top-title" id="chat-top-title">New chat</span>
         <button class="chat-clear" id="chat-clear" type="button">Clear chat</button>
       </header>
-      <main class="chat-wrap">
+      <main class="chat-wrap is-loading">
     <div class="chat-loading" id="chat-loading" aria-live="polite">
       <span class="chat-mark" aria-hidden="true">
         <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
@@ -1295,7 +1309,11 @@
 
       if (sidebarToggleMobile) {
         sidebarToggleMobile.addEventListener('click', function () {
-          sidebar.classList.toggle('is-open');
+          if (sidebar.classList.contains('is-collapsed')) {
+            sidebar.classList.remove('is-collapsed');
+          } else {
+            sidebar.classList.toggle('is-open');
+          }
         });
       }
 
@@ -1334,7 +1352,7 @@
         item.appendChild(del);
 
         item.addEventListener('click', function () {
-          openConversation(conversation.id);
+          openConversation(conversation.id, { title: conversation.title });
         });
 
         return item;
@@ -1410,6 +1428,7 @@
       }
 
       function deleteConversation(conversationId) {
+        delete conversationCache[conversationId];
         fetch('/api/chat/conversations/' + conversationId, { method: 'DELETE' })
           .then(function () {
             if (conversationId === currentConversationId) startNewChat();
@@ -1454,10 +1473,53 @@
         messages.appendChild(row);
       }
 
+      var conversationCache = {};
+
+      function renderConversation(data, conversationId, pushState) {
+        currentConversationId = data.id;
+        if (chatTopTitle) chatTopTitle.textContent = data.title;
+        resetChatView();
+        data.messages.forEach(renderStoredMessage);
+        if (data.messages.length) {
+          chatWrap.classList.add('has-messages');
+          hasEnteredChatMode = true;
+          refreshRetry();
+        }
+        setActiveHistoryItem(conversationId);
+        closeMobileSidebar();
+        chatWrap.scrollTop = chatWrap.scrollHeight;
+        setLastConversationCookie(conversationId);
+        updateUrlForConversation(conversationId, pushState);
+      }
+
       function openConversation(conversationId, options) {
         var pushState = !options || options.pushState !== false;
+        var knownTitle = options && options.title;
         viewGeneration++;
         var requestGeneration = viewGeneration;
+        isResponding = false;
+        followOutput = false;
+        if (followTimer) {
+          clearInterval(followTimer);
+          followTimer = null;
+        }
+
+        // Optimistic frontend response: update the chrome instantly so the
+        // user gets immediate feedback without waiting for the network.
+        if (knownTitle && chatTopTitle) chatTopTitle.textContent = knownTitle;
+        setActiveHistoryItem(conversationId);
+        closeMobileSidebar();
+        updateUrlForConversation(conversationId, pushState);
+        setLastConversationCookie(conversationId);
+
+        // Instant switch for already-visited conversations — no loader at all.
+        var cached = conversationCache[conversationId];
+        if (cached) {
+          setChatLoading(false);
+          renderConversation(cached, conversationId, false);
+          return;
+        }
+
         setChatLoading(true);
 
         fetch('/api/chat/conversations/' + conversationId)
@@ -1468,22 +1530,11 @@
           .then(function (data) {
             if (requestGeneration !== viewGeneration) return;
             setChatLoading(false);
-            currentConversationId = data.id;
-            if (chatTopTitle) chatTopTitle.textContent = data.title;
-            resetChatView();
-            data.messages.forEach(renderStoredMessage);
-            if (data.messages.length) {
-              chatWrap.classList.add('has-messages');
-              hasEnteredChatMode = true;
-              refreshRetry();
-            }
-            setActiveHistoryItem(conversationId);
-            closeMobileSidebar();
-            chatWrap.scrollTop = chatWrap.scrollHeight;
-            setLastConversationCookie(conversationId);
-            updateUrlForConversation(conversationId, pushState);
+            conversationCache[data.id] = data;
+            renderConversation(data, conversationId, false);
           })
           .catch(function (error) {
+            if (requestGeneration !== viewGeneration) return;
             setChatLoading(false);
             if (error && error.message === 'not_found') clearLastConversationCookie();
             console.error(error);
@@ -1581,6 +1632,7 @@
 
       function setChatLoading(isLoading) {
         if (chatLoading) chatLoading.hidden = !isLoading;
+        if (chatWrap) chatWrap.classList.toggle('is-loading', isLoading);
       }
 
       var clearBtn = document.getElementById('chat-clear');
@@ -1617,6 +1669,10 @@
       function startNewChat(options) {
         var pushState = !options || options.pushState !== false;
         viewGeneration++;
+        // New chat is purely local — never show the loader here, and clear
+        // any loader left behind by an in-flight conversation fetch.
+        isResponding = false;
+        setChatLoading(false);
         currentConversationId = null;
         if (chatTopTitle) chatTopTitle.textContent = 'New chat';
         resetChatView();
@@ -1685,7 +1741,11 @@
         }, 100);
       }
 
-      function noteUserScroll() {
+      function noteUserScroll(event) {
+        if (event && event.type === 'wheel' && event.deltaY > 0 && isAtBottom()) {
+          updateScrollBtn();
+          return;
+        }
         followOutput = false;
         if (followTimer) {
           clearInterval(followTimer);
@@ -1695,6 +1755,7 @@
       }
 
       chatWrap.addEventListener('scroll', function () {
+        if (isAtBottom()) followOutput = true;
         updateScrollBtn();
       }, { passive: true });
       window.addEventListener('resize', function () {
@@ -1740,22 +1801,25 @@
         }
       }
 
-      function typewriteText(el, fullText, done) {
+      function typewriteText(el, fullText, done, isCancelled) {
         var i = 0;
         el.textContent = '';
         var timer = setInterval(function () {
-          i++;
+          if (isCancelled && isCancelled()) {
+            clearInterval(timer);
+            return;
+          }
+          i += 3;
           el.textContent = fullText.slice(0, i);
-          chatWrap.scrollTop = chatWrap.scrollHeight;
-          if (isResponding && followOutput) {
+          if (followOutput) {
             scrollPageBottom(false);
-            ensureFollowLoop();
+            if (isResponding) ensureFollowLoop();
           }
           if (i >= fullText.length) {
             clearInterval(timer);
             if (done) done();
           }
-        }, 55);
+        }, 12);
       }
 
       var followupRow = document.createElement('div');
@@ -1791,7 +1855,7 @@
 
         var last = rows[rows.length - 1];
         last.parentNode.insertBefore(followupRow, last.nextSibling);
-        chatWrap.scrollTop = chatWrap.scrollHeight;
+        if (followOutput) scrollPageBottom(false);
       }
 
       function makeMeta(text, time, showRetry, onRetry) {
@@ -1850,6 +1914,9 @@
         var sourceMessage = row.getAttribute('data-source');
         if (!sourceMessage) return;
         row.remove();
+        isResponding = true;
+        followOutput = true;
+        if (currentConversationId) delete conversationCache[currentConversationId];
         sendBotReply(sourceMessage);
       }
 
@@ -1931,7 +1998,7 @@
 
         var div = document.createElement('div');
         div.className = 'chat-bubble bot';
-        div.innerHTML = '<span class="thinking-indicator"><span class="thinking-phase">1. Simplifying...</span><span class="thinking-elapsed">0 sec</span></span>';
+        div.innerHTML = '<span class="thinking-indicator"><span class="thinking-phase">Simplifying...</span><span class="thinking-elapsed">0 sec</span></span>';
         content.appendChild(div);
         row.appendChild(logo);
         row.appendChild(content);
@@ -1942,13 +2009,17 @@
         var thinkingElapsed = div.querySelector('.thinking-elapsed');
         var thinkingStartedAt = Date.now();
         var thinkingTimer = setInterval(function () {
+          if (requestGeneration !== viewGeneration) {
+            clearInterval(thinkingTimer);
+            return;
+          }
           thinkingElapsed.textContent = Math.floor((Date.now() - thinkingStartedAt) / 1000) + ' sec';
         }, 1000);
         function stopThinking() {
           clearInterval(thinkingTimer);
         }
-        function setThinkingPhase(number, label) {
-          thinkingPhase.textContent = number + '. ' + label + '...';
+        function setThinkingPhase(label) {
+          thinkingPhase.textContent = label + '...';
         }
 
         var toolSteps = {};
@@ -1962,18 +2033,18 @@
         function handleEvent(event) {
           if (requestGeneration !== viewGeneration) return;
           if (event.type === 'thinking') {
-            setThinkingPhase(event.phase || 1, event.label || 'Simplifying');
+            setThinkingPhase(event.label || 'Simplifying');
             return;
           }
           if (event.type === 'tool_start') {
             trace.hidden = false;
-            setThinkingPhase((event.round || 1) + 1, TOOL_LABELS[event.name] || event.name);
+            setThinkingPhase(TOOL_LABELS[event.name] || event.name);
             var key = String(event.round || 1) + ':' + String(event.index || 0);
             var call = { name: event.name, args: event.args || {} };
             var step = createToolStep(call, true);
             toolSteps[key] = step;
             trace.appendChild(step);
-            chatWrap.scrollTop = chatWrap.scrollHeight;
+            if (followOutput) scrollPageBottom(false);
             return;
           }
           if (event.type === 'tool_done') {
@@ -1986,7 +2057,7 @@
             } else {
               finishToolStep(doneStep, event);
             }
-            chatWrap.scrollTop = chatWrap.scrollHeight;
+            if (followOutput) scrollPageBottom(false);
             return;
           }
           if (event.type === 'reply') {
@@ -2009,9 +2080,8 @@
               refreshRetry();
               typewriterDone = true;
               maybeShowFollowup();
-              chatWrap.scrollTop = chatWrap.scrollHeight;
               onBotDone();
-            });
+            }, function () { return requestGeneration !== viewGeneration; });
             return;
           }
           if (event.type === 'done') {
@@ -2063,9 +2133,8 @@
             typewriteText(div, message, function () {
               content.appendChild(makeMeta(message, formatTime(new Date()), false, null));
               refreshRetry();
-              chatWrap.scrollTop = chatWrap.scrollHeight;
               onBotDone();
-            });
+            }, function () { return requestGeneration !== viewGeneration; });
           });
       }
 
@@ -2077,6 +2146,8 @@
           return;
         }
         isResponding = true;
+        followOutput = true;
+        if (currentConversationId) delete conversationCache[currentConversationId];
         addBubble(value, 'user');
         input.value = '';
         autosizeInput();
@@ -2186,10 +2257,15 @@
         }
       }
 
+      function historyTitleFor(conversationId) {
+        var item = historyList.querySelector('.history-item[data-id="' + conversationId + '"] .history-item-title');
+        return item ? item.textContent : null;
+      }
+
       window.addEventListener('popstate', function (event) {
         var urlConversationId = (event.state && event.state.conversationId) || getConversationIdFromUrl();
         if (urlConversationId) {
-          if (urlConversationId !== currentConversationId) openConversation(urlConversationId, { pushState: false });
+          if (urlConversationId !== currentConversationId) openConversation(urlConversationId, { pushState: false, title: historyTitleFor(urlConversationId) });
         } else if (currentConversationId !== null) {
           startNewChat({ pushState: false });
         }
