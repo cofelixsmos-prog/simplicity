@@ -9,8 +9,15 @@ const MAX_TOOL_ROUNDS = 3;
 
 const TITLE_SYSTEM_PROMPT = 'Summarize the following exchange as a short chat title: 3-6 words, no quotes, no trailing punctuation, no prefix like "Title:". Reply with only the title.';
 
-const SUGGESTIONS_SYSTEM_PROMPT = 'Based on this exchange, suggest up to 3 short, specific follow-up questions the user might want to ask next. Each under 8 words, phrased as something the user would say. Reply with ONLY the questions, one per line, no numbering, no bullets, no quotes. If nothing sensible follows, reply with an empty response.';
+const SUGGESTIONS_SYSTEM_PROMPT = 'Based on this exchange, suggest up to 3 short, specific follow-up questions the user might want to ask next. Each must be under 8 words and phrased as something the user would say — never a question, explanation, apology, or comment addressed to the user. Reply with ONLY the questions, one per line, no numbering, no bullets, no quotes, nothing else. If there is truly nothing sensible to suggest (e.g. the exchange is just a greeting), reply with nothing at all — not even a sentence explaining why.';
 const MAX_SUGGESTIONS = 3;
+const MAX_SUGGESTION_WORDS = 10;
+const MAX_SUGGESTION_CHARS = 80;
+// A real follow-up reads as something the user would type: a question, or a
+// request starting with one of these. Meta-commentary like "No follow-up
+// questions are warranted here" fails this — it's a statement ABOUT
+// suggestions, not one, and slips past length checks since it's short.
+const SUGGESTION_LEAD_WORDS = /^(what|how|why|when|where|who|which|whose|can|could|would|should|will|shall|is|are|do|does|did|tell|show|explain|give|list|help|walk|compare|describe|suggest|recommend|find|make|create|write|summarize|translate|calculate)\b/i;
 
 function validateMessage(message) {
   if (typeof message !== 'string') return 'Message is required.';
@@ -54,8 +61,22 @@ async function generateSuggestions(userMessage, assistantReply) {
     if (!reply.content) return [];
     return reply.content
       .split('\n')
-      .map((line) => line.replace(/^[-*\d.)\s]+/, '').trim())
+      .map((line) => line.replace(/^[-*\d.)\s]+/, '').replace(/^["']|["']$/g, '').trim())
       .filter(Boolean)
+      // A real follow-up is a short conversational phrase. Filter out:
+      // - anything longer than that (the model explaining itself instead of
+      //   following the "reply with nothing" instruction), and
+      // - LaTeX/code/notation artifacts (e.g. "\boxed{}") that have
+      //   occasionally leaked out of this model's reasoning — no genuine
+      //   follow-up question contains backslashes, braces, or math delimiters.
+      .filter((line) => {
+        if (line.length > MAX_SUGGESTION_CHARS) return false;
+        if (line.split(/\s+/).length > MAX_SUGGESTION_WORDS) return false;
+        if (/[\\{}$<>]/.test(line)) return false;
+        const letters = line.replace(/[^a-zA-Z]/g, '').length;
+        if (letters < 3 || letters / line.length <= 0.5) return false;
+        return line.endsWith('?') || SUGGESTION_LEAD_WORDS.test(line);
+      })
       .slice(0, MAX_SUGGESTIONS);
   } catch (error) {
     console.error('Suggestion generation failed:', error.message);

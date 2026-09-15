@@ -357,6 +357,10 @@
     font: inherit;
     font-size: 13px;
     cursor: pointer;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     transition: border-color 0.15s ease, color 0.15s ease;
   }
 
@@ -1450,7 +1454,8 @@
         messages.appendChild(row);
       }
 
-      function openConversation(conversationId) {
+      function openConversation(conversationId, options) {
+        var pushState = !options || options.pushState !== false;
         viewGeneration++;
         var requestGeneration = viewGeneration;
         setChatLoading(true);
@@ -1476,6 +1481,7 @@
             closeMobileSidebar();
             chatWrap.scrollTop = chatWrap.scrollHeight;
             setLastConversationCookie(conversationId);
+            updateUrlForConversation(conversationId, pushState);
           })
           .catch(function (error) {
             setChatLoading(false);
@@ -1608,7 +1614,8 @@
         updateScrollBtn();
       }
 
-      function startNewChat() {
+      function startNewChat(options) {
+        var pushState = !options || options.pushState !== false;
         viewGeneration++;
         currentConversationId = null;
         if (chatTopTitle) chatTopTitle.textContent = 'New chat';
@@ -1616,6 +1623,7 @@
         setActiveHistoryItem(null);
         closeMobileSidebar();
         clearLastConversationCookie();
+        updateUrlForNewChat(pushState);
       }
 
       clearBtn.addEventListener('click', startNewChat);
@@ -1989,6 +1997,7 @@
               if (chatTopTitle) chatTopTitle.textContent = sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage;
               loadHistoryList(currentConversationId);
               setLastConversationCookie(currentConversationId);
+              updateUrlForConversation(currentConversationId, true);
             }
             if (event.toolCalls && event.toolCalls.length && !trace.childNodes.length) {
               trace.hidden = false;
@@ -2048,6 +2057,7 @@
               if (chatTopTitle) chatTopTitle.textContent = sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage;
               loadHistoryList(currentConversationId);
               setLastConversationCookie(currentConversationId);
+              updateUrlForConversation(currentConversationId, true);
             }
             var message = requestFailedMessage(error);
             typewriteText(div, message, function () {
@@ -2152,10 +2162,44 @@
         document.cookie = LAST_CONVERSATION_COOKIE + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
       }
 
-      var lastConversationId = getLastConversationCookie();
+      function getConversationIdFromUrl() {
+        var match = window.location.pathname.match(/^\/chat\/([^/]+)\/?$/);
+        return match ? decodeURIComponent(match[1]) : null;
+      }
+
+      function updateUrlForConversation(conversationId, pushState) {
+        var url = '/chat/' + conversationId;
+        if (window.location.pathname === url) return;
+        if (pushState) {
+          window.history.pushState({ conversationId: conversationId }, '', url);
+        } else {
+          window.history.replaceState({ conversationId: conversationId }, '', url);
+        }
+      }
+
+      function updateUrlForNewChat(pushState) {
+        if (window.location.pathname === '/chat.html' || window.location.pathname === '/chat') return;
+        if (pushState) {
+          window.history.pushState({ conversationId: null }, '', '/chat.html');
+        } else {
+          window.history.replaceState({ conversationId: null }, '', '/chat.html');
+        }
+      }
+
+      window.addEventListener('popstate', function (event) {
+        var urlConversationId = (event.state && event.state.conversationId) || getConversationIdFromUrl();
+        if (urlConversationId) {
+          if (urlConversationId !== currentConversationId) openConversation(urlConversationId, { pushState: false });
+        } else if (currentConversationId !== null) {
+          startNewChat({ pushState: false });
+        }
+      });
+
+      var urlConversationId = getConversationIdFromUrl();
+      var initialConversationId = urlConversationId || getLastConversationCookie();
       setChatLoading(true);
-      loadHistoryList(lastConversationId);
-      if (lastConversationId) openConversation(lastConversationId);
+      loadHistoryList(initialConversationId);
+      if (initialConversationId) openConversation(initialConversationId, { pushState: false });
     })();
   </script>
 </body>

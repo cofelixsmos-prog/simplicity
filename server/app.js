@@ -27,6 +27,15 @@ function createApp() {
   app.use('/api/chat', chatRoutes);
 
   app.use(pageGuard);
+
+  // Deep links to a specific conversation (/chat/<id>) serve the same
+  // chat.html shell; the client reads the id from the URL and loads that
+  // conversation. Must come before express.static since there's no file
+  // at that literal path.
+  app.get('/chat/:id', (req, res) => {
+    res.sendFile(path.join(ROOT_DIR, 'chat.html'));
+  });
+
   app.use(express.static(ROOT_DIR, { extensions: ['html'] }));
 
   app.use((err, req, res, next) => {

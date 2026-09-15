@@ -7,7 +7,7 @@ const GUEST_ONLY_PAGES = new Set([
 function pageGuard(req, res, next) {
   if (req.method !== 'GET' && req.method !== 'HEAD') return next();
 
-  const isProtected = PROTECTED_PAGES.has(req.path);
+  const isProtected = PROTECTED_PAGES.has(req.path) || req.path.startsWith('/chat/');
   const isGuestOnly = GUEST_ONLY_PAGES.has(req.path);
   if (!isProtected && !isGuestOnly) return next();
 
