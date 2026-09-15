@@ -9,6 +9,9 @@ const MAX_TOOL_ROUNDS = 3;
 
 const TITLE_SYSTEM_PROMPT = 'Summarize the following exchange as a short chat title: 3-6 words, no quotes, no trailing punctuation, no prefix like "Title:". Reply with only the title.';
 
+const SUGGESTIONS_SYSTEM_PROMPT = 'Based on this exchange, suggest up to 3 short, specific follow-up questions the user might want to ask next. Each under 8 words, phrased as something the user would say. Reply with ONLY the questions, one per line, no numbering, no bullets, no quotes. If nothing sensible follows, reply with an empty response.';
+const MAX_SUGGESTIONS = 3;
+
 function validateMessage(message) {
   if (typeof message !== 'string') return 'Message is required.';
   const trimmed = message.trim();
@@ -34,6 +37,29 @@ async function generateTitle(userMessage, assistantReply) {
   } catch (error) {
     console.error('Title generation failed:', error.message);
     return null;
+  }
+}
+
+async function generateSuggestions(userMessage, assistantReply) {
+  try {
+    const reply = await createChatCompletion({
+      messages: [
+        { role: 'system', content: SUGGESTIONS_SYSTEM_PROMPT },
+        { role: 'user', content: `User: ${userMessage}\nAssistant: ${assistantReply}` },
+      ],
+      // Same reasoning-budget concern as generateTitle above — this model's
+      // reasoning-token usage varies per call, so leave extra headroom.
+      maxTokens: 500,
+    });
+    if (!reply.content) return [];
+    return reply.content
+      .split('\n')
+      .map((line) => line.replace(/^[-*\d.)\s]+/, '').trim())
+      .filter(Boolean)
+      .slice(0, MAX_SUGGESTIONS);
+  } catch (error) {
+    console.error('Suggestion generation failed:', error.message);
+    return [];
   }
 }
 
@@ -75,7 +101,21 @@ async function sendMessage(req, res, next) {
       }
     }
 
-    sendEvent({ type: 'done', conversationId: activeConversationId, title: title || undefined });
+    // Same best-effort contract as the title: never let a suggestions
+    // failure affect a turn whose reply already succeeded and was saved.
+    let suggestions = [];
+    try {
+      suggestions = await generateSuggestions(trimmedMessage, replyText);
+    } catch (suggestionError) {
+      console.error('Failed to generate suggestions:', suggestionError);
+    }
+
+    sendEvent({
+      type: 'done',
+      conversationId: activeConversationId,
+      title: title || undefined,
+      suggestions: suggestions.length ? suggestions : undefined,
+    });
     return res.end();
   }
 

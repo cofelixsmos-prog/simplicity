@@ -1752,24 +1752,35 @@
 
       var followupRow = document.createElement('div');
       followupRow.className = 'followup-row';
-      var followupBtn = document.createElement('button');
-      followupBtn.type = 'button';
-      followupBtn.className = 'followup-chip';
-      followupBtn.textContent = 'What is the time?';
-      followupBtn.setAttribute('aria-label', 'Ask what is the time');
-      followupBtn.addEventListener('click', function () {
-        handleUserMessage('What is the time?');
-      });
-      followupRow.appendChild(followupBtn);
+      var currentSuggestions = [];
 
       function hideFollowup() {
         if (followupRow.parentNode) followupRow.parentNode.removeChild(followupRow);
       }
 
+      function setSuggestions(suggestions) {
+        currentSuggestions = suggestions || [];
+      }
+
       function showFollowup() {
         hideFollowup();
+        if (!currentSuggestions.length) return;
         var rows = messages.querySelectorAll('.bot-row');
         if (!rows.length) return;
+
+        followupRow.innerHTML = '';
+        currentSuggestions.forEach(function (suggestion) {
+          var chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'followup-chip';
+          chip.textContent = suggestion;
+          chip.setAttribute('aria-label', 'Ask: ' + suggestion);
+          chip.addEventListener('click', function () {
+            handleUserMessage(suggestion);
+          });
+          followupRow.appendChild(chip);
+        });
+
         var last = rows[rows.length - 1];
         last.parentNode.insertBefore(followupRow, last.nextSibling);
         chatWrap.scrollTop = chatWrap.scrollHeight;
@@ -1934,6 +1945,11 @@
 
         var toolSteps = {};
         var replyReceived = false;
+        var typewriterDone = false;
+
+        function maybeShowFollowup() {
+          if (typewriterDone) showFollowup();
+        }
 
         function handleEvent(event) {
           if (requestGeneration !== viewGeneration) return;
@@ -1982,7 +1998,8 @@
             typewriteText(div, answer, function () {
               content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
               refreshRetry();
-              showFollowup();
+              typewriterDone = true;
+              maybeShowFollowup();
               chatWrap.scrollTop = chatWrap.scrollHeight;
               onBotDone();
             });
@@ -1990,6 +2007,8 @@
           }
           if (event.type === 'done') {
             if (event.title && chatTopTitle) chatTopTitle.textContent = event.title;
+            setSuggestions(event.suggestions);
+            maybeShowFollowup();
             return;
           }
           if (event.type === 'error') {
