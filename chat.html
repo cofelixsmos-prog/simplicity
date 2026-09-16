@@ -107,6 +107,7 @@
   }
 
   .chat-main {
+    position: relative;
     flex: 1;
     min-width: 0;
     height: 100%;
@@ -137,19 +138,18 @@
   }
 
   .chat-wrap.has-messages {
-    justify-content: flex-end;
+    justify-content: safe flex-end;
     padding-bottom: 16px;
   }
 
   .chat-messages {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 28px;
     justify-content: center;
   }
 
   .chat-wrap.has-messages .chat-messages {
-    flex: 1;
     justify-content: flex-start;
   }
 
@@ -193,19 +193,6 @@
   .chat-empty.is-leaving {
     opacity: 0;
     transform: translateY(-10px) scale(0.97);
-  }
-
-  @keyframes chat-form-settle {
-    from {
-      transform: translateY(-18px);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-
-  .chat-form.is-settling {
-    animation: chat-form-settle 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   @keyframes chat-bubble-in {
@@ -293,6 +280,7 @@
   .bot-content {
     flex: 1;
     min-width: 0;
+    max-width: 78%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -465,11 +453,12 @@
 
   .chat-form {
     position: sticky;
-    bottom: 12px;
+    bottom: 0;
     z-index: 20;
     display: flex;
     gap: 10px;
     align-items: center;
+    margin-top: 24px;
     border: 1.5px solid var(--btn-outline-border);
     border-radius: 22px;
     padding: 7px 7px 7px 16px;
@@ -508,6 +497,40 @@
     color: var(--fg-muted);
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  .chat-mic {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .chat-mic[hidden] {
+    display: none;
+  }
+
+  .chat-mic:hover {
+    background: var(--btn-outline-hover);
+    color: var(--fg);
+  }
+
+  .chat-mic.is-recording {
+    background: rgba(229, 72, 77, 0.15);
+    color: #e5484d;
+  }
+
+  .chat-mic svg {
+    width: 17px;
+    height: 17px;
   }
 
   .chat-send {
@@ -694,6 +717,10 @@
     display: none;
   }
 
+  .chat-sidebar.is-collapsed ~ .chat-main .sidebar-toggle-mobile {
+    display: inline-flex;
+  }
+
   .new-chat-btn {
     display: flex;
     align-items: center;
@@ -752,8 +779,8 @@
     align-items: center;
     gap: 8px;
     width: 100%;
-    padding: 8px 10px;
-    border-radius: 9px;
+    padding: 9px 10px;
+    border-radius: 10px;
     border: none;
     background: none;
     color: var(--fg-muted);
@@ -762,6 +789,7 @@
     text-align: left;
     cursor: pointer;
     overflow: hidden;
+    transition: background 0.15s ease;
   }
 
   .history-item-title {
@@ -770,6 +798,21 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: var(--fg);
+  }
+
+  .history-section-label {
+    padding: 12px 10px 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    opacity: 0.7;
+  }
+
+  .history-section-label:first-child {
+    padding-top: 4px;
   }
 
   .history-item:hover {
@@ -844,43 +887,79 @@
   .account-panel-up {
     top: auto;
     bottom: calc(100% + 8px);
+    left: 0;
+    right: auto;
+    min-width: 232px;
+    padding: 8px;
   }
 
-  /* ---------- Chat top bar ---------- */
-  .chat-top {
-    flex-shrink: 0;
-    z-index: 20;
+  .account-panel-head {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 12px 20px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--nav-border);
-    user-select: none;
-    -webkit-user-select: none;
+    gap: 10px;
+    padding: 8px 8px 12px;
   }
 
-  .chat-top-title {
-    flex: 1;
+  .account-panel-avatar {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 650;
+  }
+
+  .account-panel-head-text {
     min-width: 0;
-    font-size: 13.5px;
-    font-weight: 550;
+  }
+
+  .account-panel-head-text .account-panel-name {
+    margin: 0 0 1px;
+  }
+
+  .account-panel-sub {
+    margin: 0;
+    font-size: 11.5px;
     color: var(--fg-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .chat-clear {
-    border: 1px solid var(--btn-outline-border);
-    background: transparent;
+  .account-row.is-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .account-row.is-button svg {
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
     color: var(--fg-muted);
-    border-radius: 999px;
-    padding: 7px 14px;
-    font: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .account-row-danger:hover {
+    color: #e5484d;
+  }
+
+  .account-row-danger:hover svg {
+    color: #e5484d;
+  }
+
+  /* ---------- Chat top bar ---------- */
+  .chat-top {
+    flex-shrink: 0;
+    padding: 12px 16px 0;
+  }
+
+  .chat-top:empty {
+    display: none;
   }
 
   .chat-clear:hover {
@@ -1130,10 +1209,20 @@
           </button>
           <div class="account-panel account-panel-up" id="account-panel">
             <div class="account-panel-head">
-              <p class="account-panel-name" id="account-panel-username">—</p>
+              <span class="account-panel-avatar" id="account-panel-avatar">?</span>
+              <div class="account-panel-head-text">
+                <p class="account-panel-name" id="account-panel-username">—</p>
+                <p class="account-panel-sub">Simplicity account</p>
+              </div>
             </div>
-            <button class="account-row is-button" id="settings-open" type="button">Settings</button>
-            <button class="account-row is-button" id="account-logout" type="button">Log out</button>
+            <button class="account-row is-button" id="settings-open" type="button">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M8 10a2 2 0 100-4 2 2 0 000 4Z" stroke="currentColor" stroke-width="1.3"/><path d="M12.9 8.6c.03-.2.05-.4.05-.6s-.02-.4-.05-.6l1.1-.86a.5.5 0 00.12-.64l-1.04-1.8a.5.5 0 00-.6-.22l-1.3.52a4.6 4.6 0 00-1.04-.6l-.2-1.38a.5.5 0 00-.5-.42H7.56a.5.5 0 00-.5.42l-.2 1.38c-.37.15-.72.35-1.04.6l-1.3-.52a.5.5 0 00-.6.22l-1.04 1.8a.5.5 0 00.12.64l1.1.86c-.03.2-.05.4-.05.6s.02.4.05.6l-1.1.86a.5.5 0 00-.12.64l1.04 1.8c.13.22.4.31.6.22l1.3-.52c.32.25.67.45 1.04.6l.2 1.38c.04.24.25.42.5.42h2.08c.25 0 .46-.18.5-.42l.2-1.38c.37-.15.72-.35 1.04-.6l1.3.52c.2.09.47 0 .6-.22l1.04-1.8a.5.5 0 00-.12-.64l-1.1-.86Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+              Settings
+            </button>
+            <button class="account-row is-button account-row-danger" id="account-logout" type="button">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M6 14H3.5a1 1 0 01-1-1V3a1 1 0 011-1H6M10.5 11.5L14 8l-3.5-3.5M14 8H6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Log out
+            </button>
           </div>
         </div>
       </div>
@@ -1144,8 +1233,6 @@
         <button class="sidebar-toggle sidebar-toggle-mobile" id="sidebar-toggle-mobile" type="button" aria-label="Open sidebar">
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </button>
-        <span class="chat-top-title" id="chat-top-title">New chat</span>
-        <button class="chat-clear" id="chat-clear" type="button">Clear chat</button>
       </header>
       <main class="chat-wrap">
     <div class="chat-loading" id="chat-loading" aria-live="polite">
@@ -1197,6 +1284,12 @@
 
     <form class="chat-form" id="chat-form">
       <textarea id="chat-input" rows="1" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message"></textarea>
+      <button type="button" class="chat-mic" id="chat-mic" aria-label="Voice input" hidden>
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
       <button type="submit" class="chat-send" aria-label="Send">
         <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
           <circle cx="20" cy="6"  r="3.2"/>
@@ -1295,7 +1388,11 @@
 
       if (sidebarToggleMobile) {
         sidebarToggleMobile.addEventListener('click', function () {
-          sidebar.classList.toggle('is-open');
+          if (window.innerWidth <= 860) {
+            sidebar.classList.toggle('is-open');
+          } else {
+            sidebar.classList.remove('is-collapsed');
+          }
         });
       }
 
@@ -1351,6 +1448,10 @@
               if (!activeId) setChatLoading(false);
               return;
             }
+            var label = document.createElement('p');
+            label.className = 'history-section-label';
+            label.textContent = 'Recents';
+            historyList.appendChild(label);
             list.forEach(function (conversation) {
               historyList.appendChild(buildHistoryItem(conversation));
             });
@@ -1583,7 +1684,6 @@
         if (chatLoading) chatLoading.hidden = !isLoading;
       }
 
-      var clearBtn = document.getElementById('chat-clear');
       var newChatBtn = document.getElementById('new-chat-btn');
       var chatTopTitle = document.getElementById('chat-top-title');
       var currentConversationId = null;
@@ -1626,10 +1726,47 @@
         updateUrlForNewChat(pushState);
       }
 
-      clearBtn.addEventListener('click', startNewChat);
       if (newChatBtn) newChatBtn.addEventListener('click', startNewChat);
 
       autosizeInput();
+
+      var micBtn = document.getElementById('chat-mic');
+      var SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (micBtn && SpeechRecognitionCtor) {
+        micBtn.hidden = false;
+        var recognition = new SpeechRecognitionCtor();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        var isRecording = false;
+
+        recognition.addEventListener('result', function (event) {
+          var transcript = event.results[0][0].transcript;
+          input.value = (input.value ? input.value + ' ' : '') + transcript;
+          autosizeInput();
+          input.focus();
+        });
+
+        recognition.addEventListener('end', function () {
+          isRecording = false;
+          micBtn.classList.remove('is-recording');
+        });
+
+        recognition.addEventListener('error', function () {
+          isRecording = false;
+          micBtn.classList.remove('is-recording');
+        });
+
+        micBtn.addEventListener('click', function () {
+          if (isRecording) {
+            recognition.stop();
+            return;
+          }
+          isRecording = true;
+          micBtn.classList.add('is-recording');
+          recognition.start();
+        });
+      }
 
       var scrollBtn = document.getElementById('scroll-bottom');
       var followOutput = false;
@@ -1911,6 +2048,7 @@
 
       function sendBotReply(sourceMessage) {
         hideFollowup();
+        setSuggestions([]);
         var requestGeneration = viewGeneration;
 
         var row = document.createElement('div');
@@ -2196,10 +2334,10 @@
       });
 
       var urlConversationId = getConversationIdFromUrl();
-      var initialConversationId = urlConversationId || getLastConversationCookie();
       setChatLoading(true);
-      loadHistoryList(initialConversationId);
-      if (initialConversationId) openConversation(initialConversationId, { pushState: false });
+      loadHistoryList(urlConversationId);
+      if (urlConversationId) openConversation(urlConversationId, { pushState: false });
+      else setChatLoading(false);
     })();
   </script>
 </body>

@@ -129,6 +129,7 @@
 
         var toggle = document.getElementById('account-toggle');
         var avatar = document.getElementById('account-avatar');
+        var panelAvatar = document.getElementById('account-panel-avatar');
         var sidebarName = document.getElementById('sidebar-account-name');
         var panelName = document.getElementById('account-panel-username');
         var logoutBtn = document.getElementById('account-logout');
@@ -139,6 +140,7 @@
         } else if (toggle) {
           toggle.textContent = initial;
         }
+        if (panelAvatar) panelAvatar.textContent = initial;
         if (sidebarName) sidebarName.textContent = data.username;
         if (panelName) panelName.textContent = data.username;
         if (logoutBtn) logoutBtn.addEventListener('click', performLogout);
