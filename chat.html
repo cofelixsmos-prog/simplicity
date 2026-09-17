@@ -826,12 +826,12 @@
     bottom: 0;
     z-index: 20;
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
     margin-top: 24px;
     border: 1.5px solid var(--btn-outline-border);
     border-radius: 22px;
-    padding: 7px 7px 7px 16px;
+    padding: 7px 7px 7px 8px;
     background: var(--bg);
     box-shadow: 0 1px 0 var(--nav-border);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -867,6 +867,144 @@
     color: var(--fg-muted);
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  .model-picker {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .model-picker-trigger {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 32px;
+    padding: 0 10px 0 12px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 999px;
+    background: var(--btn-outline-hover);
+    color: var(--fg);
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 550;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .model-picker-trigger:hover {
+    border-color: var(--accent);
+  }
+
+  .model-picker-chevron {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    color: var(--fg-muted);
+    transition: transform 0.15s ease;
+  }
+
+  .model-picker.is-open .model-picker-chevron {
+    transform: rotate(180deg);
+  }
+
+  .model-picker-panel {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 0;
+    min-width: 240px;
+    max-width: 300px;
+    background: var(--bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+    padding: 8px;
+    z-index: 50;
+  }
+
+  .model-picker-panel[hidden] {
+    display: none;
+  }
+
+  .model-picker-group + .model-picker-group {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--nav-border);
+  }
+
+  .model-picker-group-label {
+    margin: 2px 8px 4px;
+    font-size: 10.5px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--fg-muted);
+    opacity: 0.7;
+  }
+
+  .model-picker-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--fg);
+    font: inherit;
+    font-size: 13.5px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .model-picker-option:hover,
+  .model-picker-local-list button:hover {
+    background: var(--btn-outline-hover);
+  }
+
+  .model-picker-option.is-selected,
+  .model-picker-local-list button.is-selected {
+    background: rgba(255, 90, 31, 0.1);
+    color: var(--accent);
+  }
+
+  .model-picker-local-list button {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--fg);
+    font: inherit;
+    font-size: 13.5px;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .model-picker-empty {
+    margin: 4px 8px 8px;
+    font-size: 12px;
+    color: var(--fg-muted);
+  }
+
+  .model-picker-catalog-link {
+    display: block;
+    margin-top: 4px;
+    padding: 8px;
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 550;
+    text-decoration: none;
+  }
+
+  .model-picker-catalog-link:hover {
+    background: var(--btn-outline-hover);
   }
 
   .chat-mic {
@@ -1657,6 +1795,24 @@
     <div class="question-dock" id="question-dock"></div>
 
     <form class="chat-form" id="chat-form">
+      <div class="model-picker" id="model-picker">
+        <button type="button" class="model-picker-trigger" id="model-picker-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="model-picker-panel">
+          <span class="model-picker-label" id="model-picker-label">Simplicity Cloud</span>
+          <svg class="model-picker-chevron" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="model-picker-panel" id="model-picker-panel" role="listbox" hidden>
+          <div class="model-picker-group">
+            <p class="model-picker-group-label">Cloud</p>
+            <button class="model-picker-option" type="button" data-mode="cloud" role="option">Simplicity Cloud</button>
+          </div>
+          <div class="model-picker-group" id="model-picker-local-group">
+            <p class="model-picker-group-label">Local</p>
+            <p class="model-picker-empty" id="model-picker-empty">No local models yet.</p>
+            <div class="model-picker-local-list" id="model-picker-local-list"></div>
+            <a class="model-picker-catalog-link" href="/model-catalog.html" id="model-picker-catalog-link">Go to catalog →</a>
+          </div>
+        </div>
+      </div>
       <textarea id="chat-input" rows="1" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message"></textarea>
       <button type="button" class="chat-mic" id="chat-mic" aria-label="Voice input" hidden>
         <svg viewBox="0 0 24 24" fill="none">
@@ -2282,6 +2438,144 @@
         });
       }
 
+      // ---------- Model picker: Simplicity Cloud / Simplicity Local ----------
+      var HW_SCAN_STORAGE_KEY = 'simplicity-local-hw-scan';
+      var INSTALLED_MODELS_STORAGE_KEY = 'simplicity-local-installed-models';
+      var SELECTED_MODEL_STORAGE_KEY = 'simplicity-local-selected-model';
+
+      function readLocalStorageJSON(key, fallback) {
+        try {
+          var raw = localStorage.getItem(key);
+          if (!raw) return fallback;
+          var parsed = JSON.parse(raw);
+          return parsed === null || parsed === undefined ? fallback : parsed;
+        } catch (e) {
+          return fallback;
+        }
+      }
+
+      function writeLocalStorageJSON(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+          // Storage disabled/full (e.g. Safari private mode) — best-effort only.
+        }
+      }
+
+      function getInstalledLocalModels() {
+        var list = readLocalStorageJSON(INSTALLED_MODELS_STORAGE_KEY, []);
+        return Array.isArray(list) ? list : [];
+      }
+
+      function localModelDisplayName(modelId) {
+        // "Llama-3.2-3B-Instruct-q4f16_1-MLC" -> "Llama 3.2 3B Instruct"
+        return modelId
+          .replace(/-q\d.*$/i, '')
+          .replace(/-MLC.*$/i, '')
+          .replace(/-/g, ' ');
+      }
+
+      var currentModelMode = 'cloud';
+      var currentLocalModelId = null;
+
+      function loadModelSelection() {
+        var saved = readLocalStorageJSON(SELECTED_MODEL_STORAGE_KEY, null);
+        if (!saved || (saved.mode !== 'local' && saved.mode !== 'cloud')) return;
+        if (saved.mode === 'local') {
+          var installed = getInstalledLocalModels();
+          if (!saved.localModelId || installed.indexOf(saved.localModelId) === -1) {
+            // Selected model no longer installed — never land on a missing model.
+            return;
+          }
+        }
+        currentModelMode = saved.mode;
+        currentLocalModelId = saved.mode === 'local' ? saved.localModelId : null;
+      }
+
+      function saveModelSelection() {
+        writeLocalStorageJSON(SELECTED_MODEL_STORAGE_KEY, { mode: currentModelMode, localModelId: currentLocalModelId });
+      }
+
+      var modelPicker = document.getElementById('model-picker');
+      var modelPickerTrigger = document.getElementById('model-picker-trigger');
+      var modelPickerPanel = document.getElementById('model-picker-panel');
+      var modelPickerLabel = document.getElementById('model-picker-label');
+      var modelPickerLocalList = document.getElementById('model-picker-local-list');
+      var modelPickerEmpty = document.getElementById('model-picker-empty');
+      var modelPickerCatalogLink = document.getElementById('model-picker-catalog-link');
+
+      function setModelPickerOpen(isOpen) {
+        if (!modelPicker) return;
+        modelPicker.classList.toggle('is-open', isOpen);
+        modelPickerPanel.hidden = !isOpen;
+        modelPickerTrigger.setAttribute('aria-expanded', String(isOpen));
+      }
+
+      function refreshModelPickerLabel() {
+        if (!modelPickerLabel) return;
+        if (currentModelMode === 'local' && currentLocalModelId) {
+          modelPickerLabel.textContent = localModelDisplayName(currentLocalModelId);
+        } else {
+          modelPickerLabel.textContent = 'Simplicity Cloud';
+        }
+      }
+
+      function renderModelPickerOptions() {
+        if (!modelPickerLocalList) return;
+        var installed = getInstalledLocalModels();
+        modelPickerLocalList.innerHTML = '';
+        modelPickerEmpty.hidden = installed.length > 0;
+        modelPickerCatalogLink.textContent = installed.length ? 'Manage models →' : 'Go to catalog →';
+
+        installed.forEach(function (modelId) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'model-picker-option';
+          if (currentModelMode === 'local' && currentLocalModelId === modelId) btn.classList.add('is-selected');
+          btn.textContent = localModelDisplayName(modelId);
+          btn.addEventListener('click', function () {
+            currentModelMode = 'local';
+            currentLocalModelId = modelId;
+            saveModelSelection();
+            refreshModelPickerLabel();
+            renderModelPickerOptions();
+            setModelPickerOpen(false);
+          });
+          modelPickerLocalList.appendChild(btn);
+        });
+
+        var cloudOption = modelPicker.querySelector('.model-picker-option[data-mode="cloud"]');
+        if (cloudOption) cloudOption.classList.toggle('is-selected', currentModelMode === 'cloud');
+      }
+
+      if (modelPickerTrigger && modelPicker) {
+        modelPickerTrigger.addEventListener('click', function (event) {
+          event.stopPropagation();
+          setModelPickerOpen(!modelPicker.classList.contains('is-open'));
+        });
+        document.addEventListener('click', function (event) {
+          if (!modelPicker.contains(event.target)) setModelPickerOpen(false);
+        });
+        document.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape') setModelPickerOpen(false);
+        });
+        var cloudOptionBtn = modelPicker.querySelector('.model-picker-option[data-mode="cloud"]');
+        if (cloudOptionBtn) {
+          cloudOptionBtn.addEventListener('click', function () {
+            currentModelMode = 'cloud';
+            currentLocalModelId = null;
+            saveModelSelection();
+            refreshModelPickerLabel();
+            renderModelPickerOptions();
+            setModelPickerOpen(false);
+          });
+        }
+      }
+
+      loadModelSelection();
+      refreshModelPickerLabel();
+      renderModelPickerOptions();
+
       var scrollBtn = document.getElementById('scroll-bottom');
       var followOutput = false;
       var followTimer = null;
@@ -2653,7 +2947,11 @@
         isResponding = true;
         followOutput = true;
         if (currentConversationId) delete conversationCache[currentConversationId];
-        sendBotReply(sourceMessage);
+        if (currentModelMode === 'local' && currentLocalModelId) {
+          sendLocalBotReply(sourceMessage);
+        } else {
+          sendBotReply(sourceMessage);
+        }
       }
 
       function addBubble(text, who) {
@@ -3073,6 +3371,348 @@
           });
       }
 
+      // ---------- Simplicity Local: in-browser inference via WebLLM ----------
+      var LOCAL_MAX_TOOL_ROUNDS = 3;
+      var LOCAL_SYSTEM_PROMPT = 'You are Simplicity, a helpful, concise assistant running locally in the user\'s browser. Keep answers short and direct unless asked for detail. ' +
+        'When you need information only the user can provide before you can proceed, call the ask_question tool instead of listing questions as plain text. ' +
+        'You can format replies with standard markdown: bold, italic, `code`, fenced code blocks, links, lists, tables.';
+
+      // Mirrors server/services/tools.js exactly — same schemas, same
+      // executor logic — so local and Cloud tool calls behave identically
+      // from the user's point of view.
+      var LOCAL_TOOL_DEFINITIONS = [
+        {
+          type: 'function',
+          function: {
+            name: 'get_time',
+            description: 'Get the current time. Use this when the user asks what time it is.',
+            parameters: { type: 'object', properties: {}, required: [] },
+          },
+        },
+        {
+          type: 'function',
+          function: {
+            name: 'ask_question',
+            description: "Ask the user one or more clarifying questions before continuing. Use this instead of guessing, and instead of listing questions as plain text, when you need information only the user has. If you have several things to ask, include ALL of them in ONE call as separate entries in the questions array. Each question can offer multiple-choice options; the user can always type a custom answer instead of picking one. Calling this ends your turn.",
+            parameters: {
+              type: 'object',
+              properties: {
+                questions: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      question: { type: 'string' },
+                      options: { type: 'array', items: { type: 'string' } },
+                    },
+                    required: ['question'],
+                  },
+                },
+              },
+              required: ['questions'],
+            },
+          },
+        },
+      ];
+      var LOCAL_TERMINAL_TOOLS = { ask_question: true };
+
+      function runLocalTool(name, args) {
+        if (name === 'get_time') {
+          var now = new Date();
+          return { time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }), iso: now.toISOString() };
+        }
+        if (name === 'ask_question') {
+          var questions = Array.isArray(args.questions) ? args.questions : [];
+          return {
+            questions: questions
+              .filter(function (q) { return q && typeof q.question === 'string' && q.question.trim(); })
+              .map(function (q) {
+                return {
+                  question: q.question.trim(),
+                  options: Array.isArray(q.options) ? q.options.filter(function (o) { return typeof o === 'string' && o.trim(); }).map(function (o) { return o.trim(); }) : [],
+                };
+              }),
+          };
+        }
+        throw new Error('Unknown tool: ' + name);
+      }
+
+      var webllmModulePromise = null;
+      function loadWebllm() {
+        if (!webllmModulePromise) webllmModulePromise = import('/vendor/web-llm/index.js');
+        return webllmModulePromise;
+      }
+
+      var localEngine = null;
+      var localEngineModelId = null;
+      function getLocalEngine(modelId) {
+        return loadWebllm().then(function (webllm) {
+          if (!localEngine) localEngine = new webllm.MLCEngine();
+          if (localEngineModelId === modelId) return { engine: localEngine, webllm: webllm };
+          return localEngine.reload(modelId).then(function () {
+            localEngineModelId = modelId;
+            return { engine: localEngine, webllm: webllm };
+          });
+        });
+      }
+
+      function sendLocalBotReply(sourceMessage) {
+        hideFollowup();
+        setSuggestions([]);
+        var requestGeneration = viewGeneration;
+        var modelId = currentLocalModelId;
+
+        var row = document.createElement('div');
+        row.className = 'bot-row';
+        row.setAttribute('data-source', sourceMessage);
+        var logo = document.createElement('span');
+        logo.className = 'bot-logo';
+        logo.setAttribute('aria-hidden', 'true');
+        logo.innerHTML = BOT_LOGO_SVG;
+        var content = document.createElement('div');
+        content.className = 'bot-content';
+
+        var trace = document.createElement('div');
+        trace.className = 'tool-trace';
+        trace.setAttribute('aria-live', 'polite');
+        trace.hidden = true;
+        content.appendChild(trace);
+
+        var div = document.createElement('div');
+        div.className = 'chat-bubble bot';
+        div.innerHTML = '<span class="thinking-indicator"><span class="thinking-phase">Loading model...</span><span class="thinking-elapsed">0 sec</span></span>';
+        content.appendChild(div);
+        row.appendChild(logo);
+        row.appendChild(content);
+        messages.appendChild(row);
+        chatWrap.scrollTop = chatWrap.scrollHeight;
+
+        var thinkingPhase = div.querySelector('.thinking-phase');
+        var thinkingElapsed = div.querySelector('.thinking-elapsed');
+        var thinkingStartedAt = Date.now();
+        var thinkingTimer = setInterval(function () {
+          if (requestGeneration !== viewGeneration) {
+            clearInterval(thinkingTimer);
+            return;
+          }
+          thinkingElapsed.textContent = Math.floor((Date.now() - thinkingStartedAt) / 1000) + ' sec';
+        }, 1000);
+        function stopThinking() { clearInterval(thinkingTimer); }
+        function setThinkingPhase(label) { thinkingPhase.textContent = label + '...'; }
+
+        function finishBubble(answer) {
+          content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
+          refreshRetry();
+          showFollowup();
+          onBotDone();
+        }
+
+        function failBubble(message) {
+          stopThinking();
+          div.innerHTML = renderMarkdown(message);
+          finishBubble(message);
+        }
+
+        var toolCalls = [];
+        var isNewConversation = !currentConversationId;
+
+        fetch('/api/chat/local/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: sourceMessage, conversationId: currentConversationId }),
+        })
+          .then(function (response) {
+            if (!response.ok) return response.json().then(function (data) { return Promise.reject(new Error(data.error || 'request_failed')); });
+            return response.json();
+          })
+          .then(function (startData) {
+            if (requestGeneration !== viewGeneration) return;
+            if (startData.conversationId && startData.conversationId !== currentConversationId) {
+              currentConversationId = startData.conversationId;
+              if (chatTopTitle) chatTopTitle.textContent = sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage;
+              loadHistoryList(currentConversationId);
+              setLastConversationCookie(currentConversationId);
+              updateUrlForConversation(currentConversationId, true);
+            }
+
+            setThinkingPhase('Loading model');
+            return getLocalEngine(modelId).then(function (ctx) {
+              if (requestGeneration !== viewGeneration) return;
+              var engine = ctx.engine;
+
+              var modelMessages = [{ role: 'system', content: startData.systemPrompt || LOCAL_SYSTEM_PROMPT }]
+                .concat(startData.history || [])
+                .concat([{ role: 'user', content: sourceMessage }]);
+
+              var seenCalls = {};
+              var forceFinalAnswer = false;
+              // Only attempt tool calls on models WebLLM has actually
+              // confirmed support function calling. Unsupported models don't
+              // error when given a `tools` param — they silently ignore it
+              // and just never populate tool_calls, which is indistinguishable
+              // from "chose not to use a tool this turn." Without this check,
+              // tool calling looked completely broken on any non-Hermes model
+              // even though the loop itself was correct.
+              var functionCallingIds = (ctx.webllm && ctx.webllm.functionCallingModelIds) || [];
+              var supportsTools = LOCAL_TOOL_DEFINITIONS.length > 0 && functionCallingIds.indexOf(modelId) !== -1;
+
+              function runRound(round) {
+                if (requestGeneration !== viewGeneration) return Promise.resolve();
+                setThinkingPhase('Simplifying');
+
+                var useTools = supportsTools && !forceFinalAnswer && round < LOCAL_MAX_TOOL_ROUNDS;
+                var callPromise;
+                if (useTools) {
+                  callPromise = engine.chat.completions.create({
+                    messages: modelMessages,
+                    tools: LOCAL_TOOL_DEFINITIONS,
+                    stream: false,
+                  }).catch(function () {
+                    // This model doesn't support tool calling (or rejected the
+                    // schema) — best-effort degrade to a plain completion
+                    // rather than failing the whole turn.
+                    supportsTools = false;
+                    return engine.chat.completions.create({ messages: modelMessages, stream: false });
+                  });
+                } else {
+                  callPromise = engine.chat.completions.create({ messages: modelMessages, stream: false });
+                }
+
+                return callPromise.then(function (completion) {
+                  if (requestGeneration !== viewGeneration) return;
+                  var msg = completion.choices && completion.choices[0] && completion.choices[0].message;
+                  var calls = msg && msg.tool_calls;
+
+                  if (!calls || !calls.length) {
+                    return streamFinalAnswer(modelMessages);
+                  }
+
+                  modelMessages.push({ role: 'assistant', content: msg.content || null, tool_calls: calls });
+
+                  var sawRepeat = false;
+                  var terminalResult = null;
+                  calls.forEach(function (call, index) {
+                    var args = {};
+                    try { args = call.function.arguments ? JSON.parse(call.function.arguments) : {}; } catch (e) {}
+                    var callKey = call.function.name + ':' + JSON.stringify(args);
+                    if (seenCalls[callKey]) sawRepeat = true;
+                    seenCalls[callKey] = true;
+
+                    trace.hidden = false;
+                    setThinkingPhase(TOOL_LABELS[call.function.name] || call.function.name);
+                    var stepCall = { name: call.function.name, args: args };
+                    var step = createToolStep(stepCall, true);
+                    trace.appendChild(step);
+                    if (followOutput) scrollPageBottom(false);
+
+                    var startedAt = Date.now();
+                    var result;
+                    try {
+                      result = runLocalTool(call.function.name, args);
+                    } catch (toolError) {
+                      result = { error: toolError.message };
+                    }
+                    var doneCall = { name: call.function.name, args: args, result: result, durationMs: Date.now() - startedAt };
+                    toolCalls.push(doneCall);
+                    finishToolStep(step, doneCall);
+                    if (followOutput) scrollPageBottom(false);
+
+                    modelMessages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
+
+                    if (LOCAL_TERMINAL_TOOLS[call.function.name]) terminalResult = doneCall;
+                  });
+
+                  if (terminalResult) {
+                    return finishWithLocalQuestion(terminalResult);
+                  }
+
+                  if (sawRepeat) forceFinalAnswer = true;
+                  return runRound(round + 1);
+                });
+              }
+
+              function streamFinalAnswer(finalMessages) {
+                if (requestGeneration !== viewGeneration) return;
+                stopThinking();
+                div.innerHTML = '';
+                var accumulated = '';
+                return engine.chat.completions.create({ messages: finalMessages, stream: true }).then(function (streamIter) {
+                  function pump() {
+                    return streamIter.next().then(function (step) {
+                      if (requestGeneration !== viewGeneration) return;
+                      if (step.done) {
+                        var finalText = accumulated || "I don't have a response for that.";
+                        div.innerHTML = renderMarkdown(finalText);
+                        saveLocalReply(finalText);
+                        finishBubble(finalText);
+                        return;
+                      }
+                      var delta = step.value && step.value.choices && step.value.choices[0] && step.value.choices[0].delta;
+                      if (delta && delta.content) {
+                        accumulated += delta.content;
+                        div.innerHTML = renderMarkdown(accumulated);
+                        if (followOutput) scrollPageBottom(false);
+                      }
+                      return pump();
+                    });
+                  }
+                  return pump();
+                });
+              }
+
+              function finishWithLocalQuestion(questionCall) {
+                if (requestGeneration !== viewGeneration) return;
+                stopThinking();
+                var questions = questionCall.result.questions || [];
+                var qSummary = questions.length > 1
+                  ? 'I have a few questions before continuing — see below.'
+                  : 'I have a question before continuing — see below.';
+                div.innerHTML = renderMarkdown(qSummary);
+                saveLocalReply(qSummary);
+                finishBubble(qSummary);
+                renderQuestionCard(questionDock, questions, function (answerText) {
+                  handleUserMessage(answerText);
+                });
+              }
+
+              function saveLocalReply(replyText) {
+                fetch('/api/chat/local/finish', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    conversationId: currentConversationId,
+                    message: sourceMessage,
+                    reply: replyText,
+                    toolCalls: toolCalls,
+                    isNewConversation: isNewConversation,
+                  }),
+                })
+                  .then(function (response) { return response.ok ? response.json() : null; })
+                  .then(function (data) {
+                    if (!data || requestGeneration !== viewGeneration) return;
+                    if (data.title && chatTopTitle) chatTopTitle.textContent = data.title;
+                    setSuggestions(data.suggestions);
+                    showFollowup();
+                    if (data.highlighted) div.innerHTML = renderMarkdown(data.highlighted);
+                  })
+                  .catch(function (error) {
+                    console.error('Failed to save local reply:', error);
+                  });
+              }
+
+              return runRound(0);
+            });
+          })
+          .catch(function (error) {
+            if (requestGeneration !== viewGeneration) {
+              onBotDone();
+              return;
+            }
+            console.error('Local inference failed:', error);
+            failBubble('Local model error: ' + (error && error.message ? error.message : 'something went wrong.'));
+          });
+      }
+
       function handleUserMessage(value) {
         if (isResponding) {
           enqueueMessage(value);
@@ -3091,7 +3731,11 @@
         hideFollowup();
         questionDock.classList.remove('is-active');
         questionDock.innerHTML = '';
-        sendBotReply(value);
+        if (currentModelMode === 'local' && currentLocalModelId) {
+          sendLocalBotReply(value);
+        } else {
+          sendBotReply(value);
+        }
       }
 
       form.addEventListener('submit', function (e) {

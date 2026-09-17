@@ -36,6 +36,13 @@ function createApp() {
     res.sendFile(path.join(ROOT_DIR, 'chat.html'));
   });
 
+  // Self-hosted WebLLM runtime for Simplicity Local — served from
+  // node_modules rather than a CDN so in-browser inference has no external
+  // runtime dependency. Only ever fetched when a user actually opens the
+  // model catalog or sends a message in Local mode (lazy dynamic import on
+  // the client), so this costs nothing for Cloud-only users.
+  app.use('/vendor/web-llm', express.static(path.join(ROOT_DIR, 'node_modules', '@mlc-ai', 'web-llm', 'lib')));
+
   app.use(express.static(ROOT_DIR, { extensions: ['html'] }));
 
   app.use((err, req, res, next) => {

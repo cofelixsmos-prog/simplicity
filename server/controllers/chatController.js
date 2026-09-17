@@ -367,6 +367,99 @@ async function sendMessage(req, res, next) {
   }
 }
 
+// Simplicity Local support: the actual reply is generated client-side by
+// WebLLM (in-browser inference), but persistence — conversations, messages,
+// sidebar history, titles, suggestions — stays entirely server-side and
+// identical to Cloud mode, per the user's explicit requirement ("everything
+// remains the same, just the model changes"). These two endpoints split
+// sendMessage's responsibilities so the client can drive inference itself
+// while still reusing every bit of existing save/best-effort logic.
+
+async function startLocalMessage(req, res, next) {
+  const { message, conversationId } = req.body || {};
+  const validationError = validateMessage(message);
+  if (validationError) return res.status(400).json({ error: validationError });
+
+  const trimmedMessage = message.trim();
+  let activeConversationId = conversationId;
+  const isNewConversation = !conversationId;
+
+  try {
+    if (activeConversationId) {
+      const owns = await conversations.ownsConversation(req.user.id, activeConversationId);
+      if (!owns) return res.status(404).json({ error: 'Conversation not found.' });
+    } else {
+      activeConversationId = await conversations.createConversation(req.user.id, trimmedMessage);
+    }
+
+    const history = await conversations.getConversationHistory(activeConversationId);
+    await conversations.saveMessage(activeConversationId, 'user', trimmedMessage, null);
+
+    res.json({
+      conversationId: activeConversationId,
+      isNewConversation,
+      history,
+      systemPrompt: SYSTEM_PROMPT,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function finishLocalMessage(req, res, next) {
+  const { conversationId, message, reply, toolCalls, isNewConversation } = req.body || {};
+  if (!conversationId || typeof reply !== 'string' || !reply.trim()) {
+    return res.status(400).json({ error: 'conversationId and reply are required.' });
+  }
+
+  try {
+    const owns = await conversations.ownsConversation(req.user.id, conversationId);
+    if (!owns) return res.status(404).json({ error: 'Conversation not found.' });
+
+    const replyText = reply.trim();
+    const cleanToolCalls = Array.isArray(toolCalls) && toolCalls.length ? toolCalls : null;
+    await conversations.saveMessage(conversationId, 'assistant', replyText, cleanToolCalls);
+    await conversations.touchConversation(conversationId);
+
+    const trimmedMessage = typeof message === 'string' ? message.trim() : '';
+
+    let title;
+    if (isNewConversation) {
+      try {
+        title = await generateTitle(trimmedMessage, replyText);
+        if (title) await conversations.updateTitle(conversationId, title);
+      } catch (titleError) {
+        console.error('Failed to save generated title:', titleError);
+        title = null;
+      }
+    }
+
+    let suggestions = [];
+    try {
+      suggestions = await generateSuggestions(trimmedMessage, replyText);
+    } catch (suggestionError) {
+      console.error('Failed to generate suggestions:', suggestionError);
+    }
+
+    let highlighted = null;
+    try {
+      highlighted = await highlightReply(replyText);
+      if (highlighted) await conversations.updateLastAssistantMessage(conversationId, highlighted);
+    } catch (highlightError) {
+      console.error('Failed to generate highlight:', highlightError);
+    }
+
+    res.json({
+      conversationId,
+      title: title || undefined,
+      suggestions: suggestions.length ? suggestions : undefined,
+      highlighted: highlighted || undefined,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function listConversations(req, res, next) {
   try {
     const rows = await conversations.listConversations(req.user.id);
@@ -398,4 +491,4 @@ async function deleteConversation(req, res, next) {
   }
 }
 
-module.exports = { sendMessage, listConversations, getConversation, deleteConversation };
+module.exports = { sendMessage, startLocalMessage, finishLocalMessage, listConversations, getConversation, deleteConversation };

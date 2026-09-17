@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model catalog — Simplicity</title>
+<meta name="description" content="Browse and download local AI models for Simplicity.">
+<link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+<script>
+  (function () {
+    var match = document.cookie.match(/(?:^|; )simplicity-theme=([^;]*)/);
+    var saved = match ? decodeURIComponent(match[1]) : null;
+    var theme = saved || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+
+    window.simplicitySetThemeCookie = function (value) {
+      var consentMatch = document.cookie.match(/(?:^|; )simplicity-consent=([^;]*)/);
+      var consent = consentMatch ? decodeURIComponent(consentMatch[1]) : null;
+      if (consent !== 'accepted') return;
+      var date = new Date();
+      date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
+      document.cookie = 'simplicity-theme=' + encodeURIComponent(value) + '; expires=' + date.toUTCString() + '; path=/; SameSite=Lax';
+    };
+  })();
+</script>
+<style>
+  html[data-theme="light"] { background: #F3F1EC; color: #000; }
+  html[data-theme="dark"] { background: #0A0A0A; color: #F3F1EC; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/style.css">
+<style>
+  * { box-sizing: border-box; }
+
+  html { scrollbar-width: none; -ms-overflow-style: none; }
+  html::-webkit-scrollbar { display: none; }
+
+  body {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .catalog-top {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--nav-border);
+  }
+
+  .catalog-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--fg-muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 550;
+  }
+
+  .catalog-back:hover { color: var(--fg); }
+  .catalog-back svg { width: 16px; height: 16px; }
+
+  .catalog-top-title {
+    font-size: 14px;
+    font-weight: 650;
+  }
+
+  .catalog-main {
+    flex: 1;
+    width: 100%;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ---------- Logo fill animation (shared: scan + downloads) ---------- */
+  .logo-fill {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+  }
+
+  .logo-fill svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-fill-base circle {
+    fill: none;
+    stroke: var(--btn-outline-border);
+    stroke-width: 1.6;
+  }
+
+  .logo-fill-fg circle {
+    fill: var(--fg);
+  }
+
+  .logo-fill-pct {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--fg-muted);
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+  }
+
+  .logo-fill.is-large {
+    width: 120px;
+    height: 120px;
+  }
+
+  .logo-fill.is-large + .logo-fill-pct {
+    margin-top: 18px;
+    font-size: 15px;
+  }
+
+  /* ---------- Scan screen ---------- */
+  .scan-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+  }
+
+  .scan-status {
+    margin-top: 22px;
+    font-size: 14.5px;
+    color: var(--fg-muted);
+    min-height: 1.5em;
+  }
+
+  .scan-results {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .scan-results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 28px 0;
+  }
+
+  .scan-spec-card {
+    padding: 16px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 12px;
+    background: var(--btn-outline-hover);
+    text-align: left;
+  }
+
+  .scan-spec-label {
+    font-size: 11px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--fg-muted);
+    opacity: 0.75;
+    margin-bottom: 4px;
+  }
+
+  .scan-spec-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .scan-warning {
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    border: 1px solid rgba(229, 72, 77, 0.3);
+    border-radius: 10px;
+    background: rgba(229, 72, 77, 0.08);
+    color: #c23b3f;
+    font-size: 13px;
+    text-align: left;
+  }
+
+  html[data-theme="dark"] .scan-warning {
+    color: #f28b8e;
+  }
+
+  /* ---------- Catalog browse screen ---------- */
+  .catalog-hidden { display: none !important; }
+
+  .catalog-hw-strip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 10px 14px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 10px;
+    background: var(--btn-outline-hover);
+    font-size: 12.5px;
+    color: var(--fg-muted);
+  }
+
+  .catalog-hw-strip a {
+    margin-left: auto;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 550;
+  }
+
+  .catalog-hw-strip a:hover { text-decoration: underline; }
+
+  .catalog-search {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--btn-outline-border);
+    border-radius: 14px;
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+    font-size: 14.5px;
+    outline: none;
+    margin-bottom: 14px;
+  }
+
+  .catalog-search:focus { border-color: var(--accent); }
+
+  .catalog-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .catalog-chip {
+    padding: 7px 14px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+
+  .catalog-chip:hover { border-color: var(--accent); }
+
+  .catalog-chip.is-active {
+    border-color: var(--accent);
+    background: rgba(255, 90, 31, 0.1);
+    color: var(--accent);
+  }
+
+  .catalog-section-label {
+    font-size: 12px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--fg-muted);
+    opacity: 0.75;
+    margin: 28px 0 12px;
+  }
+
+  .catalog-section-label:first-of-type { margin-top: 0; }
+
+  .catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .catalog-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 14px;
+    background: var(--btn-outline-hover);
+  }
+
+  .catalog-card-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fg);
+    overflow-wrap: anywhere;
+  }
+
+  .catalog-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--fg-muted);
+  }
+
+  .catalog-card-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--btn-outline-border);
+    font-size: 10.5px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .catalog-card-badge-tools {
+    border-color: rgba(255, 90, 31, 0.4);
+    color: var(--accent);
+  }
+
+  .catalog-card-action {
+    margin-top: auto;
+    padding: 8px 12px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 550;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .catalog-card-action:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .catalog-card-action:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+
+  .catalog-card-action.is-installed {
+    border-color: rgba(30, 165, 90, 0.4);
+    color: #1ea55a;
+  }
+
+  .catalog-card-remove {
+    margin-top: 4px;
+    background: none;
+    border: none;
+    color: var(--fg-muted);
+    font-size: 11.5px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .catalog-card-remove:hover { color: #e5484d; }
+
+  .catalog-card.is-downloading .catalog-card-action-row {
+    display: none;
+  }
+
+  .catalog-empty-note {
+    padding: 24px;
+    text-align: center;
+    color: var(--fg-muted);
+    font-size: 13.5px;
+    border: 1px dashed var(--btn-outline-border);
+    border-radius: 12px;
+  }
+
+  @media (max-width: 560px) {
+    .scan-results-grid { grid-template-columns: 1fr; }
+    .catalog-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body data-no-nav data-require-auth>
+  <header class="catalog-top">
+    <a class="catalog-back" href="/chat.html">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to chat
+    </a>
+    <span class="catalog-top-title">Model catalog</span>
+  </header>
+
+  <main class="catalog-main">
+    <div class="scan-screen" id="scan-screen">
+      <div class="logo-fill is-large" id="scan-logo"></div>
+      <p class="scan-status" id="scan-status">Checking your device…</p>
+    </div>
+
+    <div class="catalog-hidden" id="catalog-screen">
+      <div class="catalog-hw-strip" id="catalog-hw-strip">
+        <span id="catalog-hw-summary">—</span>
+        <a href="#" id="catalog-rescan-link">Re-scan</a>
+      </div>
+
+      <input type="search" class="catalog-search" id="catalog-search" placeholder="Search models…" autocomplete="off">
+
+      <div class="catalog-chips" id="catalog-chips">
+        <button type="button" class="catalog-chip is-active" data-category="all">All</button>
+        <button type="button" class="catalog-chip" data-category="normal">Normal</button>
+        <button type="button" class="catalog-chip" data-category="low-end">Low-end</button>
+        <button type="button" class="catalog-chip" data-category="coding">Coding</button>
+        <button type="button" class="catalog-chip" data-category="reasoning">Reasoning</button>
+        <button type="button" class="catalog-chip" data-category="tools">Tool calling</button>
+      </div>
+
+      <div id="catalog-recommended-wrap">
+        <p class="catalog-section-label">Recommended for you</p>
+        <div class="catalog-grid" id="catalog-recommended-grid"></div>
+      </div>
+
+      <p class="catalog-section-label">All models</p>
+      <div class="catalog-grid" id="catalog-full-grid"></div>
+      <p class="catalog-empty-note catalog-hidden" id="catalog-empty-note">No models match your search.</p>
+    </div>
+  </main>
+
+  <script src="/scripts/nav-init.js"></script>
+  <script type="module">
+    (function () {
+      var HW_SCAN_STORAGE_KEY = 'simplicity-local-hw-scan';
+      var INSTALLED_MODELS_STORAGE_KEY = 'simplicity-local-installed-models';
+      var HW_SCAN_VERSION = 1;
+      var HARD_CEILING_MB = 12000;
+
+      function readJSON(key, fallback) {
+        try {
+          var raw = localStorage.getItem(key);
+          if (!raw) return fallback;
+          var parsed = JSON.parse(raw);
+          return parsed === null || parsed === undefined ? fallback : parsed;
+        } catch (e) {
+          return fallback;
+        }
+      }
+
+      function writeJSON(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {}
+      }
+
+      function getInstalledModels() {
+        var list = readJSON(INSTALLED_MODELS_STORAGE_KEY, []);
+        return Array.isArray(list) ? list : [];
+      }
+
+      function setInstalledModels(list) {
+        writeJSON(INSTALLED_MODELS_STORAGE_KEY, list);
+      }
+
+      // ---------- Shared logo-fill animation ----------
+      var DOT_CIRCLES = '<circle cx="20" cy="6" r="3.2"/><circle cx="12" cy="12" r="2.8"/><circle cx="28" cy="12" r="2.8"/><circle cx="7" cy="20" r="2.4"/><circle cx="33" cy="20" r="2.4"/><circle cx="20" cy="20" r="2.2"/><circle cx="20" cy="28" r="2"/><circle cx="20" cy="34" r="1.8"/>';
+
+      function buildLogoFill(container) {
+        var clipId = 'logofill-clip-' + Math.random().toString(36).slice(2);
+        container.innerHTML =
+          '<svg class="logo-fill-base" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' + DOT_CIRCLES + '</svg>' +
+          '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
+          '<defs><clipPath id="' + clipId + '"><rect x="0" y="40" width="40" height="0"/></clipPath></defs>' +
+          '<g class="logo-fill-fg" clip-path="url(#' + clipId + ')">' + DOT_CIRCLES + '</g>' +
+          '</svg>';
+        var rect = container.querySelector('clipPath rect');
+        return {
+          setFraction: function (fraction) {
+            var f = Math.max(0, Math.min(1, fraction));
+            var height = 40 * f;
+            rect.setAttribute('y', String(40 - height));
+            rect.setAttribute('height', String(height));
+          },
+        };
+      }
+
+      // ---------- Hardware scan ----------
+      function formatMB(mb) {
+        if (mb >= 1024) return (mb / 1024).toFixed(1) + ' GB';
+        return Math.round(mb) + ' MB';
+      }
+
+      function runHardwareScan(onDone) {
+        var statusEl = document.getElementById('scan-status');
+        var fill = buildLogoFill(document.getElementById('scan-logo'));
+        var steps = ['Checking processor…', 'Checking memory…', 'Checking graphics…', 'Finishing up…'];
+        var stepIndex = 0;
+        var startedAt = Date.now();
+        var MIN_DURATION_MS = 1600;
+
+        function setStep(i) {
+          stepIndex = i;
+          statusEl.textContent = steps[Math.min(i, steps.length - 1)];
+          fill.setFraction((i + 1) / steps.length);
+        }
+
+        setStep(0);
+
+        var result = {
+          version: HW_SCAN_VERSION,
+          scannedAt: new Date().toISOString(),
+          cpuCores: navigator.hardwareConcurrency || null,
+          ramGB: typeof navigator.deviceMemory === 'number' ? navigator.deviceMemory : null,
+          gpuInfo: null,
+          estimatedVramMB: null,
+          webgpuAvailable: false,
+        };
+
+        setTimeout(function () {
+          setStep(1);
+
+          setTimeout(function () {
+            setStep(2);
+
+            var gpuPromise;
+            if (navigator.gpu && navigator.gpu.requestAdapter) {
+              gpuPromise = navigator.gpu.requestAdapter().then(function (adapter) {
+                if (!adapter) return;
+                result.webgpuAvailable = true;
+                var infoPromise = adapter.requestAdapterInfo ? adapter.requestAdapterInfo() : Promise.resolve(adapter.info || {});
+                return infoPromise.then(function (info) {
+                  var parts = [info && info.vendor, info && info.architecture, info && info.description].filter(Boolean);
+                  result.gpuInfo = parts.length ? parts.join(' ') : 'WebGPU adapter';
+                  var limits = adapter.limits || {};
+                  var proxyBytes = limits.maxBufferSize || limits.maxStorageBufferBindingSize || 0;
+                  result.estimatedVramMB = proxyBytes ? Math.round(proxyBytes / (1024 * 1024)) : null;
+                });
+              }).catch(function () {});
+            } else {
+              gpuPromise = Promise.resolve();
+            }
+
+            gpuPromise.then(function () {
+              setStep(3);
+              var elapsed = Date.now() - startedAt;
+              var remaining = Math.max(0, MIN_DURATION_MS - elapsed);
+              setTimeout(function () {
+                fill.setFraction(1);
+                onDone(result);
+              }, remaining);
+            });
+          }, 250);
+        }, 250);
+      }
+
+      function renderScanResults(result) {
+        var screen = document.getElementById('scan-screen');
+        var body = document.createElement('div');
+        body.className = 'scan-results';
+
+        var warning = '';
+        if (!result.webgpuAvailable) {
+          warning = '<p class="scan-warning">WebGPU isn\'t available in this browser, so local models can\'t run here. You can still browse the catalog, but downloads won\'t work until you switch to a WebGPU-capable browser (recent Chrome or Edge).</p>';
+        }
+
+        body.innerHTML =
+          warning +
+          '<div class="scan-results-grid">' +
+          '<div class="scan-spec-card"><p class="scan-spec-label">CPU cores</p><p class="scan-spec-value">' + (result.cpuCores || 'Unavailable') + '</p></div>' +
+          '<div class="scan-spec-card"><p class="scan-spec-label">RAM</p><p class="scan-spec-value">' + (result.ramGB ? result.ramGB + '+ GB' : 'Unavailable') + '</p></div>' +
+          '<div class="scan-spec-card"><p class="scan-spec-label">Graphics</p><p class="scan-spec-value">' + (result.gpuInfo || (result.webgpuAvailable ? 'Detected' : 'Unavailable')) + '</p></div>' +
+          '<div class="scan-spec-card"><p class="scan-spec-label">Est. VRAM budget</p><p class="scan-spec-value">' + (result.estimatedVramMB ? formatMB(result.estimatedVramMB) : 'Unknown') + '</p></div>' +
+          '</div>' +
+          '<button type="button" class="catalog-card-action" id="scan-continue-btn" style="width:100%;padding:12px;">Continue</button>';
+
+        screen.innerHTML = '';
+        screen.appendChild(body);
+        document.getElementById('scan-continue-btn').addEventListener('click', function () {
+          writeJSON(HW_SCAN_STORAGE_KEY, result);
+          showCatalog(result);
+        });
+      }
+
+      function startScanFlow() {
+        runHardwareScan(function (result) {
+          renderScanResults(result);
+        });
+      }
+
+      // ---------- Catalog browse ----------
+      var webllmModule = null;
+      function loadWebllm() {
+        if (webllmModule) return webllmModule;
+        webllmModule = import('/vendor/web-llm/index.js');
+        return webllmModule;
+      }
+
+      function categorize(model) {
+        var id = model.model_id;
+        if (model.vram_required_MB <= 1500) return 'low-end';
+        if (/coder/i.test(id)) return 'coding';
+        if (/deepseek-r1|qwen3/i.test(id)) return 'reasoning';
+        return 'normal';
+      }
+
+      function displayName(modelId) {
+        return modelId.replace(/-q\d.*$/i, '').replace(/-MLC.*$/i, '').replace(/-/g, ' ');
+      }
+
+      var currentEngine = null;
+      var currentEngineModelId = null;
+
+      function getEngine() {
+        return loadWebllm().then(function (webllm) {
+          if (!currentEngine) currentEngine = new webllm.MLCEngine();
+          return { webllm: webllm, engine: currentEngine };
+        });
+      }
+
+      var DOWNLOAD_MAX_ATTEMPTS = 4;
+      var DOWNLOAD_RETRY_DELAY_MS = 2000;
+
+      function delay(ms) {
+        return new Promise(function (resolve) { setTimeout(resolve, ms); });
+      }
+
+      function downloadModel(modelId, card) {
+        var progressWrap = document.createElement('div');
+        var fillContainer = document.createElement('div');
+        fillContainer.className = 'logo-fill';
+        var pct = document.createElement('span');
+        pct.className = 'logo-fill-pct';
+        pct.textContent = '0%';
+        progressWrap.appendChild(fillContainer);
+        progressWrap.appendChild(pct);
+        card.classList.add('is-downloading');
+        card.appendChild(progressWrap);
+
+        var fill = buildLogoFill(fillContainer);
+
+        function attempt(attemptNumber) {
+          return getEngine().then(function (ctx) {
+            ctx.engine.setInitProgressCallback(function (report) {
+              var fraction = typeof report.progress === 'number' ? report.progress : 0;
+              fill.setFraction(fraction);
+              // WebLLM's report includes a human-readable phase string (e.g.
+              // "Fetching param cache[12/45]") that's far more useful than a
+              // bare percentage while progress is still 0 — the very first
+              // phases (fetching config, compiling WASM) can take a while
+              // before any weight bytes are downloaded, so a silent "0%" for
+              // 30+ seconds looks broken even when it's actually working.
+              var attemptSuffix = attemptNumber > 1 ? ' (attempt ' + attemptNumber + ')' : '';
+              pct.textContent = Math.round(fraction * 100) + '%' + (report.text ? ' — ' + report.text : '') + attemptSuffix;
+            });
+            return ctx.engine.reload(modelId);
+          }).catch(function (err) {
+            // Large multi-shard downloads from the Hugging Face CDN
+            // occasionally hit a transient HTTP/2 protocol error mid-stream
+            // (network/proxy/AV related, not something this code controls) —
+            // worth an automatic retry with a short backoff before giving up,
+            // since a plain retry alone very often just succeeds.
+            if (attemptNumber >= DOWNLOAD_MAX_ATTEMPTS) throw err;
+            console.warn('Download attempt ' + attemptNumber + ' failed, retrying:', err.message || err);
+            // A reload() that failed partway through may leave the engine
+            // instance in a half-initialized state — rather than trust it,
+            // drop it and start the retry with a fresh MLCEngine.
+            currentEngine = null;
+            currentEngineModelId = null;
+            fill.setFraction(0);
+            pct.textContent = 'Retrying (attempt ' + (attemptNumber + 1) + ' of ' + DOWNLOAD_MAX_ATTEMPTS + ')…';
+            return delay(DOWNLOAD_RETRY_DELAY_MS).then(function () { return attempt(attemptNumber + 1); });
+          });
+        }
+
+        attempt(1).then(function () {
+          currentEngineModelId = modelId;
+          var installed = getInstalledModels();
+          if (installed.indexOf(modelId) === -1) {
+            installed.push(modelId);
+            setInstalledModels(installed);
+          }
+          progressWrap.remove();
+          card.classList.remove('is-downloading');
+          renderCardAction(card, modelId, true);
+        }).catch(function (err) {
+          console.error('Model download failed after ' + DOWNLOAD_MAX_ATTEMPTS + ' attempts:', err);
+          progressWrap.remove();
+          card.classList.remove('is-downloading');
+          renderCardAction(card, modelId, false);
+          var errNote = document.createElement('p');
+          errNote.className = 'catalog-card-meta';
+          errNote.style.color = '#e5484d';
+          errNote.textContent = 'Download failed after ' + DOWNLOAD_MAX_ATTEMPTS + ' attempts — check your connection and try again.';
+          card.appendChild(errNote);
+        });
+      }
+
+      function renderCardAction(card, modelId, isInstalled) {
+        var existingRow = card.querySelector('.catalog-card-action-row');
+        if (existingRow) existingRow.remove();
+
+        var row = document.createElement('div');
+        row.className = 'catalog-card-action-row';
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'catalog-card-action';
+
+        if (isInstalled) {
+          btn.textContent = 'Installed ✓';
+          btn.classList.add('is-installed');
+          btn.disabled = true;
+          row.appendChild(btn);
+
+          var removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'catalog-card-remove';
+          removeBtn.textContent = 'Remove';
+          removeBtn.addEventListener('click', function () {
+            var installed = getInstalledModels().filter(function (id) { return id !== modelId; });
+            setInstalledModels(installed);
+            renderCardAction(card, modelId, false);
+          });
+          row.appendChild(removeBtn);
+        } else {
+          btn.textContent = 'Download';
+          btn.addEventListener('click', function () {
+            downloadModel(modelId, card);
+          });
+          row.appendChild(btn);
+        }
+
+        card.appendChild(row);
+      }
+
+      function buildCard(model, installedSet, functionCallingIds) {
+        var card = document.createElement('div');
+        card.className = 'catalog-card';
+        card.setAttribute('data-model-id', model.model_id);
+        card.setAttribute('data-category', categorize(model));
+        var supportsTools = functionCallingIds && functionCallingIds.indexOf(model.model_id) !== -1;
+        card.setAttribute('data-tools', supportsTools ? '1' : '0');
+
+        var name = document.createElement('p');
+        name.className = 'catalog-card-name';
+        name.textContent = displayName(model.model_id);
+        card.appendChild(name);
+
+        var meta = document.createElement('div');
+        meta.className = 'catalog-card-meta';
+        var badge = document.createElement('span');
+        badge.className = 'catalog-card-badge';
+        badge.textContent = categorize(model);
+        meta.appendChild(badge);
+        if (supportsTools) {
+          var toolsBadge = document.createElement('span');
+          toolsBadge.className = 'catalog-card-badge catalog-card-badge-tools';
+          toolsBadge.textContent = 'tools';
+          toolsBadge.title = 'Supports calling tools like ask_question and get_time';
+          meta.appendChild(toolsBadge);
+        }
+        var size = document.createElement('span');
+        size.textContent = formatMB(model.vram_required_MB);
+        meta.appendChild(size);
+        card.appendChild(meta);
+
+        renderCardAction(card, model.model_id, installedSet.indexOf(model.model_id) !== -1);
+        return card;
+      }
+
+      function showCatalog(hwResult) {
+        document.getElementById('scan-screen').classList.add('catalog-hidden');
+        var catalogScreen = document.getElementById('catalog-screen');
+        catalogScreen.classList.remove('catalog-hidden');
+
+        var hwSummary = document.getElementById('catalog-hw-summary');
+        if (hwResult.webgpuAvailable) {
+          hwSummary.textContent = (hwResult.gpuInfo || 'WebGPU device') + (hwResult.estimatedVramMB ? ' · ~' + formatMB(hwResult.estimatedVramMB) + ' budget' : '');
+        } else {
+          hwSummary.textContent = 'WebGPU unavailable on this device';
+        }
+        document.getElementById('catalog-rescan-link').addEventListener('click', function (e) {
+          e.preventDefault();
+          writeJSON(HW_SCAN_STORAGE_KEY, null);
+          localStorage.removeItem(HW_SCAN_STORAGE_KEY);
+          catalogScreen.classList.add('catalog-hidden');
+          document.getElementById('scan-screen').classList.remove('catalog-hidden');
+          startScanFlow();
+        });
+
+        loadWebllm().then(function (webllm) {
+          var allModels = webllm.prebuiltAppConfig.model_list.filter(function (m) {
+            return m.vram_required_MB <= HARD_CEILING_MB;
+          });
+
+          var installedSet = getInstalledModels();
+          var recommendedWrap = document.getElementById('catalog-recommended-wrap');
+          var recommendedGrid = document.getElementById('catalog-recommended-grid');
+          var fullGrid = document.getElementById('catalog-full-grid');
+          var emptyNote = document.getElementById('catalog-empty-note');
+          var searchInput = document.getElementById('catalog-search');
+          var chips = document.querySelectorAll('.catalog-chip');
+          var activeCategory = 'all';
+
+          if (hwResult.webgpuAvailable && hwResult.estimatedVramMB) {
+            var budget = hwResult.estimatedVramMB * 0.8;
+            var recommended = allModels
+              .filter(function (m) { return m.vram_required_MB <= budget; })
+              .sort(function (a, b) { return a.vram_required_MB - b.vram_required_MB; })
+              .slice(0, 6);
+            recommended.forEach(function (m) { recommendedGrid.appendChild(buildCard(m, installedSet, webllm.functionCallingModelIds)); });
+            if (!recommended.length) recommendedWrap.classList.add('catalog-hidden');
+          } else {
+            recommendedWrap.classList.add('catalog-hidden');
+          }
+
+          allModels.forEach(function (m) { fullGrid.appendChild(buildCard(m, installedSet, webllm.functionCallingModelIds)); });
+
+          function applyFilter() {
+            var query = searchInput.value.trim().toLowerCase();
+            var visibleCount = 0;
+            fullGrid.querySelectorAll('.catalog-card').forEach(function (card) {
+              var id = card.getAttribute('data-model-id').toLowerCase();
+              var category = card.getAttribute('data-category');
+              var matchesSearch = !query || id.indexOf(query) !== -1;
+              // "tools" isn't a mutually-exclusive category like the others
+              // (a model can be both "coding" and tool-capable) — it's a
+              // straight yes/no filter on data-tools instead.
+              var matchesCategory = activeCategory === 'all'
+                || (activeCategory === 'tools' ? card.getAttribute('data-tools') === '1' : category === activeCategory);
+              var visible = matchesSearch && matchesCategory;
+              card.classList.toggle('catalog-hidden', !visible);
+              if (visible) visibleCount++;
+            });
+            emptyNote.classList.toggle('catalog-hidden', visibleCount > 0);
+          }
+
+          searchInput.addEventListener('input', applyFilter);
+          chips.forEach(function (chip) {
+            chip.addEventListener('click', function () {
+              chips.forEach(function (c) { c.classList.remove('is-active'); });
+              chip.classList.add('is-active');
+              activeCategory = chip.getAttribute('data-category');
+              applyFilter();
+            });
+          });
+        });
+      }
+
+      // ---------- Boot ----------
+      var cachedScan = readJSON(HW_SCAN_STORAGE_KEY, null);
+      if (cachedScan && cachedScan.version === HW_SCAN_VERSION) {
+        document.getElementById('scan-screen').classList.add('catalog-hidden');
+        showCatalog(cachedScan);
+      } else {
+        startScanFlow();
+      }
+    })();
+  </script>
+</body>
+</html>
