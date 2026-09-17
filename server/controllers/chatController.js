@@ -162,6 +162,7 @@ async function sendMessage(req, res, next) {
   let activeConversationId = conversationId;
   const isNewConversation = !conversationId;
   const generationTimes = [];
+  const trace = [];
   const turnStartedAt = Date.now();
 
   function sendEvent(event) {
@@ -171,7 +172,7 @@ async function sendMessage(req, res, next) {
   }
 
   async function finishTurn(replyText, toolCalls) {
-    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null, generationTimes);
+    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null, generationTimes, trace);
     await conversations.touchConversation(activeConversationId);
 
     sendEvent({
@@ -233,7 +234,7 @@ async function sendMessage(req, res, next) {
     const summary = questions.map((q) => '- ' + q.question).join('\n');
     const replyText = 'I need a bit more information before I continue:\n' + summary;
 
-    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls, generationTimes);
+    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls, generationTimes, trace);
     await conversations.touchConversation(activeConversationId);
 
     sendEvent({
@@ -282,6 +283,7 @@ async function sendMessage(req, res, next) {
       });
       const seconds = Math.max(1, Math.round((Date.now() - turnStartedAt) / 1000));
       generationTimes.push(seconds);
+      trace.push({ type: 'simplified', seconds });
       sendEvent({ type: 'simplified', seconds, conversationId: activeConversationId });
 
       if (!reply.tool_calls || reply.tool_calls.length === 0) {
@@ -312,6 +314,7 @@ async function sendMessage(req, res, next) {
           durationMs: Date.now() - toolStartedAt,
         };
         toolCalls.push(toolCall);
+        trace.push({ type: 'tool', call: toolCall });
         sendEvent({ type: 'tool_done', index, round: round + 1, ...toolCall });
 
         if (isTerminalTool(call.function.name)) {
@@ -341,6 +344,7 @@ async function sendMessage(req, res, next) {
     });
     const seconds = Math.max(1, Math.round((Date.now() - turnStartedAt) / 1000));
     generationTimes.push(seconds);
+    trace.push({ type: 'simplified', seconds });
     sendEvent({ type: 'simplified', seconds, conversationId: activeConversationId });
     const fallbackReply = finalReply.content || "I wasn't able to finish that — could you try asking again?";
     return await finishTurn(fallbackReply, toolCalls);

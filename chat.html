@@ -2189,15 +2189,23 @@
         if ((msg.toolCalls && msg.toolCalls.length) || (msg.generationTimes && msg.generationTimes.length)) {
           var trace = document.createElement('div');
           trace.className = 'tool-trace';
-          (msg.toolCalls || []).forEach(function (call) {
-            trace.appendChild(createToolStep(call, false));
-          });
-          (msg.generationTimes || []).forEach(function (seconds) {
+          function appendGenerationTime(seconds) {
             var label = document.createElement('div');
             label.className = 'thinking-indicator generation-time-label';
             label.textContent = 'Simplified in ' + seconds + ' sec';
             trace.appendChild(label);
-          });
+          }
+          if (msg.trace && msg.trace.length) {
+            msg.trace.forEach(function (entry) {
+              if (entry.type === 'tool' && entry.call) trace.appendChild(createToolStep(entry.call, false));
+              if (entry.type === 'simplified') appendGenerationTime(entry.seconds);
+            });
+          } else {
+            (msg.toolCalls || []).forEach(function (call) {
+              trace.appendChild(createToolStep(call, false));
+            });
+            (msg.generationTimes || []).forEach(appendGenerationTime);
+          }
           content.appendChild(trace);
         }
 

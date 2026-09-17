@@ -46,6 +46,12 @@ async function migrate() {
     // The column already exists on databases that have been migrated.
   }
 
+  try {
+    await db.execute('ALTER TABLE messages ADD COLUMN trace TEXT');
+  } catch (error) {
+    // The column already exists on databases that have been migrated.
+  }
+
   await db.execute('CREATE INDEX IF NOT EXISTS idx_conversations_user ON conversations(user_id, updated_at DESC)');
   await db.execute('CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id, created_at)');
 }
