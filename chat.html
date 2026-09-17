@@ -1186,6 +1186,7 @@
     flex-shrink: 0;
     width: 264px;
     height: 100%;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1282,15 +1283,14 @@
     gap: 2px;
     margin-top: 8px;
     padding-right: 2px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   .history-list::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .history-list::-webkit-scrollbar-thumb {
-    background: var(--btn-outline-border);
-    border-radius: 999px;
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   .history-empty {
@@ -1304,6 +1304,8 @@
     align-items: center;
     gap: 8px;
     width: 100%;
+    min-height: 40px;
+    flex-shrink: 0;
     padding: 9px 10px;
     border-radius: 10px;
     border: none;
@@ -1311,6 +1313,7 @@
     color: var(--fg-muted);
     font: inherit;
     font-size: 13.5px;
+    line-height: 1.3;
     text-align: left;
     cursor: pointer;
     overflow: hidden;
