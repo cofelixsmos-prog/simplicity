@@ -810,6 +810,21 @@
     line-height: 1;
   }
 
+  .tool-step:not([open]) {
+    border-color: transparent;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .tool-step:not([open]) .tool-summary {
+    padding: 2px 0;
+    color: var(--fg-muted);
+  }
+
+  .tool-step:not([open]) .tool-summary-chevron {
+    opacity: 0.7;
+  }
+
   .thinking-indicator {
     display: inline-flex;
     align-items: baseline;
@@ -2168,11 +2183,17 @@
         var content = document.createElement('div');
         content.className = 'bot-content';
 
-        if (msg.toolCalls && msg.toolCalls.length) {
+        if ((msg.toolCalls && msg.toolCalls.length) || (msg.generationTimes && msg.generationTimes.length)) {
           var trace = document.createElement('div');
           trace.className = 'tool-trace';
-          msg.toolCalls.forEach(function (call) {
+          (msg.toolCalls || []).forEach(function (call) {
             trace.appendChild(createToolStep(call, false));
+          });
+          (msg.generationTimes || []).forEach(function (seconds) {
+            var label = document.createElement('div');
+            label.className = 'thinking-indicator generation-time-label';
+            label.textContent = 'Simplified in ' + seconds + ' sec';
+            trace.appendChild(label);
           });
           content.appendChild(trace);
         }
@@ -3223,7 +3244,28 @@
         var replyReceived = false;
         var typewriterDone = false;
         var streamedAnswer = '';
-        var streamStarted = false;
+        var generationTimes = [];
+
+        function renderCompletedReply(text) {
+          div.innerHTML = renderMarkdown(text);
+        }
+
+        function addSimplifiedLabel(seconds) {
+          trace.hidden = false;
+          generationTimes.push(seconds);
+          var label = document.createElement('div');
+          label.className = 'thinking-indicator generation-time-label';
+          label.textContent = 'Simplified in ' + seconds + ' sec';
+          trace.appendChild(label);
+        }
+
+        function ensureSimplifiedLabels(times) {
+          (times || []).forEach(function (seconds, index) {
+            if (trace.querySelectorAll('.generation-time-label').length <= index) {
+              addSimplifiedLabel(seconds);
+            }
+          });
+        }
 
         function maybeShowFollowup() {
           if (typewriterDone) showFollowup();
@@ -3261,16 +3303,20 @@
           }
           if (event.type === 'token') {
             replyReceived = true;
-            streamStarted = true;
             streamedAnswer = event.content || streamedAnswer + (event.token || '');
             stopThinking();
             div.innerHTML = renderMarkdown(streamedAnswer);
             if (followOutput) scrollPageBottom(false);
             return;
           }
+          if (event.type === 'simplified') {
+            addSimplifiedLabel(event.seconds);
+            return;
+          }
           if (event.type === 'reply') {
             replyReceived = true;
             stopThinking();
+            ensureSimplifiedLabels(event.generationTimes);
             if (event.conversationId && event.conversationId !== currentConversationId) {
               currentConversationId = event.conversationId;
               if (chatTopTitle) chatTopTitle.textContent = sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage;
@@ -3283,22 +3329,12 @@
               event.toolCalls.forEach(function (call) { trace.appendChild(createToolStep(call, false)); });
             }
             var answer = event.reply || streamedAnswer || "I don't have a response for that.";
-            if (streamStarted) {
-              div.innerHTML = renderMarkdown(answer);
-              content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
-              refreshRetry();
-              typewriterDone = true;
-              maybeShowFollowup();
-              onBotDone();
-            } else {
-              typewriteText(div, answer, function () {
-                content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
-                refreshRetry();
-                typewriterDone = true;
-                maybeShowFollowup();
-                onBotDone();
-              }, function () { return requestGeneration !== viewGeneration; });
-            }
+            renderCompletedReply(answer);
+            content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
+            refreshRetry();
+            typewriterDone = true;
+            maybeShowFollowup();
+            onBotDone();
             return;
           }
           if (event.type === 'question') {
@@ -3332,7 +3368,7 @@
           }
           if (event.type === 'highlight') {
             if (requestGeneration === viewGeneration) {
-              div.innerHTML = renderMarkdown(event.reply);
+              renderCompletedReply(event.reply);
             }
             return;
           }
@@ -3518,6 +3554,16 @@
         }, 1000);
         function stopThinking() { clearInterval(thinkingTimer); }
         function setThinkingPhase(label) { thinkingPhase.textContent = label + '...'; }
+        var generationTimes = [];
+
+        function addLocalSimplifiedLabel(seconds) {
+          trace.hidden = false;
+          generationTimes.push(seconds);
+          var label = document.createElement('div');
+          label.className = 'thinking-indicator';
+          label.textContent = 'Simplified in ' + seconds + ' sec';
+          trace.appendChild(label);
+        }
 
         function finishBubble(answer) {
           content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
@@ -3599,6 +3645,7 @@
 
                 return callPromise.then(function (completion) {
                   if (requestGeneration !== viewGeneration) return;
+                  addLocalSimplifiedLabel(Math.max(1, Math.round((Date.now() - thinkingStartedAt) / 1000)));
                   var msg = completion.choices && completion.choices[0] && completion.choices[0].message;
                   var calls = msg && msg.tool_calls;
 
@@ -3660,6 +3707,7 @@
                     return streamIter.next().then(function (step) {
                       if (requestGeneration !== viewGeneration) return;
                       if (step.done) {
+                        addLocalSimplifiedLabel(Math.max(1, Math.round((Date.now() - thinkingStartedAt) / 1000)));
                         var finalText = accumulated || "I don't have a response for that.";
                         div.innerHTML = renderMarkdown(finalText);
                         saveLocalReply(finalText);
@@ -3703,6 +3751,7 @@
                     message: sourceMessage,
                     reply: replyText,
                     toolCalls: toolCalls,
+                    generationTimes: generationTimes,
                     isNewConversation: isNewConversation,
                   }),
                 })

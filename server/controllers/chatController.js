@@ -161,19 +161,24 @@ async function sendMessage(req, res, next) {
   const trimmedMessage = message.trim();
   let activeConversationId = conversationId;
   const isNewConversation = !conversationId;
+  const generationTimes = [];
+  const turnStartedAt = Date.now();
 
   function sendEvent(event) {
-    if (!res.writableEnded) res.write(JSON.stringify(event) + '\n');
+    if (res.writableEnded) return;
+    res.write(JSON.stringify(event) + '\n');
+    if (typeof res.flush === 'function') res.flush();
   }
 
   async function finishTurn(replyText, toolCalls) {
-    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null);
+    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null, generationTimes);
     await conversations.touchConversation(activeConversationId);
 
     sendEvent({
       type: 'reply',
       reply: replyText,
       toolCalls,
+      generationTimes,
       conversationId: activeConversationId,
     });
 
@@ -228,7 +233,7 @@ async function sendMessage(req, res, next) {
     const summary = questions.map((q) => '- ' + q.question).join('\n');
     const replyText = 'I need a bit more information before I continue:\n' + summary;
 
-    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls);
+    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls, generationTimes);
     await conversations.touchConversation(activeConversationId);
 
     sendEvent({
@@ -275,6 +280,9 @@ async function sendMessage(req, res, next) {
         tools: forceFinalAnswer ? undefined : TOOL_DEFINITIONS,
         onToken: (token, content) => sendEvent({ type: 'token', token, content, conversationId: activeConversationId }),
       });
+      const seconds = Math.max(1, Math.round((Date.now() - turnStartedAt) / 1000));
+      generationTimes.push(seconds);
+      sendEvent({ type: 'simplified', seconds, conversationId: activeConversationId });
 
       if (!reply.tool_calls || reply.tool_calls.length === 0) {
         const replyText = reply.content || "I don't have a response for that.";
@@ -331,6 +339,9 @@ async function sendMessage(req, res, next) {
       tools: undefined,
       onToken: (token, content) => sendEvent({ type: 'token', token, content, conversationId: activeConversationId }),
     });
+    const seconds = Math.max(1, Math.round((Date.now() - turnStartedAt) / 1000));
+    generationTimes.push(seconds);
+    sendEvent({ type: 'simplified', seconds, conversationId: activeConversationId });
     const fallbackReply = finalReply.content || "I wasn't able to finish that — could you try asking again?";
     return await finishTurn(fallbackReply, toolCalls);
   } catch (error) {
@@ -412,7 +423,7 @@ async function startLocalMessage(req, res, next) {
 }
 
 async function finishLocalMessage(req, res, next) {
-  const { conversationId, message, reply, toolCalls, isNewConversation } = req.body || {};
+  const { conversationId, message, reply, toolCalls, generationTimes, isNewConversation } = req.body || {};
   if (!conversationId || typeof reply !== 'string' || !reply.trim()) {
     return res.status(400).json({ error: 'conversationId and reply are required.' });
   }
@@ -423,7 +434,7 @@ async function finishLocalMessage(req, res, next) {
 
     const replyText = reply.trim();
     const cleanToolCalls = Array.isArray(toolCalls) && toolCalls.length ? toolCalls : null;
-    await conversations.saveMessage(conversationId, 'assistant', replyText, cleanToolCalls);
+    await conversations.saveMessage(conversationId, 'assistant', replyText, cleanToolCalls, Array.isArray(generationTimes) ? generationTimes : null);
     await conversations.touchConversation(conversationId);
 
     const trimmedMessage = typeof message === 'string' ? message.trim() : '';

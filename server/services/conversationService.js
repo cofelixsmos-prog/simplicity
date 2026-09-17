@@ -26,7 +26,7 @@ async function getConversation(userId, conversationId) {
   if (!conversation) return null;
 
   const messagesResult = await db.execute({
-    sql: 'SELECT id, role, content, tool_calls, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC',
+    sql: 'SELECT id, role, content, tool_calls, generation_times, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC',
     args: [conversationId],
   });
 
@@ -38,6 +38,7 @@ async function getConversation(userId, conversationId) {
       role: row.role,
       content: row.content,
       toolCalls: row.tool_calls ? JSON.parse(row.tool_calls) : null,
+      generationTimes: row.generation_times ? JSON.parse(row.generation_times) : null,
       createdAt: row.created_at,
     })),
   };
@@ -74,11 +75,11 @@ async function getConversationHistory(conversationId) {
   return result.rows.map((row) => ({ role: row.role, content: row.content }));
 }
 
-async function saveMessage(conversationId, role, content, toolCalls) {
+async function saveMessage(conversationId, role, content, toolCalls, generationTimes) {
   const id = crypto.randomUUID();
   await db.execute({
-    sql: 'INSERT INTO messages (id, conversation_id, role, content, tool_calls) VALUES (?, ?, ?, ?, ?)',
-    args: [id, conversationId, role, content, toolCalls ? JSON.stringify(toolCalls) : null],
+    sql: 'INSERT INTO messages (id, conversation_id, role, content, tool_calls, generation_times) VALUES (?, ?, ?, ?, ?, ?)',
+    args: [id, conversationId, role, content, toolCalls ? JSON.stringify(toolCalls) : null, generationTimes ? JSON.stringify(generationTimes) : null],
   });
   return id;
 }
