@@ -9,7 +9,7 @@ const cspDirectives = {
   scriptSrc: ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", 'https://unpkg.com'],
   styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
   fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-  imgSrc: ["'self'", 'data:', 'https://github.com'],
+  imgSrc: ["'self'", 'data:', 'https://github.com', 'https://release-assets.githubusercontent.com'],
   mediaSrc: ["'self'", 'https://github.com', 'https://release-assets.githubusercontent.com'],
   // huggingface.co serves model metadata/config; the actual weight-shard
   // binaries redirect to Hugging Face's CDN (observed: us.aws.cdn.hf.co,
