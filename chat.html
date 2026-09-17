@@ -3222,6 +3222,8 @@
         var toolSteps = {};
         var replyReceived = false;
         var typewriterDone = false;
+        var streamedAnswer = '';
+        var streamStarted = false;
 
         function maybeShowFollowup() {
           if (typewriterDone) showFollowup();
@@ -3257,6 +3259,15 @@
             if (followOutput) scrollPageBottom(false);
             return;
           }
+          if (event.type === 'token') {
+            replyReceived = true;
+            streamStarted = true;
+            streamedAnswer = event.content || streamedAnswer + (event.token || '');
+            stopThinking();
+            div.innerHTML = renderMarkdown(streamedAnswer);
+            if (followOutput) scrollPageBottom(false);
+            return;
+          }
           if (event.type === 'reply') {
             replyReceived = true;
             stopThinking();
@@ -3271,14 +3282,23 @@
               trace.hidden = false;
               event.toolCalls.forEach(function (call) { trace.appendChild(createToolStep(call, false)); });
             }
-            var answer = event.reply || "I don't have a response for that.";
-            typewriteText(div, answer, function () {
+            var answer = event.reply || streamedAnswer || "I don't have a response for that.";
+            if (streamStarted) {
+              div.innerHTML = renderMarkdown(answer);
               content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
               refreshRetry();
               typewriterDone = true;
               maybeShowFollowup();
               onBotDone();
-            }, function () { return requestGeneration !== viewGeneration; });
+            } else {
+              typewriteText(div, answer, function () {
+                content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
+                refreshRetry();
+                typewriterDone = true;
+                maybeShowFollowup();
+                onBotDone();
+              }, function () { return requestGeneration !== viewGeneration; });
+            }
             return;
           }
           if (event.type === 'question') {

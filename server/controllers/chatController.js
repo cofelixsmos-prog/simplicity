@@ -273,6 +273,7 @@ async function sendMessage(req, res, next) {
       const reply = await createChatCompletion({
         messages: modelMessages,
         tools: forceFinalAnswer ? undefined : TOOL_DEFINITIONS,
+        onToken: (token, content) => sendEvent({ type: 'token', token, content, conversationId: activeConversationId }),
       });
 
       if (!reply.tool_calls || reply.tool_calls.length === 0) {
@@ -325,7 +326,11 @@ async function sendMessage(req, res, next) {
       }
     }
 
-    const finalReply = await createChatCompletion({ messages: modelMessages, tools: undefined });
+    const finalReply = await createChatCompletion({
+      messages: modelMessages,
+      tools: undefined,
+      onToken: (token, content) => sendEvent({ type: 'token', token, content, conversationId: activeConversationId }),
+    });
     const fallbackReply = finalReply.content || "I wasn't able to finish that — could you try asking again?";
     return await finishTurn(fallbackReply, toolCalls);
   } catch (error) {
