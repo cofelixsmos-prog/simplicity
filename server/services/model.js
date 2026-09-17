@@ -1,18 +1,11 @@
-const crypto = require('crypto');
-
-const BASE_URL = process.env.OPENCODE_BASE_URL || 'https://opencode.ai/zen/v1';
-const API_KEY = process.env.OPENCODE_API_KEY;
-const MODEL_ID = process.env.OPENCODE_MODEL || 'big-pickle';
+const BASE_URL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
+const API_KEY = process.env.OPENROUTER_API_KEY;
+const MODEL_ID = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free';
 
 if (!API_KEY) {
-  throw new Error('OPENCODE_API_KEY must be set in the environment.');
+  throw new Error('OPENROUTER_API_KEY must be set in the environment.');
 }
 
-// OpenCode Zen's free-tier models require a stable per-session identifier
-// on every request (x-opencode-session), or they reject the call with
-// MissingSessionID. One id per server process is sufficient here since
-// requests aren't tied to a specific end-user conversation session.
-const OPENCODE_SESSION_ID = crypto.randomUUID();
 const REQUEST_TIMEOUT_MS = 30000;
 
 async function createChatCompletion({ messages, tools, maxTokens }) {
@@ -26,7 +19,6 @@ async function createChatCompletion({ messages, tools, maxTokens }) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${API_KEY}`,
-        'x-opencode-session': OPENCODE_SESSION_ID,
       },
       body: JSON.stringify({
         model: MODEL_ID,
