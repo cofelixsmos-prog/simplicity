@@ -83,6 +83,19 @@ async function saveMessage(conversationId, role, content, toolCalls) {
   return id;
 }
 
+async function updateLastAssistantMessage(conversationId, content) {
+  const result = await db.execute({
+    sql: "SELECT id FROM messages WHERE conversation_id = ? AND role = 'assistant' ORDER BY created_at DESC LIMIT 1",
+    args: [conversationId],
+  });
+  const message = result.rows[0];
+  if (!message) return;
+  await db.execute({
+    sql: 'UPDATE messages SET content = ? WHERE id = ?',
+    args: [content, message.id],
+  });
+}
+
 async function deleteConversation(userId, conversationId) {
   const result = await db.execute({
     sql: 'SELECT id FROM conversations WHERE id = ? AND user_id = ?',
@@ -111,6 +124,7 @@ module.exports = {
   updateTitle,
   getConversationHistory,
   saveMessage,
+  updateLastAssistantMessage,
   deleteConversation,
   ownsConversation,
 };

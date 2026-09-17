@@ -11,7 +11,41 @@ const TOOL_DEFINITIONS = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'ask_question',
+      description: "Ask the user one or more clarifying questions before continuing. Use this instead of guessing, and instead of listing questions as plain text, when you need information only the user has. If you have several things to ask, include ALL of them in ONE call as separate entries in the questions array — do not call this tool multiple times in a row for separate questions. Each question can offer multiple-choice options; the user can always type a custom answer instead of picking one. Calling this ends your turn — the user's answer(s) will come back as their next message.",
+      parameters: {
+        type: 'object',
+        properties: {
+          questions: {
+            type: 'array',
+            description: 'One or more questions to ask, in the order they should be shown.',
+            items: {
+              type: 'object',
+              properties: {
+                question: { type: 'string', description: 'The question text.' },
+                options: {
+                  type: 'array',
+                  description: 'Optional multiple-choice options. Omit or leave empty for a free-text-only question. The user can always type their own answer even when options are given.',
+                  items: { type: 'string' },
+                },
+              },
+              required: ['question'],
+            },
+          },
+        },
+        required: ['questions'],
+      },
+    },
+  },
 ];
+
+// Tools marked terminal end the tool loop immediately instead of feeding a
+// result back to the model: the "result" is a UI element the user has to act
+// on (e.g. answering a question), which can't resolve within one request.
+const TERMINAL_TOOLS = new Set(['ask_question']);
 
 const TOOL_EXECUTORS = {
   get_time: async () => {
@@ -21,7 +55,22 @@ const TOOL_EXECUTORS = {
       iso: now.toISOString(),
     };
   },
+  ask_question: async (args) => {
+    const questions = Array.isArray(args.questions) ? args.questions : [];
+    return {
+      questions: questions
+        .filter((q) => q && typeof q.question === 'string' && q.question.trim())
+        .map((q) => ({
+          question: q.question.trim(),
+          options: Array.isArray(q.options) ? q.options.filter((o) => typeof o === 'string' && o.trim()).map((o) => o.trim()) : [],
+        })),
+    };
+  },
 };
+
+function isTerminalTool(name) {
+  return TERMINAL_TOOLS.has(name);
+}
 
 async function runTool(name, args) {
   const executor = TOOL_EXECUTORS[name];
@@ -31,4 +80,4 @@ async function runTool(name, args) {
   return executor(args);
 }
 
-module.exports = { TOOL_DEFINITIONS, runTool };
+module.exports = { TOOL_DEFINITIONS, runTool, isTerminalTool };

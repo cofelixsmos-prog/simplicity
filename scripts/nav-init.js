@@ -273,7 +273,7 @@
     if (!document.body.hasAttribute('data-no-nav')) loadNav();
     loadBrandMark();
     loadFooter();
-    loadCookieUI();
+    if (!document.body.hasAttribute('data-no-nav')) loadCookieUI();
     setupAccountDropdown();
     loadAccountState();
   }

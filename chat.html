@@ -29,7 +29,7 @@
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="/style.css">
 <style>
   /* ---------- Chat-specific navigation controls ---------- */
@@ -151,7 +151,6 @@
 
   .chat-wrap.has-messages .chat-messages {
     justify-content: flex-start;
-    padding-bottom: 28vh;
   }
 
   .chat-loading {
@@ -267,6 +266,316 @@
     max-width: 100%;
   }
 
+  .chat-bubble.bot .md-h1,
+  .chat-bubble.bot .md-h2,
+  .chat-bubble.bot .md-h3 {
+    margin: 14px 0 6px;
+    font-weight: 650;
+    line-height: 1.3;
+  }
+
+  .chat-bubble.bot .md-h1:first-child,
+  .chat-bubble.bot .md-h2:first-child,
+  .chat-bubble.bot .md-h3:first-child {
+    margin-top: 0;
+  }
+
+  .chat-bubble.bot .md-h1 { font-size: 1.25em; }
+  .chat-bubble.bot .md-h2 { font-size: 1.15em; }
+  .chat-bubble.bot .md-h3 { font-size: 1.05em; }
+
+  .chat-bubble.bot .md-list {
+    margin: 6px 0;
+    padding-left: 22px;
+  }
+
+  .chat-bubble.bot .md-list li {
+    margin: 2px 0;
+  }
+
+  .chat-bubble.bot .md-table-wrap {
+    margin: 10px 0;
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 10px;
+  }
+
+  .chat-bubble.bot .md-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92em;
+  }
+
+  .chat-bubble.bot .md-table th,
+  .chat-bubble.bot .md-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--btn-outline-border);
+    white-space: nowrap;
+  }
+
+  .chat-bubble.bot .md-table th {
+    background: var(--btn-outline-hover);
+    font-weight: 650;
+    color: var(--fg);
+  }
+
+  .chat-bubble.bot .md-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .chat-bubble.bot .md-table tbody tr:hover {
+    background: var(--btn-outline-hover);
+  }
+
+  .chat-bubble.bot .md-inline-code {
+    background: var(--btn-outline-hover);
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 5px;
+    padding: 1px 5px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.9em;
+  }
+
+  .chat-bubble.bot .md-code-block {
+    margin: 8px 0;
+    padding: 12px 14px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 10px;
+    background: var(--btn-outline-hover);
+    overflow-x: auto;
+  }
+
+  .chat-bubble.bot .md-code-block code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.88em;
+    line-height: 1.5;
+    white-space: pre;
+  }
+
+  .chat-bubble.bot a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 90, 31, 0.4);
+  }
+
+  .chat-bubble.bot a:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  .chat-bubble.bot .md-hl {
+    display: block;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-weight: 550;
+    line-height: 1.5;
+  }
+
+  .question-dock {
+    flex-shrink: 0;
+    display: none;
+  }
+
+  .question-dock.is-active {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .question-card {
+    width: 100%;
+    border: 1px solid var(--nav-border);
+    border-radius: 16px;
+    background: var(--btn-outline-hover);
+    padding: 16px;
+    outline: none;
+  }
+
+  .question-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .question-text {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg);
+    line-height: 1.4;
+  }
+
+  .question-step {
+    flex-shrink: 0;
+    font-size: 11.5px;
+    color: var(--fg-muted);
+    opacity: 0.75;
+    white-space: nowrap;
+    margin-top: 2px;
+    margin-right: 4px;
+  }
+
+  .question-close {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+
+  .question-close:hover {
+    background: var(--btn-outline-hover);
+    color: var(--fg);
+  }
+
+  .question-close svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .question-list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .question-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-bottom: 1px solid var(--btn-outline-border);
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+    font-size: 13.5px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .question-row:last-child {
+    border-bottom: none;
+  }
+
+  .question-row.is-selected {
+    background: var(--btn-outline-hover);
+  }
+
+  .question-row-num {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background: var(--btn-outline-hover);
+    color: var(--fg-muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .question-row.is-selected .question-row-num {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .question-row-num svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .question-row-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .question-row-hint {
+    flex-shrink: 0;
+    display: inline-flex;
+    opacity: 0;
+    color: var(--fg-muted);
+    transition: opacity 0.1s ease;
+  }
+
+  .question-row.is-selected .question-row-hint {
+    opacity: 1;
+  }
+
+  .question-row-hint svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .question-row-custom {
+    cursor: text;
+  }
+
+  .question-row-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 13.5px;
+  }
+
+  .question-row-input::placeholder {
+    color: var(--fg-muted);
+  }
+
+  .question-skip-btn {
+    flex-shrink: 0;
+    border: none;
+    background: var(--btn-outline-hover);
+    color: var(--fg-muted);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font: inherit;
+    font-size: 11.5px;
+    cursor: pointer;
+  }
+
+  .question-skip-btn:hover {
+    color: var(--fg);
+  }
+
+  .question-foot {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--fg-muted);
+    opacity: 0.7;
+  }
+
+  .question-foot kbd {
+    font: inherit;
+    background: var(--btn-outline-hover);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
   .msg-user {
     align-self: flex-end;
     display: flex;
@@ -368,7 +677,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin: 2px 0 8px;
+    margin: 2px 0 10px;
     font-size: 12.5px;
     line-height: 1.5;
     color: var(--fg-muted);
@@ -380,12 +689,17 @@
 
   .tool-step {
     display: block;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 10px;
+    background: var(--btn-outline-hover);
+    overflow: hidden;
   }
 
   .tool-summary {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 7px 10px;
     cursor: pointer;
     list-style: none;
   }
@@ -394,26 +708,75 @@
     display: none;
   }
 
-  .tool-summary::after {
-    content: "+";
+  .tool-summary-chevron {
     margin-left: auto;
+    flex-shrink: 0;
+    display: inline-flex;
     color: var(--fg-muted);
-    font-size: 14px;
+    transition: transform 0.15s ease;
   }
 
-  .tool-step[open] .tool-summary::after {
-    content: "−";
+  .tool-summary-chevron svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .tool-step[open] .tool-summary-chevron {
+    transform: rotate(180deg);
   }
 
   .tool-details {
-    margin: 7px 0 2px 20px;
-    padding: 8px 10px;
-    border-left: 1px solid var(--btn-outline-border);
+    margin: 0;
+    padding: 10px 12px 12px;
+    border-top: 1px solid var(--btn-outline-border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tool-details-section-label {
+    font-size: 10.5px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     color: var(--fg-muted);
-    font-size: 11.5px;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+
+  .tool-details-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tool-details-field {
+    display: flex;
+    gap: 6px;
+    font-size: 12px;
     line-height: 1.5;
-    white-space: pre-wrap;
+  }
+
+  .tool-details-field-key {
+    flex-shrink: 0;
+    color: var(--fg-muted);
+  }
+
+  .tool-details-field-value {
+    color: var(--fg);
     overflow-wrap: anywhere;
+  }
+
+  .tool-details-prose {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+
+  .tool-details-meta {
+    font-size: 11px;
+    color: var(--fg-muted);
   }
 
   .tool-dot {
@@ -675,7 +1038,7 @@
     gap: 8px;
     padding: 16px 12px;
     border-right: 1px solid var(--nav-border);
-    background: var(--bg);
+    background: var(--btn-outline-hover);
     overflow: hidden;
     transition: margin-left 0.25s ease;
   }
@@ -825,7 +1188,7 @@
   }
 
   .history-item:hover {
-    background: var(--btn-outline-hover);
+    background: var(--btn-outline-border);
     color: var(--fg);
   }
 
@@ -1291,6 +1654,8 @@
       </div>
     </div>
 
+    <div class="question-dock" id="question-dock"></div>
+
     <form class="chat-form" id="chat-form">
       <textarea id="chat-input" rows="1" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message"></textarea>
       <button type="button" class="chat-mic" id="chat-mic" aria-label="Voice input" hidden>
@@ -1372,6 +1737,7 @@
       var empty = document.getElementById('chat-empty');
       var chatLoading = document.getElementById('chat-loading');
       var chatWrap = document.querySelector('.chat-wrap');
+      var questionDock = document.getElementById('question-dock');
       var queueBar = document.getElementById('queue-bar');
       var queueList = document.getElementById('queue-list');
       var queueCount = document.getElementById('queue-count');
@@ -1481,11 +1847,101 @@
         return label;
       }
 
-      function toolDetails(call) {
+      function humanizeKey(key) {
+        return key
+          .replace(/_/g, ' ')
+          .replace(/([a-z])([A-Z])/g, '$1 $2')
+          .replace(/^./, function (c) { return c.toUpperCase(); });
+      }
+
+      // Plain-language fallback for any tool result: one "Key: value" line
+      // per field instead of a raw JSON dump. Nested objects/arrays get
+      // JSON-stringified inline only as a last resort (kept short), since
+      // there's no generic way to prose-ify arbitrary nested data.
+      function humanizeValue(value) {
+        if (value === null || value === undefined) return '—';
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
+        if (Array.isArray(value)) {
+          if (!value.length) return 'None';
+          if (value.every(function (v) { return typeof v === 'string' || typeof v === 'number'; })) return value.join(', ');
+          return value.map(function (v) { return typeof v === 'object' ? JSON.stringify(v) : v; }).join('; ');
+        }
+        return JSON.stringify(value);
+      }
+
+      function renderFieldList(container, obj) {
+        Object.keys(obj).forEach(function (key) {
+          var row = document.createElement('div');
+          row.className = 'tool-details-field';
+          var k = document.createElement('span');
+          k.className = 'tool-details-field-key';
+          k.textContent = humanizeKey(key) + ':';
+          var v = document.createElement('span');
+          v.className = 'tool-details-field-value';
+          v.textContent = humanizeValue(obj[key]);
+          row.appendChild(k);
+          row.appendChild(v);
+          container.appendChild(row);
+        });
+      }
+
+      // Per-tool renderers for a fully natural-language summary, checked
+      // before falling back to the generic field-list above.
+      var TOOL_RESULT_RENDERERS = {
+        get_time: function (container, call) {
+          var p = document.createElement('p');
+          p.className = 'tool-details-prose';
+          p.textContent = 'The current time is ' + (call.result && call.result.time || 'unknown') + '.';
+          container.appendChild(p);
+        },
+        ask_question: function (container, call) {
+          var questions = (call.result && call.result.questions) || [];
+          questions.forEach(function (q) {
+            var p = document.createElement('p');
+            p.className = 'tool-details-prose';
+            p.textContent = q.question + (q.options && q.options.length ? ' (options: ' + q.options.join(', ') + ')' : '');
+            container.appendChild(p);
+          });
+        },
+      };
+
+      function buildToolDetails(container, call) {
+        container.innerHTML = '';
         var args = call.args || {};
-        var result = call.result || {};
-        var duration = typeof call.durationMs === 'number' ? (call.durationMs / 1000).toFixed(2) + ' sec' : '—';
-        return 'Arguments\n' + JSON.stringify(args, null, 2) + '\n\nResult\n' + JSON.stringify(result, null, 2) + '\n\nElapsed\n' + duration;
+        var renderer = TOOL_RESULT_RENDERERS[call.name];
+
+        if (!renderer && Object.keys(args).length > 0) {
+          var argsLabel = document.createElement('div');
+          argsLabel.className = 'tool-details-section-label';
+          argsLabel.textContent = 'Arguments';
+          container.appendChild(argsLabel);
+          var argsBox = document.createElement('div');
+          argsBox.className = 'tool-details-fields';
+          renderFieldList(argsBox, args);
+          container.appendChild(argsBox);
+        }
+
+        var resultLabel = document.createElement('div');
+        resultLabel.className = 'tool-details-section-label';
+        resultLabel.textContent = 'Result';
+        container.appendChild(resultLabel);
+
+        if (renderer) {
+          renderer(container, call);
+        } else {
+          var resultBox = document.createElement('div');
+          resultBox.className = 'tool-details-fields';
+          renderFieldList(resultBox, call.result || {});
+          container.appendChild(resultBox);
+        }
+
+        var duration = typeof call.durationMs === 'number' ? (call.durationMs / 1000).toFixed(2) + ' sec' : null;
+        if (duration) {
+          var meta = document.createElement('div');
+          meta.className = 'tool-details-meta';
+          meta.textContent = 'Took ' + duration;
+          container.appendChild(meta);
+        }
       }
 
       function createToolStep(call, isActive) {
@@ -1500,13 +1956,24 @@
         var label = document.createElement('span');
         label.className = 'tool-label';
         label.textContent = isActive ? (TOOL_LABELS[call.name] || call.name) + '...' : toolLabel(call);
+        var chevron = document.createElement('span');
+        chevron.className = 'tool-summary-chevron';
+        chevron.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         summary.appendChild(dot);
         summary.appendChild(label);
+        summary.appendChild(chevron);
         step.appendChild(summary);
 
         var detail = document.createElement('div');
         detail.className = 'tool-details';
-        detail.textContent = isActive ? 'Waiting for result...' : toolDetails(call);
+        if (isActive) {
+          var waiting = document.createElement('div');
+          waiting.className = 'tool-details-meta';
+          waiting.textContent = 'Waiting for result…';
+          detail.appendChild(waiting);
+        } else {
+          buildToolDetails(detail, call);
+        }
         step.appendChild(detail);
         return step;
       }
@@ -1516,7 +1983,7 @@
         step.classList.add('is-done');
         step.open = false;
         step.querySelector('.tool-label').textContent = toolLabel(call);
-        step.querySelector('.tool-details').textContent = toolDetails(call);
+        buildToolDetails(step.querySelector('.tool-details'), call);
       }
 
       function deleteConversation(conversationId) {
@@ -1557,7 +2024,7 @@
 
         var div = document.createElement('div');
         div.className = 'chat-bubble bot';
-        div.textContent = msg.content;
+        div.innerHTML = renderMarkdown(msg.content);
         content.appendChild(div);
         content.appendChild(makeMeta(msg.content, formatTime(new Date(msg.createdAt)), false, null));
         row.appendChild(logo);
@@ -1910,6 +2377,134 @@
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
 
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      // Minimal markdown renderer for AI replies. Input is escaped to plain
+      // text FIRST, then markdown syntax is layered on top — so nothing the
+      // model outputs (or a prompt-injected instruction) can ever produce a
+      // live tag; every literal "<" in the reply stays inert text.
+      function renderMarkdown(raw) {
+        var blocks = [];
+        var text = escapeHtml(raw).replace(/\r\n/g, '\n');
+
+        // Fenced code blocks first — their contents must survive untouched
+        // by every other rule below (bold/italic/links inside code would be
+        // wrong), so pull them out and swap back in at the very end.
+        text = text.replace(/```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g, function (m, lang, code) {
+          var token = ' BLOCK' + blocks.length + ' ';
+          blocks.push('<pre class="md-code-block"><code>' + code.replace(/\n$/, '') + '</code></pre>');
+          return token;
+        });
+
+        // Inline code next, same reasoning — protect before bold/italic run.
+        text = text.replace(/`([^`\n]+)`/g, function (m, code) {
+          var token = ' BLOCK' + blocks.length + ' ';
+          blocks.push('<code class="md-inline-code">' + code + '</code>');
+          return token;
+        });
+
+        text = text
+          .replace(/^### (.+)$/gm, '<h3 class="md-h3">$1</h3>')
+          .replace(/^## (.+)$/gm, '<h2 class="md-h2">$1</h2>')
+          .replace(/^# (.+)$/gm, '<h1 class="md-h1">$1</h1>')
+          .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>')
+          // Non-standard, house convention: ==text== marks an important
+          // line/passage as a solid orange highlight block. No official
+          // markdown spec covers this, so the model is told about it
+          // explicitly in the system prompt. Can span multiple sentences
+          // (and the newlines between them), so it's pulled out as a
+          // protected block like code, rendered after the <br> pass below
+          // rather than inline, so it becomes its own block element instead
+          // of an inline span broken across line breaks.
+          .replace(/==([\s\S]+?)==/g, function (m, inner) {
+            var token = ' BLOCK' + blocks.length + ' ';
+            blocks.push('<div class="md-hl">' + inner.trim().replace(/\n/g, '<br>') + '</div>');
+            return token;
+          })
+          .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+        // Group consecutive "- "/"1. " lines into real <ul>/<ol> blocks, and
+        // a header + "---|---" separator + data rows into a real <table>.
+        var lines = text.split('\n');
+        var out = [];
+        var listBuffer = [];
+        var listType = null;
+        function flushList() {
+          if (!listBuffer.length) return;
+          var tag = listType === 'ol' ? 'ol' : 'ul';
+          out.push('<' + tag + ' class="md-list">' + listBuffer.map(function (item) { return '<li>' + item + '</li>'; }).join('') + '</' + tag + '>');
+          listBuffer = [];
+          listType = null;
+        }
+        function splitTableRow(line) {
+          var cells = line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|');
+          return cells.map(function (c) { return c.trim(); });
+        }
+        function isTableSeparator(line) {
+          return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(line) && line.indexOf('-') !== -1;
+        }
+        for (var li = 0; li < lines.length; li++) {
+          var line = lines[li];
+          var ulMatch = line.match(/^[-*]\s+(.+)$/);
+          var olMatch = line.match(/^\d+\.\s+(.+)$/);
+          var nextLine = lines[li + 1];
+          if (line.indexOf('|') !== -1 && nextLine && isTableSeparator(nextLine) && !ulMatch) {
+            flushList();
+            var headerCells = splitTableRow(line);
+            var token = ' BLOCK' + blocks.length + ' ';
+            var rows = [];
+            var scan = li + 2;
+            while (scan < lines.length && lines[scan].indexOf('|') !== -1 && lines[scan].trim() !== '') {
+              rows.push(splitTableRow(lines[scan]));
+              scan++;
+            }
+            var html = '<div class="md-table-wrap"><table class="md-table"><thead><tr>' +
+              headerCells.map(function (c) { return '<th>' + c + '</th>'; }).join('') +
+              '</tr></thead><tbody>' +
+              rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + (c || '') + '</td>'; }).join('') + '</tr>'; }).join('') +
+              '</tbody></table></div>';
+            blocks.push(html);
+            out.push(token);
+            li = scan - 1;
+            continue;
+          }
+          if (ulMatch) {
+            if (listType && listType !== 'ul') flushList();
+            listType = 'ul';
+            listBuffer.push(ulMatch[1]);
+          } else if (olMatch) {
+            if (listType && listType !== 'ol') flushList();
+            listType = 'ol';
+            listBuffer.push(olMatch[1]);
+          } else {
+            flushList();
+            out.push(line);
+          }
+        }
+        flushList();
+        text = out.join('\n');
+
+        // Remaining bare newlines become <br> — anything already inside a
+        // block-level tag we just built (list/heading/code) keeps its own
+        // formatting, so this only affects plain paragraph text.
+        text = text.replace(/\n/g, '<br>');
+
+        text = text.replace(/ BLOCK(\d+) /g, function (m, i) {
+          return blocks[Number(i)];
+        });
+
+        return text;
+      }
+
       function copyText(text, btn) {
         function done() {
           var original = btn.getAttribute('data-label') || 'Copy';
@@ -1932,19 +2527,31 @@
       function typewriteText(el, fullText, done, isCancelled) {
         var i = 0;
         el.textContent = '';
+        // Reveal several characters per animation tick so long replies (the
+        // common case once markdown/tables/code blocks are involved) finish
+        // in a reasonable time instead of trickling out for several seconds.
+        var chunk = Math.max(3, Math.ceil(fullText.length / 120));
         var timer = setInterval(function () {
           if (isCancelled && isCancelled()) {
             clearInterval(timer);
             return;
           }
-          i += 3;
-          el.textContent = fullText.slice(0, i);
+          i += chunk;
+          // Render markdown live as it types (not just at the end) so the
+          // user isn't staring at raw **asterisks**/## symbols for the
+          // whole animation — a long reply used to look "stuck" in plain
+          // text until typing finished. A half-open marker (e.g. a "**"
+          // with no closing pair yet) just renders as literal text for a
+          // moment, which reads fine — far better than several seconds of
+          // unformatted markdown.
+          el.innerHTML = renderMarkdown(fullText.slice(0, i));
           if (followOutput) {
             scrollPageBottom(false);
             if (isResponding) ensureFollowLoop();
           }
           if (i >= fullText.length) {
             clearInterval(timer);
+            el.innerHTML = renderMarkdown(fullText);
             if (done) done();
           }
         }, 12);
@@ -2035,7 +2642,8 @@
       }
 
       var TOOL_LABELS = {
-        get_time: 'Checking the time'
+        get_time: 'Checking the time',
+        ask_question: 'Asking a question'
       };
 
       function retryResponse(row) {
@@ -2060,6 +2668,169 @@
         wrap.appendChild(makeMeta(text, time, false, null));
         messages.appendChild(wrap);
         chatWrap.scrollTop = chatWrap.scrollHeight;
+      }
+
+      function renderQuestionCard(container, questions, onSubmit) {
+        var answers = new Array(questions.length).fill(null);
+        var qIndex = 0;
+
+        container.innerHTML = '';
+        container.classList.add('is-active');
+        var card = document.createElement('div');
+        card.className = 'question-card';
+        container.appendChild(card);
+        if (followOutput) scrollPageBottom(false);
+
+        function finishAll() {
+          var summary = questions.map(function (q, i) {
+            return q.question + ' ' + answers[i];
+          }).join('\n');
+          container.classList.remove('is-active');
+          container.innerHTML = '';
+          onSubmit(summary);
+        }
+
+        function renderStep() {
+          card.innerHTML = '';
+          var q = questions[qIndex];
+          var rowsCount = (q.options || []).length + 1;
+          var selected = 0;
+
+          var head = document.createElement('div');
+          head.className = 'question-head';
+          var qText = document.createElement('p');
+          qText.className = 'question-text';
+          qText.textContent = q.question;
+          head.appendChild(qText);
+          if (questions.length > 1) {
+            var stepLabel = document.createElement('span');
+            stepLabel.className = 'question-step';
+            stepLabel.textContent = (qIndex + 1) + ' / ' + questions.length;
+            head.appendChild(stepLabel);
+          }
+          var closeBtn = document.createElement('button');
+          closeBtn.type = 'button';
+          closeBtn.className = 'question-close';
+          closeBtn.setAttribute('aria-label', 'Dismiss question');
+          closeBtn.innerHTML = '<svg viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+          closeBtn.addEventListener('click', function () {
+            container.classList.remove('is-active');
+            container.innerHTML = '';
+          });
+          head.appendChild(closeBtn);
+          card.appendChild(head);
+
+          var list = document.createElement('div');
+          list.className = 'question-list';
+          card.appendChild(list);
+
+          function lockIn(answerText) {
+            answers[qIndex] = answerText;
+            if (qIndex < questions.length - 1) {
+              qIndex++;
+              renderStep();
+            } else {
+              finishAll();
+            }
+          }
+
+          var rowEls = [];
+
+          (q.options || []).forEach(function (optionText, i) {
+            var row = document.createElement('button');
+            row.type = 'button';
+            row.className = 'question-row';
+            var num = document.createElement('span');
+            num.className = 'question-row-num';
+            num.textContent = String(i + 1);
+            var label = document.createElement('span');
+            label.className = 'question-row-label';
+            label.textContent = optionText;
+            var hint = document.createElement('span');
+            hint.className = 'question-row-hint';
+            hint.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M20 7v4a2 2 0 01-2 2H6M6 13l4-4M6 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            row.appendChild(num);
+            row.appendChild(label);
+            row.appendChild(hint);
+            row.addEventListener('click', function () { lockIn(optionText); });
+            row.addEventListener('mouseenter', function () { setSelected(i); });
+            list.appendChild(row);
+            rowEls.push(row);
+          });
+
+          var customRowIndex = rowEls.length;
+          var customRow = document.createElement('div');
+          customRow.className = 'question-row question-row-custom';
+          var customIcon = document.createElement('span');
+          customIcon.className = 'question-row-num';
+          customIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4L18.5 9.5a2 2 0 000-2.8l-1.2-1.2a2 2 0 00-2.8 0L4 16v4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+          var customInput = document.createElement('input');
+          customInput.type = 'text';
+          customInput.className = 'question-row-input';
+          customInput.placeholder = (q.options && q.options.length) ? 'Something else…' : 'Type your answer…';
+          customInput.setAttribute('aria-label', 'Your answer to: ' + q.question);
+          customRow.appendChild(customIcon);
+          customRow.appendChild(customInput);
+          if (q.options && q.options.length) {
+            var skipBtn = document.createElement('button');
+            skipBtn.type = 'button';
+            skipBtn.className = 'question-skip-btn';
+            skipBtn.textContent = 'Skip';
+            skipBtn.addEventListener('click', function (e) {
+              e.stopPropagation();
+              lockIn('(skipped)');
+            });
+            customRow.appendChild(skipBtn);
+          }
+          customRow.addEventListener('click', function (e) {
+            if (e.target === customInput || e.target.closest('.question-skip-btn')) return;
+            customInput.focus();
+          });
+          customRow.addEventListener('mouseenter', function () { setSelected(customRowIndex); });
+          list.appendChild(customRow);
+          rowEls.push(customRow);
+
+          customInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              var val = customInput.value.trim();
+              if (val) lockIn(val);
+            }
+          });
+
+          function setSelected(i) {
+            selected = i;
+            rowEls.forEach(function (row, idx) { row.classList.toggle('is-selected', idx === i); });
+          }
+          setSelected(0);
+
+          function onKeydown(e) {
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              setSelected((selected + 1) % rowEls.length);
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              setSelected((selected - 1 + rowEls.length) % rowEls.length);
+            } else if (e.key === 'Enter' && document.activeElement !== customInput) {
+              e.preventDefault();
+              if (selected === customRowIndex) {
+                customInput.focus();
+              } else {
+                lockIn(q.options[selected]);
+              }
+            }
+          }
+          card.addEventListener('keydown', onKeydown);
+          card.setAttribute('tabindex', '-1');
+          card.focus();
+
+          var foot = document.createElement('div');
+          foot.className = 'question-foot';
+          foot.innerHTML = '<span>&uarr;&darr; to navigate &middot; <kbd>enter</kbd> to select</span>';
+          card.appendChild(foot);
+        }
+
+        renderStep();
       }
 
       function requestFailedMessage(error) {
@@ -2213,6 +2984,41 @@
             }, function () { return requestGeneration !== viewGeneration; });
             return;
           }
+          if (event.type === 'question') {
+            replyReceived = true;
+            stopThinking();
+            if (event.conversationId && event.conversationId !== currentConversationId) {
+              currentConversationId = event.conversationId;
+              if (chatTopTitle) chatTopTitle.textContent = sourceMessage.length > 48 ? sourceMessage.slice(0, 47) + '…' : sourceMessage;
+              loadHistoryList(currentConversationId);
+              setLastConversationCookie(currentConversationId);
+              updateUrlForConversation(currentConversationId, true);
+            }
+            if (event.toolCalls && event.toolCalls.length && !trace.childNodes.length) {
+              trace.hidden = false;
+              event.toolCalls.forEach(function (call) { trace.appendChild(createToolStep(call, false)); });
+            }
+            var qSummary = event.questions.length > 1
+              ? 'I have a few questions before continuing — see below.'
+              : 'I have a question before continuing — see below.';
+            typewriteText(div, qSummary, function () {
+              content.appendChild(makeMeta(qSummary, formatTime(new Date()), false, null));
+              refreshRetry();
+              typewriterDone = true;
+              maybeShowFollowup();
+              onBotDone();
+            }, function () { return requestGeneration !== viewGeneration; });
+            renderQuestionCard(questionDock, event.questions, function (answerText) {
+              handleUserMessage(answerText);
+            });
+            return;
+          }
+          if (event.type === 'highlight') {
+            if (requestGeneration === viewGeneration) {
+              div.innerHTML = renderMarkdown(event.reply);
+            }
+            return;
+          }
           if (event.type === 'done') {
             if (event.title && chatTopTitle) chatTopTitle.textContent = event.title;
             setSuggestions(event.suggestions);
@@ -2283,6 +3089,8 @@
         scrollPageBottom(false);
         updateScrollBtn();
         hideFollowup();
+        questionDock.classList.remove('is-active');
+        questionDock.innerHTML = '';
         sendBotReply(value);
       }
 

@@ -1,8 +1,15 @@
 const { createChatCompletion } = require('../services/model');
-const { TOOL_DEFINITIONS, runTool } = require('../services/tools');
+const { TOOL_DEFINITIONS, runTool, isTerminalTool } = require('../services/tools');
 const conversations = require('../services/conversationService');
 
-const SYSTEM_PROMPT = 'You are Simplicity, a helpful, concise assistant. Keep answers short and direct unless asked for detail.';
+const SYSTEM_PROMPT = 'You are Simplicity, a helpful, concise assistant. Keep answers short and direct unless asked for detail. ' +
+  'When you need information only the user can provide before you can proceed (missing details, a choice between options, clarification), call the ask_question tool instead of listing questions as plain text. ' +
+  'If you have more than one thing to ask, put every question in a single ask_question call as separate entries in the questions array — never ask one, wait, then call the tool again for the next one. ' +
+  'You can format replies with standard markdown: bold, italic, `code`, fenced code blocks, links, lists, tables.';
+
+const HIGHLIGHT_SYSTEM_PROMPT = 'You will be given a chat reply written in markdown. Your only job is to re-emit it with the single most important line, sentence, or short passage wrapped in ==double equals== — do not change, add, remove, rephrase, or reformat anything else, not even punctuation or whitespace. ' +
+  'Pick the one part the user most needs to walk away with: the main takeaway, the correct answer, or the most important warning/caveat — whichever matters most in this specific reply. Wrap ONLY that one passage (a sentence or two, never a whole paragraph, never the entire reply). If the reply is short/simple with nothing that stands out as clearly most important (e.g. a greeting, a one-line factual answer), return it completely unchanged. ' +
+  'Reply with ONLY the full modified text, no preamble, no explanation, no code fences around it.';
 
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_TOOL_ROUNDS = 3;
@@ -43,6 +50,68 @@ async function generateTitle(userMessage, assistantReply) {
     return reply.content ? reply.content.trim() : null;
   } catch (error) {
     console.error('Title generation failed:', error.message);
+    return null;
+  }
+}
+
+async function highlightReply(replyText) {
+  try {
+    if (!replyText || replyText.length < 40) return null;
+    const reply = await createChatCompletion({
+      messages: [
+        { role: 'system', content: HIGHLIGHT_SYSTEM_PROMPT },
+        { role: 'user', content: replyText },
+      ],
+      // This model's internal reasoning pass alone has been observed to run
+      // to ~10,000 characters (~3000+ tokens) for a single moderate-length
+      // reply — far more than the reply itself — and that reasoning is
+      // billed against maxTokens before any content is emitted. Title/
+      // suggestion generation get away with a small budget because they
+      // only need a short output; this pass echoes the whole reply back
+      // (often 500-1500+ chars), so it needs enough room for both the
+      // reasoning AND the full echo, or content silently comes back empty.
+      maxTokens: 8000,
+    });
+    if (!reply.content) { console.log('[highlight] rejected: empty content from model'); return null; }
+    const highlighted = reply.content.trim();
+    // Sanity check: this call must only ADD == markers, never rewrite the
+    // reply. If stripping the markers doesn't reproduce the original text
+    // (near enough), the model deviated from the instruction, so discard
+    // the result rather than risk showing altered content to the user.
+    const stripped = highlighted.replace(/==([\s\S]+?)==/g, '$1');
+    // This model can't reliably echo long text back byte-for-byte — it
+    // tends to drop a stray punctuation mark, or occasionally add/reword a
+    // clause, even when told not to. An exact-match check rejects almost
+    // every attempt, so this compares word-set OVERLAP instead: if most of
+    // the original's words are still present and few new ones were
+    // introduced, treat it as "annotated," not "rewritten." A wholesale
+    // rewrite or fabricated addition drops the overlap ratio enough to
+    // still get caught.
+    const wordsOf = (s) => s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean);
+    const originalWords = wordsOf(replyText);
+    const strippedWords = wordsOf(stripped);
+    // Word-COUNT closeness catches duplication (the model repeating the
+    // highlighted sentence as an extra block instead of marking it in
+    // place) and fabrication — both inflate the word count. Kept tight
+    // since a correct "wrap only" pass changes length by ~0.
+    // Sequence match against the ORIGINAL length (not the shorter of the
+    // two) — this catches both truncation (dropped an ending) and the more
+    // common failure mode with this model, appending extra sentences after
+    // the real content (which a shared-prefix-only check would miss, since
+    // everything up to the original's length still lines up).
+    let inOrder = 0;
+    for (let i = 0; i < originalWords.length; i++) {
+      if (originalWords[i] === strippedWords[i]) inOrder++;
+    }
+    const sequenceMatch = originalWords.length ? inOrder / originalWords.length : 0;
+    const lengthRatio = originalWords.length ? strippedWords.length / originalWords.length : 1;
+    if (sequenceMatch < 0.95) { console.log('[highlight] rejected: sequenceMatch', sequenceMatch.toFixed(3)); return null; }
+    if (lengthRatio > 1.1 || lengthRatio < 0.95) { console.log('[highlight] rejected: lengthRatio', lengthRatio.toFixed(3)); return null; }
+    if (stripped === highlighted) { console.log('[highlight] rejected: no markers added'); return null; }
+    console.log('[highlight] accepted');
+    return highlighted;
+  } catch (error) {
+    console.error('Highlight pass failed:', error.message);
     return null;
   }
 }
@@ -131,12 +200,44 @@ async function sendMessage(req, res, next) {
       console.error('Failed to generate suggestions:', suggestionError);
     }
 
+    // Best-effort second pass that adds ==yellow==/++green++ highlight
+    // markers to the reply already shown to the user. Runs after the
+    // typewriter would have finished, so the client swaps it in once ready
+    // rather than delaying the initial reply for this.
+    const highlighted = await highlightReply(replyText);
+    if (highlighted) {
+      await conversations.updateLastAssistantMessage(activeConversationId, highlighted);
+      sendEvent({
+        type: 'highlight',
+        reply: highlighted,
+        conversationId: activeConversationId,
+      });
+    }
+
     sendEvent({
       type: 'done',
       conversationId: activeConversationId,
       title: title || undefined,
       suggestions: suggestions.length ? suggestions : undefined,
     });
+    return res.end();
+  }
+
+  async function finishWithQuestion(questionCall, toolCalls) {
+    const questions = questionCall.result.questions;
+    const summary = questions.map((q) => '- ' + q.question).join('\n');
+    const replyText = 'I need a bit more information before I continue:\n' + summary;
+
+    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls);
+    await conversations.touchConversation(activeConversationId);
+
+    sendEvent({
+      type: 'question',
+      questions,
+      toolCalls,
+      conversationId: activeConversationId,
+    });
+    sendEvent({ type: 'done', conversationId: activeConversationId });
     return res.end();
   }
 
@@ -203,6 +304,11 @@ async function sendMessage(req, res, next) {
         };
         toolCalls.push(toolCall);
         sendEvent({ type: 'tool_done', index, round: round + 1, ...toolCall });
+
+        if (isTerminalTool(call.function.name)) {
+          return await finishWithQuestion(toolCall, toolCalls);
+        }
+
         modelMessages.push({
           role: 'tool',
           tool_call_id: call.id,
