@@ -11,15 +11,11 @@ const cspDirectives = {
   fontSrc: ["'self'", 'https://fonts.gstatic.com'],
   imgSrc: ["'self'", 'data:', 'https://github.com', 'https://release-assets.githubusercontent.com'],
   mediaSrc: ["'self'", 'https://github.com', 'https://release-assets.githubusercontent.com'],
-  // huggingface.co serves model metadata/config; the actual weight-shard
-  // binaries redirect to Hugging Face's CDN (observed: us.aws.cdn.hf.co,
-  // confirmed via a real resolve request — HF's Xet-backed storage layer,
-  // subdomain may vary by region/file, hence the wildcard rather than one
-  // hardcoded host). raw.githubusercontent.com serves the compiled WASM
-  // model libraries WebLLM pairs with each model (see @mlc-ai/web-llm's
-  // modelLibURLPrefix). All are required for any local-model download to
-  // complete — without them the browser blocks the fetch outright.
-  connectSrc: ["'self'", 'https://unpkg.com', 'https://huggingface.co', 'https://*.hf.co', 'https://*.cdn.hf.co', 'https://raw.githubusercontent.com'],
+  // Simplicity Local's model files (weights + WASM libs) are fetched
+  // through /api/model-cache/* on our own origin — the server fetches from
+  // Hugging Face/GitHub once and disk-caches the result, so the browser
+  // never needs a direct connection to those external hosts.
+  connectSrc: ["'self'", 'https://unpkg.com'],
   objectSrc: ["'none'"],
   baseUri: ["'self'"],
   frameAncestors: ["'self'"],

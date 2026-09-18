@@ -427,7 +427,7 @@ async function startLocalMessage(req, res, next) {
 }
 
 async function finishLocalMessage(req, res, next) {
-  const { conversationId, message, reply, toolCalls, generationTimes, isNewConversation } = req.body || {};
+  const { conversationId, message, reply, toolCalls, generationTimes, isNewConversation, clientTitle } = req.body || {};
   if (!conversationId || typeof reply !== 'string' || !reply.trim()) {
     return res.status(400).json({ error: 'conversationId and reply are required.' });
   }
@@ -443,15 +443,15 @@ async function finishLocalMessage(req, res, next) {
 
     const trimmedMessage = typeof message === 'string' ? message.trim() : '';
 
+    // Local-mode titles are generated client-side by the same WebLLM model
+    // the user is chatting with (chat.html sends it as clientTitle) since
+    // the server has no local model to call — generateTitle here would hit
+    // the Cloud backend for a Local-mode conversation, which is wrong even
+    // when that backend is healthy.
     let title;
     if (isNewConversation) {
-      try {
-        title = await generateTitle(trimmedMessage, replyText);
-        if (title) await conversations.updateTitle(conversationId, title);
-      } catch (titleError) {
-        console.error('Failed to save generated title:', titleError);
-        title = null;
-      }
+      title = typeof clientTitle === 'string' && clientTitle.trim() ? clientTitle.trim() : null;
+      if (title) await conversations.updateTitle(conversationId, title);
     }
 
     let suggestions = [];

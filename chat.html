@@ -3443,6 +3443,28 @@
         'When you need information only the user can provide before you can proceed, call the ask_question tool instead of listing questions as plain text. ' +
         'You can format replies with standard markdown: bold, italic, `code`, fenced code blocks, links, lists, tables.';
 
+      // Mirrors server/controllers/chatController.js's TITLE_SYSTEM_PROMPT —
+      // Cloud mode has the server ask its model for a title; Local mode has
+      // no server-side model to call, so the same short-title generation
+      // runs client-side against the model already loaded for the chat.
+      var LOCAL_TITLE_SYSTEM_PROMPT = 'Summarize the following exchange as a short chat title: 3-6 words, no quotes, no trailing punctuation, no prefix like "Title:". Reply with only the title.';
+
+      function generateLocalTitle(engine, userMessage, assistantReply) {
+        return engine.chat.completions.create({
+          messages: [
+            { role: 'system', content: LOCAL_TITLE_SYSTEM_PROMPT },
+            { role: 'user', content: 'User: ' + userMessage + '\nAssistant: ' + assistantReply },
+          ],
+          stream: false,
+        }).then(function (completion) {
+          var content = completion.choices && completion.choices[0] && completion.choices[0].message && completion.choices[0].message.content;
+          return content ? content.trim().replace(/^["']|["']$/g, '') : null;
+        }).catch(function (err) {
+          console.warn('Local title generation failed:', err.message || err);
+          return null;
+        });
+      }
+
       // Mirrors server/services/tools.js exactly — same schemas, same
       // executor logic — so local and Cloud tool calls behave identically
       // from the user's point of view.
@@ -3509,11 +3531,39 @@
         return webllmModulePromise;
       }
 
+      // Model weight/WASM URLs point at huggingface.co / raw.githubusercontent.com
+      // by default. Rewriting them to our own /api/model-cache/* route means
+      // the browser only ever talks to our origin — the server fetches from
+      // the real upstream once and disk-caches the result for everyone after.
+      function proxiedCacheUrl(url) {
+        var parsed = new URL(url);
+        if (parsed.hostname === 'huggingface.co') {
+          return location.origin + '/api/model-cache/hf' + parsed.pathname + parsed.search;
+        }
+        if (parsed.hostname === 'raw.githubusercontent.com') {
+          return location.origin + '/api/model-cache/gh' + parsed.pathname + parsed.search;
+        }
+        return url;
+      }
+
+      function applyModelCacheAppConfig(webllm, engine) {
+        var rewritten = webllm.prebuiltAppConfig.model_list.map(function (m) {
+          return Object.assign({}, m, {
+            model: proxiedCacheUrl(m.model),
+            model_lib: proxiedCacheUrl(m.model_lib),
+          });
+        });
+        engine.setAppConfig(Object.assign({}, webllm.prebuiltAppConfig, { model_list: rewritten }));
+      }
+
       var localEngine = null;
       var localEngineModelId = null;
       function getLocalEngine(modelId) {
         return loadWebllm().then(function (webllm) {
-          if (!localEngine) localEngine = new webllm.MLCEngine();
+          if (!localEngine) {
+            localEngine = new webllm.MLCEngine();
+            applyModelCacheAppConfig(webllm, localEngine);
+          }
           if (localEngineModelId === modelId) return { engine: localEngine, webllm: webllm };
           return localEngine.reload(modelId).then(function () {
             localEngineModelId = modelId;
@@ -3622,15 +3672,17 @@
 
               var seenCalls = {};
               var forceFinalAnswer = false;
-              // Only attempt tool calls on models WebLLM has actually
-              // confirmed support function calling. Unsupported models don't
-              // error when given a `tools` param — they silently ignore it
-              // and just never populate tool_calls, which is indistinguishable
-              // from "chose not to use a tool this turn." Without this check,
-              // tool calling looked completely broken on any non-Hermes model
-              // even though the loop itself was correct.
-              var functionCallingIds = (ctx.webllm && ctx.webllm.functionCallingModelIds) || [];
-              var supportsTools = LOCAL_TOOL_DEFINITIONS.length > 0 && functionCallingIds.indexOf(modelId) !== -1;
+              // webllm.functionCallingModelIds only lists the 5 Hermes models
+              // WebLLM's own maintainers happened to test — it's not an
+              // exhaustive list of every model capable of tool calling.
+              // Rather than hard-gating on it, attempt tools on every model:
+              // one that truly can't do it either throws (caught below,
+              // degrades to a plain completion) or silently returns no
+              // tool_calls (handled further down as "chose not to use a tool
+              // this turn") — safe either way. In practice, small models
+              // (under ~7-8B) are usually too unreliable at the structured
+              // tool-call format to use this well regardless of the list.
+              var supportsTools = LOCAL_TOOL_DEFINITIONS.length > 0;
 
               function runRound(round) {
                 if (requestGeneration !== viewGeneration) return Promise.resolve();
@@ -3754,19 +3806,26 @@
               }
 
               function saveLocalReply(replyText) {
-                fetch('/api/chat/local/finish', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    conversationId: currentConversationId,
-                    message: sourceMessage,
-                    reply: replyText,
-                    toolCalls: toolCalls,
-                    generationTimes: generationTimes,
-                    isNewConversation: isNewConversation,
-                  }),
+                var titlePromise = isNewConversation
+                  ? generateLocalTitle(engine, sourceMessage, replyText)
+                  : Promise.resolve(null);
+
+                titlePromise.then(function (clientTitle) {
+                  return fetch('/api/chat/local/finish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      conversationId: currentConversationId,
+                      message: sourceMessage,
+                      reply: replyText,
+                      toolCalls: toolCalls,
+                      generationTimes: generationTimes,
+                      isNewConversation: isNewConversation,
+                      clientTitle: clientTitle,
+                    }),
+                  });
                 })
-                  .then(function (response) { return response.ok ? response.json() : null; })
+                  .then(function (response) { return response && response.ok ? response.json() : null; })
                   .then(function (data) {
                     if (!data || requestGeneration !== viewGeneration) return;
                     if (data.title && chatTopTitle) chatTopTitle.textContent = data.title;

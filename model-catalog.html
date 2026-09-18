@@ -124,6 +124,67 @@
     font-size: 15px;
   }
 
+  /* ---------- Turbo download (server-cached, multi-shard) ---------- */
+  .turbo-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #b5650f, #a23a63);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+  }
+
+  .turbo-progress {
+    border-radius: 12px;
+    background: #0d0f14;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 14px 16px;
+  }
+
+  .turbo-progress-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 650;
+    color: #fff;
+  }
+
+  .turbo-progress-head .turbo-pct {
+    color: #35c1e0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .turbo-bar-track {
+    margin-top: 10px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+
+  .turbo-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #7c6df2, #35c1e0, #3ddc84);
+    width: 0%;
+    transition: width 0.2s ease;
+  }
+
+  .turbo-progress-note {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--fg-muted);
+    font-family: inherit;
+  }
+
   /* ---------- Scan screen ---------- */
   .scan-screen {
     display: flex;
@@ -604,9 +665,39 @@
       var currentEngine = null;
       var currentEngineModelId = null;
 
+      // Model weight/WASM URLs point at huggingface.co / raw.githubusercontent.com
+      // by default. Rewriting them to our own /api/model-cache/* route means
+      // the browser only ever talks to our origin — the server fetches from
+      // the real upstream once and disk-caches the result for everyone after,
+      // so a repeat download (by this user or any other) is served straight
+      // off local disk instead of hitting Hugging Face again.
+      function proxiedCacheUrl(url) {
+        var parsed = new URL(url);
+        if (parsed.hostname === 'huggingface.co') {
+          return location.origin + '/api/model-cache/hf' + parsed.pathname + parsed.search;
+        }
+        if (parsed.hostname === 'raw.githubusercontent.com') {
+          return location.origin + '/api/model-cache/gh' + parsed.pathname + parsed.search;
+        }
+        return url;
+      }
+
+      function applyModelCacheAppConfig(webllm, engine) {
+        var rewritten = webllm.prebuiltAppConfig.model_list.map(function (m) {
+          return Object.assign({}, m, {
+            model: proxiedCacheUrl(m.model),
+            model_lib: proxiedCacheUrl(m.model_lib),
+          });
+        });
+        engine.setAppConfig(Object.assign({}, webllm.prebuiltAppConfig, { model_list: rewritten }));
+      }
+
       function getEngine() {
         return loadWebllm().then(function (webllm) {
-          if (!currentEngine) currentEngine = new webllm.MLCEngine();
+          if (!currentEngine) {
+            currentEngine = new webllm.MLCEngine();
+            applyModelCacheAppConfig(webllm, currentEngine);
+          }
           return { webllm: webllm, engine: currentEngine };
         });
       }
@@ -620,39 +711,63 @@
 
       function downloadModel(modelId, card) {
         var progressWrap = document.createElement('div');
-        var fillContainer = document.createElement('div');
-        fillContainer.className = 'logo-fill';
+
+        var banner = document.createElement('div');
+        banner.className = 'turbo-banner';
+        banner.innerHTML = '⚡ Turbo Download via Server Cache';
+
+        var progress = document.createElement('div');
+        progress.className = 'turbo-progress';
+
+        var head = document.createElement('div');
+        head.className = 'turbo-progress-head';
+        var label = document.createElement('span');
+        label.textContent = '⚡ Turbo Downloading: ' + displayName(modelId) + '…';
         var pct = document.createElement('span');
-        pct.className = 'logo-fill-pct';
+        pct.className = 'turbo-pct';
         pct.textContent = '0%';
-        progressWrap.appendChild(fillContainer);
-        progressWrap.appendChild(pct);
+        head.appendChild(label);
+        head.appendChild(pct);
+
+        var track = document.createElement('div');
+        track.className = 'turbo-bar-track';
+        var barFill = document.createElement('div');
+        barFill.className = 'turbo-bar-fill';
+        track.appendChild(barFill);
+
+        var note = document.createElement('p');
+        note.className = 'turbo-progress-note';
+        note.textContent = 'Starting…';
+
+        progress.appendChild(head);
+        progress.appendChild(track);
+        progress.appendChild(note);
+
+        progressWrap.appendChild(banner);
+        progressWrap.appendChild(progress);
         card.classList.add('is-downloading');
         card.appendChild(progressWrap);
 
-        var fill = buildLogoFill(fillContainer);
+        function setFraction(fraction, text) {
+          var clamped = Math.max(0, Math.min(1, fraction));
+          barFill.style.width = (clamped * 100) + '%';
+          pct.textContent = Math.round(clamped * 100) + '%';
+          if (text) note.textContent = text;
+        }
 
         function attempt(attemptNumber) {
           return getEngine().then(function (ctx) {
             ctx.engine.setInitProgressCallback(function (report) {
               var fraction = typeof report.progress === 'number' ? report.progress : 0;
-              fill.setFraction(fraction);
-              // WebLLM's report includes a human-readable phase string (e.g.
-              // "Fetching param cache[12/45]") that's far more useful than a
-              // bare percentage while progress is still 0 — the very first
-              // phases (fetching config, compiling WASM) can take a while
-              // before any weight bytes are downloaded, so a silent "0%" for
-              // 30+ seconds looks broken even when it's actually working.
               var attemptSuffix = attemptNumber > 1 ? ' (attempt ' + attemptNumber + ')' : '';
-              pct.textContent = Math.round(fraction * 100) + '%' + (report.text ? ' — ' + report.text : '') + attemptSuffix;
+              setFraction(fraction, (report.text || 'Downloading…') + attemptSuffix);
             });
             return ctx.engine.reload(modelId);
           }).catch(function (err) {
-            // Large multi-shard downloads from the Hugging Face CDN
-            // occasionally hit a transient HTTP/2 protocol error mid-stream
-            // (network/proxy/AV related, not something this code controls) —
-            // worth an automatic retry with a short backoff before giving up,
-            // since a plain retry alone very often just succeeds.
+            // The server-side cache route retries its own upstream fetch
+            // before giving up, but a client-side retry is still worth
+            // keeping as a second layer — e.g. if the browser's own
+            // connection to our server was interrupted mid-shard.
             if (attemptNumber >= DOWNLOAD_MAX_ATTEMPTS) throw err;
             console.warn('Download attempt ' + attemptNumber + ' failed, retrying:', err.message || err);
             // A reload() that failed partway through may leave the engine
@@ -660,8 +775,7 @@
             // drop it and start the retry with a fresh MLCEngine.
             currentEngine = null;
             currentEngineModelId = null;
-            fill.setFraction(0);
-            pct.textContent = 'Retrying (attempt ' + (attemptNumber + 1) + ' of ' + DOWNLOAD_MAX_ATTEMPTS + ')…';
+            setFraction(0, 'Retrying (attempt ' + (attemptNumber + 1) + ' of ' + DOWNLOAD_MAX_ATTEMPTS + ')…');
             return delay(DOWNLOAD_RETRY_DELAY_MS).then(function () { return attempt(attemptNumber + 1); });
           });
         }

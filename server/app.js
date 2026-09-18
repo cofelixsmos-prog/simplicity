@@ -6,6 +6,7 @@ const { attachSession } = require('./middleware/session');
 const pageGuard = require('./middleware/pageGuard');
 const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
+const modelCacheRoutes = require('./routes/modelCache');
 
 const ROOT_DIR = path.join(__dirname, '..');
 
@@ -25,6 +26,7 @@ function createApp() {
 
   app.use('/api/auth', authRoutes);
   app.use('/api/chat', chatRoutes);
+  app.use('/api/model-cache', modelCacheRoutes);
 
   app.use(pageGuard);
 
