@@ -10,7 +10,8 @@
       date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
       expires = '; expires=' + date.toUTCString();
     }
-    document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/; SameSite=Lax';
+    var isSecure = window.location.protocol === 'https:';
+    document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/; SameSite=Lax' + (isSecure ? '; Secure' : '');
   }
 
   function getCookie(name) {
@@ -19,7 +20,8 @@
   }
 
   function deleteCookie(name) {
-    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+    var isSecure = window.location.protocol === 'https:';
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax' + (isSecure ? '; Secure' : '');
   }
 
   function getConsent() {
@@ -126,17 +128,17 @@
     document.documentElement.dataset.simplicityCookieModalReady = 'true';
 
     function refresh() {
-      if (!toggle || !status) return;
+      if (!toggle) return;
       var consent = getConsent();
       if (consent === 'accepted') {
         toggle.checked = true;
-        status.textContent = 'Preference cookies are currently allowed.';
+        if (status) status.textContent = 'Preference cookies allowed.';
       } else if (consent === 'rejected') {
         toggle.checked = false;
-        status.textContent = 'Preference cookies are currently blocked. Only essential cookies are stored.';
+        if (status) status.textContent = 'Preference cookies blocked.';
       } else {
         toggle.checked = false;
-        status.textContent = "You haven't made a choice yet — preference cookies are blocked by default.";
+        if (status) status.textContent = 'Preference cookies blocked by default.';
       }
     }
 

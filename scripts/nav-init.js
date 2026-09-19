@@ -9,7 +9,8 @@
     if (consent !== 'accepted') return;
     var date = new Date();
     date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
-    document.cookie = 'simplicity-theme=' + encodeURIComponent(value) + '; expires=' + date.toUTCString() + '; path=/; SameSite=Lax';
+    var isSecure = window.location.protocol === 'https:';
+    document.cookie = 'simplicity-theme=' + encodeURIComponent(value) + '; expires=' + date.toUTCString() + '; path=/; SameSite=Lax' + (isSecure ? '; Secure' : '');
   }
 
   function setupThemeToggle() {
