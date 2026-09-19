@@ -110,6 +110,18 @@ async function deleteConversation(userId, conversationId) {
   return true;
 }
 
+async function deleteAllConversations(userId) {
+  const convs = await db.execute({
+    sql: 'SELECT id FROM conversations WHERE user_id = ?',
+    args: [userId],
+  });
+  for (const row of convs.rows) {
+    await db.execute({ sql: 'DELETE FROM messages WHERE conversation_id = ?', args: [row.id] });
+  }
+  await db.execute({ sql: 'DELETE FROM conversations WHERE user_id = ?', args: [userId] });
+  return true;
+}
+
 async function ownsConversation(userId, conversationId) {
   const result = await db.execute({
     sql: 'SELECT id FROM conversations WHERE id = ? AND user_id = ?',
@@ -128,5 +140,6 @@ module.exports = {
   saveMessage,
   updateLastAssistantMessage,
   deleteConversation,
+  deleteAllConversations,
   ownsConversation,
 };

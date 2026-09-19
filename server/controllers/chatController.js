@@ -511,4 +511,13 @@ async function deleteConversation(req, res, next) {
   }
 }
 
-module.exports = { sendMessage, startLocalMessage, finishLocalMessage, listConversations, getConversation, deleteConversation };
+async function deleteAllConversations(req, res, next) {
+  try {
+    await conversations.deleteAllConversations(req.user.id);
+    res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { sendMessage, startLocalMessage, finishLocalMessage, listConversations, getConversation, deleteConversation, deleteAllConversations };
