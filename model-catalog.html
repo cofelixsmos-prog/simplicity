@@ -379,6 +379,12 @@
     color: var(--accent);
   }
 
+  .catalog-card-badge-unsupported {
+    border-color: rgba(229, 72, 77, 0.35);
+    background: rgba(229, 72, 77, 0.08);
+    color: #b42318;
+  }
+
   .catalog-card-action {
     margin-top: auto;
     padding: 8px 12px;
@@ -569,6 +575,7 @@
           gpuInfo: null,
           estimatedVramMB: null,
           webgpuAvailable: false,
+          shaderF16Supported: false,
         };
 
         setTimeout(function () {
@@ -582,6 +589,7 @@
               gpuPromise = navigator.gpu.requestAdapter().then(function (adapter) {
                 if (!adapter) return;
                 result.webgpuAvailable = true;
+                result.shaderF16Supported = !!(adapter.features && adapter.features.has && adapter.features.has('shader-f16'));
                 var infoPromise = adapter.requestAdapterInfo ? adapter.requestAdapterInfo() : Promise.resolve(adapter.info || {});
                 return infoPromise.then(function (info) {
                   var parts = [info && info.vendor, info && info.architecture, info && info.description].filter(Boolean);
@@ -616,6 +624,8 @@
         var warning = '';
         if (!result.webgpuAvailable) {
           warning = '<p class="scan-warning">WebGPU isn\'t available in this browser, so local models can\'t run here. You can still browse the catalog, but downloads won\'t work until you switch to a WebGPU-capable browser (recent Chrome or Edge).</p>';
+        } else if (!result.shaderF16Supported) {
+          warning = '<p class="scan-warning">WebGPU is available, but this browser is missing the shader-f16 feature required by most modern local models. The catalog has been filtered to compatible models; if you want the full list, try a newer Chrome/Edge build or Chrome Canary with the Dawn flag enabled.</p>';
         }
 
         body.innerHTML =
@@ -841,12 +851,13 @@
         card.appendChild(row);
       }
 
-      function buildCard(model, installedSet, functionCallingIds) {
+      function buildCard(model, installedSet, functionCallingIds, hwResult) {
         var card = document.createElement('div');
         card.className = 'catalog-card';
         card.setAttribute('data-model-id', model.model_id);
         card.setAttribute('data-category', categorize(model));
         var supportsTools = functionCallingIds && functionCallingIds.indexOf(model.model_id) !== -1;
+        var isUnsupportedInBrowser = !!(hwResult && hwResult.webgpuAvailable && !hwResult.shaderF16Supported && model.required_features && model.required_features.indexOf('shader-f16') !== -1);
         card.setAttribute('data-tools', supportsTools ? '1' : '0');
 
         var name = document.createElement('p');
@@ -866,6 +877,13 @@
           toolsBadge.textContent = 'tools';
           toolsBadge.title = 'Supports calling tools like ask_question and get_time';
           meta.appendChild(toolsBadge);
+        }
+        if (isUnsupportedInBrowser) {
+          var unsupportedBadge = document.createElement('span');
+          unsupportedBadge.className = 'catalog-card-badge catalog-card-badge-unsupported';
+          unsupportedBadge.textContent = 'Unsupported on this browser';
+          unsupportedBadge.title = 'Requires WebGPU shader-f16 support, which this browser does not provide.';
+          meta.appendChild(unsupportedBadge);
         }
         var size = document.createElement('span');
         size.textContent = formatMB(model.vram_required_MB);
@@ -897,8 +915,21 @@
         });
 
         loadWebllm().then(function (webllm) {
+          var requiresShaderF16 = function (m) {
+            return !!(m.required_features && m.required_features.indexOf('shader-f16') !== -1);
+          };
+          var shaderF16HiddenCount = 0;
+          webllm.prebuiltAppConfig.model_list.forEach(function (m) {
+            if (m.vram_required_MB <= HARD_CEILING_MB && requiresShaderF16(m) && hwResult.webgpuAvailable && !hwResult.shaderF16Supported) {
+              shaderF16HiddenCount += 1;
+            }
+          });
           var allModels = webllm.prebuiltAppConfig.model_list.filter(function (m) {
-            return m.vram_required_MB <= HARD_CEILING_MB;
+            if (m.vram_required_MB > HARD_CEILING_MB) return false;
+            if (requiresShaderF16(m) && hwResult.webgpuAvailable && !hwResult.shaderF16Supported) {
+              return false;
+            }
+            return true;
           });
 
           var installedSet = getInstalledModels();
@@ -916,13 +947,19 @@
               .filter(function (m) { return m.vram_required_MB <= budget; })
               .sort(function (a, b) { return a.vram_required_MB - b.vram_required_MB; })
               .slice(0, 6);
-            recommended.forEach(function (m) { recommendedGrid.appendChild(buildCard(m, installedSet, webllm.functionCallingModelIds)); });
+            recommended.forEach(function (m) { recommendedGrid.appendChild(buildCard(m, installedSet, webllm.functionCallingModelIds, hwResult)); });
             if (!recommended.length) recommendedWrap.classList.add('catalog-hidden');
           } else {
             recommendedWrap.classList.add('catalog-hidden');
           }
 
-          allModels.forEach(function (m) { fullGrid.appendChild(buildCard(m, installedSet, webllm.functionCallingModelIds)); });
+          allModels.forEach(function (m) { fullGrid.appendChild(buildCard(m, installedSet, webllm.functionCallingModelIds, hwResult)); });
+
+          if (shaderF16HiddenCount > 0) {
+            emptyNote.textContent = 'This browser is missing the WebGPU shader-f16 feature required by ' + shaderF16HiddenCount + ' model(s). Try a newer Chrome/Edge build or launch Chrome Canary with --enable-dawn-features=allow_unsafe_apis.';
+          } else {
+            emptyNote.textContent = 'No models match your current search.';
+          }
 
           function applyFilter() {
             var query = searchInput.value.trim().toLowerCase();
@@ -941,6 +978,9 @@
               if (visible) visibleCount++;
             });
             emptyNote.classList.toggle('catalog-hidden', visibleCount > 0);
+            if (visibleCount === 0 && shaderF16HiddenCount > 0 && !query && activeCategory === 'all') {
+              emptyNote.textContent = 'This browser is missing the WebGPU shader-f16 feature required by ' + shaderF16HiddenCount + ' model(s). Try a newer Chrome/Edge build or launch Chrome Canary with --enable-dawn-features=allow_unsafe_apis.';
+            }
           }
 
           searchInput.addEventListener('input', applyFilter);

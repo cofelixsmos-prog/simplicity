@@ -63,10 +63,11 @@
   document.dispatchEvent(new CustomEvent('simplicity:consent-ready'));
 
   function setupBanner() {
-    if (getConsent()) return;
     var banner = document.getElementById('cookie-banner');
     if (!banner) return;
-    banner.classList.add('is-visible');
+    if (!getConsent()) {
+      banner.classList.add('is-visible');
+    }
 
     var acceptBtn = document.getElementById('cookie-accept');
     var rejectBtn = document.getElementById('cookie-reject');
@@ -119,6 +120,11 @@
     var banner = document.getElementById('cookie-banner');
     var lastFocusedElement;
 
+    if (document.documentElement.dataset.simplicityCookieModalReady === 'true') {
+      return;
+    }
+    document.documentElement.dataset.simplicityCookieModalReady = 'true';
+
     function refresh() {
       if (!toggle || !status) return;
       var consent = getConsent();
@@ -153,6 +159,12 @@
 
     openBtns.forEach(function (btn) {
       btn.addEventListener('click', open);
+    });
+    document.addEventListener('click', function (event) {
+      var target = event && event.target;
+      if (!target || typeof target.closest !== 'function') return;
+      var trigger = target.closest('#cookie-open, #mobile-cookie-open, #cookie-banner-settings, #footer-cookie-open');
+      if (trigger) open(event);
     });
     if (closeBtn) closeBtn.addEventListener('click', close);
     overlay.addEventListener('click', function (event) {
