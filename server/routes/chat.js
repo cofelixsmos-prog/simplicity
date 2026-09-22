@@ -10,6 +10,7 @@ router.post('/local/start', requireAuth, chatLimiter, chatController.startLocalM
 router.post('/local/finish', requireAuth, chatLimiter, chatController.finishLocalMessage);
 router.get('/conversations', requireAuth, chatController.listConversations);
 router.get('/conversations/:id', requireAuth, chatController.getConversation);
+router.patch('/conversations/:id/title', requireAuth, chatController.updateConversationTitle);
 router.delete('/conversations', requireAuth, chatController.deleteAllConversations);
 router.delete('/conversations/:id', requireAuth, chatController.deleteConversation);
 
