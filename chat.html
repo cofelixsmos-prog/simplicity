@@ -898,6 +898,7 @@
   }
 
   .chat-form-top {
+    order: 2;
     width: 100%;
     display: flex;
   }
@@ -922,6 +923,7 @@
   }
 
   .chat-form-toolbar {
+    order: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1007,7 +1009,6 @@
   .model-picker-group + .model-picker-group {
     margin-top: 4px;
     padding-top: 4px;
-    border-top: 1px solid var(--nav-border);
   }
 
   .model-picker-group-label {
@@ -1416,6 +1417,7 @@
     color: var(--fg);
   }
 
+  .history-item-rename,
   .history-item-delete {
     flex-shrink: 0;
     display: none;
@@ -1428,10 +1430,17 @@
     background: transparent;
     color: var(--fg-muted);
     cursor: pointer;
+    margin-left: 2px;
   }
 
+  .history-item:hover .history-item-rename,
   .history-item:hover .history-item-delete {
     display: inline-flex;
+  }
+
+  .history-item-rename:hover {
+    background: var(--btn-outline-border);
+    color: var(--fg);
   }
 
   .history-item-delete:hover {
@@ -1439,6 +1448,7 @@
     color: var(--accent);
   }
 
+  .history-item-rename svg,
   .history-item-delete svg {
     width: 12px;
     height: 12px;
@@ -1870,9 +1880,6 @@
     <div class="question-dock" id="question-dock"></div>
 
     <form class="chat-form" id="chat-form">
-      <div class="chat-form-top">
-        <textarea id="chat-input" rows="2" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message"></textarea>
-      </div>
       <div class="chat-form-toolbar">
         <div class="model-picker" id="model-picker">
           <button type="button" class="model-picker-trigger" id="model-picker-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="model-picker-panel" title="Select model">
@@ -1912,6 +1919,9 @@
             </svg>
           </button>
         </div>
+      </div>
+      <div class="chat-form-top">
+        <textarea id="chat-input" rows="2" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message"></textarea>
       </div>
     </form>
     <button class="scroll-bottom" id="scroll-bottom" type="button" aria-label="Scroll to bottom" hidden>↓</button>
@@ -2037,6 +2047,57 @@
         });
       }
 
+      function customPrompt(options) {
+        return new Promise(function (resolve) {
+          var overlay = document.getElementById('confirm-modal-overlay');
+          var titleEl = document.getElementById('confirm-modal-title');
+          var msgEl = document.getElementById('confirm-modal-message');
+          var okBtn = document.getElementById('confirm-modal-ok');
+          var cancelBtn = document.getElementById('confirm-modal-cancel');
+
+          titleEl.textContent = (options && options.title) || 'Rename';
+          msgEl.innerHTML = '';
+          if (options && options.message) {
+            var p = document.createElement('p');
+            p.textContent = options.message;
+            msgEl.appendChild(p);
+          }
+          var promptInput = document.createElement('input');
+          promptInput.type = 'text';
+          promptInput.className = 'outline-style-select';
+          promptInput.style.width = '100%';
+          promptInput.style.marginTop = '10px';
+          promptInput.value = (options && options.defaultValue) || '';
+          msgEl.appendChild(promptInput);
+
+          okBtn.textContent = (options && options.confirmText) || 'Save';
+          okBtn.className = 'btn btn-primary';
+          okBtn.style.background = '';
+          okBtn.style.color = '';
+
+          overlay.hidden = false;
+          overlay.classList.add('is-visible');
+          setTimeout(function () { promptInput.focus(); promptInput.select(); }, 50);
+
+          function cleanup(val) {
+            overlay.classList.remove('is-visible');
+            setTimeout(function () { overlay.hidden = true; msgEl.innerHTML = ''; }, 200);
+            okBtn.removeEventListener('click', onOk);
+            cancelBtn.removeEventListener('click', onCancel);
+            promptInput.removeEventListener('keydown', onKey);
+            resolve(val);
+          }
+
+          function onOk() { cleanup(promptInput.value.trim()); }
+          function onCancel() { cleanup(null); }
+          function onKey(e) { if (e.key === 'Enter') onOk(); }
+
+          okBtn.addEventListener('click', onOk);
+          cancelBtn.addEventListener('click', onCancel);
+          promptInput.addEventListener('keydown', onKey);
+        });
+      }
+
       function buildHistoryItem(conversation) {
         var item = document.createElement('button');
         item.type = 'button';
@@ -2048,10 +2109,46 @@
         title.textContent = conversation.title;
         item.appendChild(title);
 
+        var renameBtn = document.createElement('span');
+        renameBtn.className = 'history-item-rename';
+        renameBtn.setAttribute('role', 'button');
+        renameBtn.setAttribute('aria-label', 'Rename conversation');
+        renameBtn.title = 'Rename chat';
+        renameBtn.innerHTML = '<svg viewBox="0 0 16 16"><path d="M11 2l3 3-9 9H2v-3l9-9z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+        renameBtn.addEventListener('click', function (event) {
+          event.stopPropagation();
+          customPrompt({
+            title: 'Rename Chat',
+            message: 'Enter a new title for this conversation:',
+            defaultValue: conversation.title
+          }).then(function (newTitle) {
+            if (!newTitle) return;
+            fetch('/api/chat/conversations/' + conversation.id + '/title', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title: newTitle }),
+            })
+              .then(function (res) { return res.ok ? res.json() : null; })
+              .then(function (data) {
+                if (!data) return;
+                conversation.title = data.title;
+                title.textContent = data.title;
+                if (conversation.id === currentConversationId && chatTopTitle) {
+                  chatTopTitle.textContent = data.title;
+                }
+                if (conversationCache[conversation.id]) {
+                  conversationCache[conversation.id].title = data.title;
+                }
+              });
+          });
+        });
+        item.appendChild(renameBtn);
+
         var del = document.createElement('span');
         del.className = 'history-item-delete';
         del.setAttribute('role', 'button');
         del.setAttribute('aria-label', 'Delete conversation');
+        del.title = 'Delete chat';
         del.innerHTML = '<svg viewBox="0 0 16 16"><path d="M3 4h10M6.5 4V2.5h3V4M4.5 4l.5 9.5h6l.5-9.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         del.addEventListener('click', function (event) {
           event.stopPropagation();

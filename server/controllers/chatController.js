@@ -511,6 +511,23 @@ async function deleteConversation(req, res, next) {
   }
 }
 
+async function updateConversationTitle(req, res, next) {
+  try {
+    const { title } = req.body || {};
+    if (typeof title !== 'string' || !title.trim()) {
+      return res.status(400).json({ error: 'Title is required.' });
+    }
+    const owns = await conversations.ownsConversation(req.user.id, req.params.id);
+    if (!owns) return res.status(404).json({ error: 'Conversation not found.' });
+
+    const newTitle = title.trim();
+    await conversations.updateTitle(req.params.id, newTitle);
+    res.json({ id: req.params.id, title: newTitle });
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function deleteAllConversations(req, res, next) {
   try {
     await conversations.deleteAllConversations(req.user.id);
@@ -520,4 +537,4 @@ async function deleteAllConversations(req, res, next) {
   }
 }
 
-module.exports = { sendMessage, startLocalMessage, finishLocalMessage, listConversations, getConversation, deleteConversation, deleteAllConversations };
+module.exports = { sendMessage, startLocalMessage, finishLocalMessage, listConversations, getConversation, deleteConversation, deleteAllConversations, updateConversationTitle };
