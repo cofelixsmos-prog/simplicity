@@ -81,7 +81,7 @@
      Dark #0A0A0A, Muted #6B6A63. Poppins + dot-mark language. */
   ::selection {
     background: var(--accent);
-    color: #fff;
+    color: rgba(243, 241, 236, 0.9);
   }
 
   /* ---------- Very simple chat layout ---------- */
@@ -186,7 +186,7 @@
 
   .chat-empty {
     text-align: center;
-    color: var(--fg-muted);
+    color: rgba(243, 241, 236, 0.72);
     font-size: 15px;
     line-height: 1.6;
     display: flex;
@@ -194,6 +194,10 @@
     align-items: center;
     margin-bottom: 28px;
     transition: opacity 0.28s ease, transform 0.28s ease;
+  }
+
+  .chat-empty strong {
+    color: rgba(243, 241, 236, 0.9);
   }
 
   .chat-empty.is-leaving {
@@ -234,9 +238,9 @@
 
   .chat-empty strong {
     display: block;
-    color: var(--fg);
-    font-size: clamp(1.3rem, 2.8vw, 1.85rem);
-    font-weight: 500;
+    color: rgba(243, 241, 236, 0.68);
+    font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+    font-weight: 400;
     letter-spacing: -0.02em;
     line-height: 1.2;
     margin-bottom: 6px;
@@ -255,6 +259,8 @@
   :root {
     --user-bubble-border-style: dashed;
     --user-bubble-border-color: #FF5A1F;
+    --assistant-text-color: var(--fg);
+    --highlight-background: var(--accent);
   }
 
   .chat-bubble.user {
@@ -270,6 +276,7 @@
   }
 
   .swatch-btn {
+    position: relative;
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -286,6 +293,7 @@
   .swatch-btn.is-selected {
     border-color: var(--fg);
     transform: scale(1.15);
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--fg);
   }
 
   .outline-style-select {
@@ -299,9 +307,90 @@
     cursor: pointer;
   }
 
+  .outline-style-picker {
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .outline-style-trigger {
+    min-width: 142px;
+    padding: 8px 30px 8px 10px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 13px;
+    line-height: 16px;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .outline-style-trigger::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 11px;
+    width: 6px;
+    height: 6px;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: translateY(-65%) rotate(45deg);
+    transition: transform 0.16s ease;
+  }
+
+  .outline-style-picker.is-open .outline-style-trigger::after {
+    transform: translateY(-20%) rotate(225deg);
+  }
+
+  .outline-style-trigger:focus-visible,
+  .outline-style-option:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .outline-style-menu {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 100%;
+    padding: 4px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 8px;
+    background: var(--bg);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+    display: none;
+  }
+
+  .outline-style-picker.is-open .outline-style-menu {
+    display: grid;
+  }
+
+  .outline-style-option {
+    border: 0;
+    border-radius: 5px;
+    padding: 7px 8px;
+    background: transparent;
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 13px;
+    line-height: 16px;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .outline-style-option:hover,
+  .outline-style-option.is-selected {
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--fg);
+  }
+
   .chat-bubble.bot {
     background: transparent;
-    color: var(--fg);
+    color: var(--assistant-text-color);
     border: none;
     padding: 2px 0;
     max-width: 100%;
@@ -406,16 +495,15 @@
   }
 
   .chat-bubble.bot .md-hl {
-    display: block;
+    display: inline;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
-    background: var(--accent);
-    color: #fff;
-    border-radius: 10px;
-    padding: 10px 14px;
-    margin: 8px 0;
+    background: var(--highlight-background);
+    color: rgba(243, 241, 236, 0.9);
+    border-radius: 4px;
+    padding: 1px 4px;
     font-weight: 550;
-    line-height: 1.5;
+    line-height: inherit;
   }
 
   .question-dock {
@@ -535,7 +623,7 @@
 
   .question-row.is-selected .question-row-num {
     background: var(--accent);
-    color: #fff;
+    color: rgba(243, 241, 236, 0.9);
   }
 
   .question-row-num svg {
@@ -566,6 +654,105 @@
   .question-row-hint svg {
     width: 14px;
     height: 14px;
+  }
+
+  .question-option-check {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 4px;
+    background: var(--bg);
+  }
+
+  .question-row.is-selected .question-option-check {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: inset 0 0 0 3px var(--bg);
+  }
+
+  .question-info-btn {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .question-info-btn:hover {
+    color: var(--fg);
+    border-color: var(--accent);
+  }
+
+  .question-info-panel {
+    padding: 8px 12px 10px 42px;
+    border-bottom: 1px solid var(--btn-outline-border);
+    color: var(--fg-muted);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .question-extra-notes,
+  .question-answer-input {
+    width: 100%;
+    min-height: 54px;
+    margin-top: 10px;
+    padding: 9px 10px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 9px;
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+    font-size: 13px;
+    resize: vertical;
+  }
+
+  .question-extra-notes::placeholder,
+  .question-answer-input::placeholder {
+    color: var(--fg-muted);
+  }
+
+  .question-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .question-nav-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .question-nav button {
+    min-height: 30px;
+    padding: 5px 10px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .question-nav button:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
+
+  .question-nav button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  .question-nav .question-next {
+    background: var(--fg);
+    color: var(--bg);
   }
 
   .question-row-custom {
@@ -883,11 +1070,11 @@
     z-index: 20;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 24px;
+    gap: 6px;
+    margin-top: 18px;
     border: 1.5px solid var(--btn-outline-border);
     border-radius: 20px;
-    padding: 12px 14px 10px;
+    padding: 8px 12px 8px;
     background: var(--bg);
     box-shadow: 0 1px 0 var(--nav-border);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -906,17 +1093,17 @@
   .chat-form textarea {
     flex: 1;
     min-width: 0;
-    min-height: 44px;
+    min-height: 20px;
     border: none;
     outline: none;
     background: transparent;
     color: var(--fg);
     font: inherit;
     font-size: 14.5px;
-    line-height: 1.5;
+    line-height: 1.2;
     resize: none;
     overflow-y: auto;
-    max-height: 160px;
+    max-height: 110px;
     padding: 2px 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -929,8 +1116,8 @@
     justify-content: space-between;
     gap: 8px;
     width: 100%;
-    padding-top: 8px;
-    border-top: 1px dashed var(--btn-outline-border);
+    padding-top: 0;
+    border-top: none;
   }
 
   .chat-form-actions {
@@ -971,6 +1158,10 @@
     cursor: pointer;
     white-space: nowrap;
     transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .model-picker-label {
+    color: var(--fg-muted);
   }
 
   .model-picker-trigger:hover {
@@ -1127,7 +1318,7 @@
     border-radius: 50%;
     border: none;
     background: var(--accent);
-    color: #fff;
+    color: rgba(243, 241, 236, 0.9);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -1319,7 +1510,7 @@
     border-radius: 10px;
     border: 1px solid var(--btn-outline-border);
     background: transparent;
-    color: var(--fg);
+    color: rgba(243, 241, 236, 0.72);
     font: inherit;
     font-size: 13.5px;
     font-weight: 550;
@@ -1330,12 +1521,14 @@
   .new-chat-btn:hover {
     border-color: var(--accent);
     background: var(--btn-outline-hover);
+    color: rgba(243, 241, 236, 0.88);
   }
 
   .new-chat-btn svg {
     width: 15px;
     height: 15px;
     flex-shrink: 0;
+    opacity: 0.72;
   }
 
   .history-list {
@@ -1374,7 +1567,7 @@
     border-radius: 10px;
     border: none;
     background: none;
-    color: var(--fg-muted);
+    color: rgba(243, 241, 236, 0.8);
     font: inherit;
     font-size: 13.5px;
     line-height: 1.3;
@@ -1390,7 +1583,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: var(--fg);
+    color: rgba(243, 241, 236, 0.9);
   }
 
   .history-section-label {
@@ -1399,7 +1592,7 @@
     font-weight: 600;
     letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: var(--fg-muted);
+    color: rgba(243, 241, 236, 0.7);
     opacity: 0.7;
   }
 
@@ -1479,7 +1672,8 @@
   .sidebar-account-name {
     font-size: 13.5px;
     font-weight: 550;
-    color: var(--fg);
+    color: rgba(243, 241, 236, 0.68);
+    opacity: 0.85;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1506,12 +1700,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: var(--fg);
     color: var(--bg);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 650;
   }
 
@@ -1545,12 +1739,25 @@
     color: var(--fg-muted);
   }
 
-  .account-row-danger:hover {
-    color: #e5484d;
+  #settings-logout,
+  #settings-delete-all-chats,
+  .account-row-danger {
+    color: var(--fg-muted);
+    border-color: var(--btn-outline-border);
+    background: transparent;
   }
 
+  #settings-logout:hover,
+  #settings-delete-all-chats:hover,
+  .account-row-danger:hover {
+    color: rgba(243, 241, 236, 0.82);
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .account-row-danger svg,
   .account-row-danger:hover svg {
-    color: #e5484d;
+    color: var(--fg-muted);
   }
 
   /* ---------- Chat top bar ---------- */
@@ -1646,9 +1853,11 @@
 
   .settings-modal {
     width: 100%;
-    max-width: 420px;
+    max-width: 760px;
     max-height: 90vh;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     background: var(--bg);
     border: 1px solid var(--nav-border);
     border-radius: 20px;
@@ -1656,6 +1865,10 @@
     padding: 26px;
     transform: translateY(12px) scale(0.98);
     transition: transform 0.25s ease;
+  }
+
+  .settings-modal::-webkit-scrollbar {
+    display: none;
   }
 
   .settings-modal-overlay.is-visible .settings-modal {
@@ -1669,10 +1882,15 @@
     gap: 16px;
   }
 
+  .settings-modal {
+    color: rgba(243, 241, 236, 0.72);
+  }
+
   .settings-modal-head h2 {
     font-size: 1.2rem;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: -0.01em;
+    color: rgba(243, 241, 236, 0.72);
   }
 
   .settings-modal-close {
@@ -1715,13 +1933,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: var(--fg);
     color: var(--bg);
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 650;
   }
 
   .settings-identity-text {
@@ -1730,8 +1948,8 @@
 
   .settings-identity-name {
     font-size: 15px;
-    font-weight: 700;
-    color: var(--fg);
+    font-weight: 500;
+    color: rgba(243, 241, 236, 0.72);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1740,39 +1958,121 @@
   .settings-identity-label {
     margin-top: 2px;
     font-size: 12.5px;
-    color: var(--fg-muted);
+    color: rgba(243, 241, 236, 0.62);
+    font-weight: 400;
   }
 
   .settings-modal-row {
-    padding: 18px 0;
+    padding: 12px 0;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 18px;
+    min-height: 56px;
+  }
+
+  .settings-modal-row-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .settings-modal-row-text h3 {
     font-size: 0.95rem;
-    font-weight: 700;
-    margin-bottom: 4px;
+    font-weight: 500;
+    margin: 0 0 3px;
+    line-height: 1.3;
+    color: rgba(243, 241, 236, 0.72);
   }
 
   .settings-modal-row-text p {
-    color: var(--fg-muted);
+    color: rgba(243, 241, 236, 0.62);
     font-size: 0.85rem;
-    line-height: 1.5;
+    line-height: 1.45;
     max-width: 38ch;
+    margin: 0;
+    font-weight: 400;
   }
 
   .settings-modal-actions {
-    margin-top: 8px;
+    margin-top: 0;
     display: flex;
+    justify-content: flex-end;
+    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
   }
 
+  .settings-modal-row .settings-modal-actions {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .confirm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s;
+  }
+
+  .confirm-modal-overlay.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .confirm-modal {
+    width: min(100%, 440px);
+    padding: 24px;
+    border: 1px solid var(--nav-border);
+    border-radius: 16px;
+    background: var(--bg);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+  }
+
+  .confirm-modal h2 {
+    color: var(--fg-muted);
+    opacity: 0.82;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .confirm-modal-message {
+    margin-top: 10px;
+    color: var(--fg-muted);
+    opacity: 0.78;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .confirm-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
   @media (max-width: 480px) {
-    .settings-modal { padding: 20px; }
+    .settings-modal-overlay {
+      align-items: stretch;
+      padding: 0;
+    }
+
+    .settings-modal {
+      max-width: none;
+      max-height: none;
+      min-height: 100%;
+      border-radius: 0;
+      padding: 20px;
+    }
   }
 
 </style>
@@ -1929,6 +2229,17 @@
     </div>
   </div>
 
+  <div class="confirm-modal-overlay" id="confirm-modal-overlay" hidden>
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <h2 id="confirm-modal-title">Confirm</h2>
+      <div class="confirm-modal-message" id="confirm-modal-message"></div>
+      <div class="confirm-modal-actions">
+        <button class="btn btn-outline" id="confirm-modal-cancel" type="button">Cancel</button>
+        <button class="btn btn-primary" id="confirm-modal-ok" type="button">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <div class="settings-modal-overlay" id="settings-modal-overlay">
     <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
       <div class="settings-modal-head">
@@ -1963,12 +2274,15 @@
           <h3>Message Outline Style</h3>
           <p>Choose user message border style.</p>
         </div>
-        <select class="outline-style-select" id="user-outline-style-select" aria-label="User message border style">
-          <option value="dashed">Dotted / Dashed</option>
-          <option value="solid">Solid Line</option>
-          <option value="double">Double Line</option>
-          <option value="groove">Groove</option>
-        </select>
+        <div class="outline-style-picker" id="user-outline-style-picker">
+          <button class="outline-style-trigger" id="user-outline-style-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">Dotted / Dashed</button>
+          <div class="outline-style-menu" id="user-outline-style-menu" role="listbox" aria-label="User message border style">
+            <button class="outline-style-option is-selected" type="button" role="option" aria-selected="true" data-value="dashed">Dotted / Dashed</button>
+            <button class="outline-style-option" type="button" role="option" aria-selected="false" data-value="solid">Solid Line</button>
+            <button class="outline-style-option" type="button" role="option" aria-selected="false" data-value="double">Double Line</button>
+            <button class="outline-style-option" type="button" role="option" aria-selected="false" data-value="groove">Groove</button>
+          </div>
+        </div>
       </div>
 
       <div class="settings-modal-row">
@@ -1985,8 +2299,47 @@
         </div>
       </div>
 
-      <div class="settings-modal-actions">
+      <div class="settings-modal-row">
+        <div class="settings-modal-row-text">
+          <h3>Assistant Text Color</h3>
+          <p>Choose the color used for assistant replies.</p>
+        </div>
+        <div class="appearance-swatches" id="assistant-text-color-swatches">
+          <button type="button" class="swatch-btn is-selected" data-color="#F3F1EC" style="background:#F3F1EC" title="Warm white"></button>
+          <button type="button" class="swatch-btn" data-color="#CBD5E1" style="background:#CBD5E1" title="Cool white"></button>
+          <button type="button" class="swatch-btn" data-color="#93C5FD" style="background:#93C5FD" title="Soft blue"></button>
+          <button type="button" class="swatch-btn" data-color="#A7F3D0" style="background:#A7F3D0" title="Soft green"></button>
+          <button type="button" class="swatch-btn" data-color="#FDE68A" style="background:#FDE68A" title="Soft yellow"></button>
+        </div>
+      </div>
+
+      <div class="settings-modal-row">
+        <div class="settings-modal-row-text">
+          <h3>Highlight Color</h3>
+          <p>Choose the background for important reply passages.</p>
+        </div>
+        <div class="appearance-swatches" id="highlight-color-swatches">
+          <button type="button" class="swatch-btn is-selected" data-color="#FF5A1F" style="background:#FF5A1F" title="Accent orange"></button>
+          <button type="button" class="swatch-btn" data-color="#2563EB" style="background:#2563EB" title="Blue"></button>
+          <button type="button" class="swatch-btn" data-color="#059669" style="background:#059669" title="Green"></button>
+          <button type="button" class="swatch-btn" data-color="#DB2777" style="background:#DB2777" title="Pink"></button>
+          <button type="button" class="swatch-btn" data-color="#7C3AED" style="background:#7C3AED" title="Violet"></button>
+        </div>
+      </div>
+
+      <div class="settings-modal-row">
+        <div class="settings-modal-row-text">
+          <h3>Log out</h3>
+          <p>End your current session and return to the sign-in screen.</p>
+        </div>
         <button class="btn btn-outline" id="settings-logout" type="button" title="Log out">Log out</button>
+      </div>
+
+      <div class="settings-modal-row">
+        <div class="settings-modal-row-text">
+          <h3>Delete all chats</h3>
+          <p>Remove every saved conversation from this account.</p>
+        </div>
         <button class="btn btn-outline account-row-danger" id="settings-delete-all-chats" type="button" title="Delete all chats">Delete all chats</button>
       </div>
     </div>
@@ -2098,20 +2451,53 @@
         });
       }
 
+      function customConfirm(options) {
+        return new Promise(function (resolve) {
+          var overlay = document.getElementById('confirm-modal-overlay');
+          var titleEl = document.getElementById('confirm-modal-title');
+          var msgEl = document.getElementById('confirm-modal-message');
+          var okBtn = document.getElementById('confirm-modal-ok');
+          var cancelBtn = document.getElementById('confirm-modal-cancel');
+
+          titleEl.textContent = (options && options.title) || 'Confirm';
+          msgEl.textContent = (options && options.message) || '';
+          okBtn.textContent = (options && options.confirmText) || 'Confirm';
+          okBtn.className = (options && options.danger) ? 'btn btn-outline account-row-danger' : 'btn btn-primary';
+          overlay.hidden = false;
+          overlay.classList.add('is-visible');
+
+          function cleanup(value) {
+            overlay.classList.remove('is-visible');
+            setTimeout(function () { overlay.hidden = true; }, 200);
+            okBtn.removeEventListener('click', onOk);
+            cancelBtn.removeEventListener('click', onCancel);
+            resolve(value);
+          }
+
+          function onOk() { cleanup(true); }
+          function onCancel() { cleanup(false); }
+
+          okBtn.addEventListener('click', onOk);
+          cancelBtn.addEventListener('click', onCancel);
+          okBtn.focus();
+        });
+      }
+
       function buildHistoryItem(conversation) {
-        var item = document.createElement('button');
-        item.type = 'button';
+        var item = document.createElement('div');
         item.className = 'history-item';
         item.setAttribute('data-id', conversation.id);
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
 
         var title = document.createElement('span');
         title.className = 'history-item-title';
         title.textContent = conversation.title;
         item.appendChild(title);
 
-        var renameBtn = document.createElement('span');
+        var renameBtn = document.createElement('button');
+        renameBtn.type = 'button';
         renameBtn.className = 'history-item-rename';
-        renameBtn.setAttribute('role', 'button');
         renameBtn.setAttribute('aria-label', 'Rename conversation');
         renameBtn.title = 'Rename chat';
         renameBtn.innerHTML = '<svg viewBox="0 0 16 16"><path d="M11 2l3 3-9 9H2v-3l9-9z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
@@ -2144,9 +2530,9 @@
         });
         item.appendChild(renameBtn);
 
-        var del = document.createElement('span');
+        var del = document.createElement('button');
+        del.type = 'button';
         del.className = 'history-item-delete';
-        del.setAttribute('role', 'button');
         del.setAttribute('aria-label', 'Delete conversation');
         del.title = 'Delete chat';
         del.innerHTML = '<svg viewBox="0 0 16 16"><path d="M3 4h10M6.5 4V2.5h3V4M4.5 4l.5 9.5h6l.5-9.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
@@ -2158,6 +2544,13 @@
 
         item.addEventListener('click', function () {
           openConversation(conversation.id, { title: conversation.title });
+        });
+        item.addEventListener('keydown', function (event) {
+          if (event.target !== item) return;
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openConversation(conversation.id, { title: conversation.title });
+          }
         });
 
         return item;
@@ -2338,26 +2731,40 @@
       }
 
       function deleteConversation(conversationId) {
-        if (!confirm('Are you sure you want to delete this chat?')) return;
-        delete conversationCache[conversationId];
-        fetch('/api/chat/conversations/' + conversationId, { method: 'DELETE' })
-          .then(function () {
-            if (conversationId === currentConversationId) startNewChat();
-            loadHistoryList(currentConversationId);
-          })
-          .catch(function (error) { console.error(error); });
+        customConfirm({
+          title: 'Delete chat',
+          message: 'Are you sure you want to delete this chat?',
+          confirmText: 'Delete',
+          danger: true
+        }).then(function (confirmed) {
+          if (!confirmed) return;
+          delete conversationCache[conversationId];
+          fetch('/api/chat/conversations/' + conversationId, { method: 'DELETE' })
+            .then(function () {
+              if (conversationId === currentConversationId) startNewChat();
+              loadHistoryList(currentConversationId);
+            })
+            .catch(function (error) { console.error(error); });
+        });
       }
 
       function deleteAllConversations() {
-        if (!confirm('Are you sure you want to delete ALL chats? This action cannot be undone.')) return;
-        conversationCache = {};
-        fetch('/api/chat/conversations', { method: 'DELETE' })
-          .then(function () {
-            startNewChat();
-            loadHistoryList(null);
-            closeSettings();
-          })
-          .catch(function (error) { console.error(error); });
+        customConfirm({
+          title: 'Delete all chats',
+          message: 'Are you sure you want to delete ALL chats? This action cannot be undone.',
+          confirmText: 'Delete all',
+          danger: true
+        }).then(function (confirmed) {
+          if (!confirmed) return;
+          conversationCache = {};
+          fetch('/api/chat/conversations', { method: 'DELETE' })
+            .then(function () {
+              startNewChat();
+              loadHistoryList(null);
+              closeSettings();
+            })
+            .catch(function (error) { console.error(error); });
+        });
       }
 
       function renderStoredMessage(msg) {
@@ -2383,7 +2790,7 @@
           function appendGenerationTime(seconds) {
             var label = document.createElement('div');
             label.className = 'thinking-indicator generation-time-label';
-            label.textContent = 'Simplified in ' + seconds + ' sec';
+            label.textContent = 'Simplified in ' + formatElapsed(seconds);
             trace.appendChild(label);
           }
           if (msg.trace && msg.trace.length) {
@@ -2893,6 +3300,17 @@
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
 
+      function formatElapsed(seconds) {
+        var total = Math.max(0, Math.round(Number(seconds) || 0));
+        if (total < 60) return total + ' sec';
+        var minutes = Math.floor(total / 60);
+        var remainingSeconds = total % 60;
+        if (minutes < 60) return minutes + ' min ' + remainingSeconds + ' sec';
+        var hours = Math.floor(minutes / 60);
+        minutes %= 60;
+        return hours + ' h ' + minutes + ' min ' + remainingSeconds + ' sec';
+      }
+
       function escapeHtml(text) {
         return text
           .replace(/&/g, '&amp;')
@@ -3191,19 +3609,31 @@
       }
 
       function renderQuestionCard(container, questions, onSubmit) {
-        var answers = new Array(questions.length).fill(null);
+        var normalizedQuestions = (questions || []).map(function (question) {
+          var normalized = question || {};
+          normalized.options = (normalized.options || []).map(function (option) {
+            return typeof option === 'string' ? { label: option, description: '' } : option;
+          });
+          normalized.multiple = Boolean(normalized.multiple);
+          normalized.required = normalized.required !== false;
+          return normalized;
+        });
+        var answers = normalizedQuestions.map(function () { return { choices: [], custom: '', notes: '' }; });
         var qIndex = 0;
 
         container.innerHTML = '';
         container.classList.add('is-active');
         var card = document.createElement('div');
         card.className = 'question-card';
+        card.setAttribute('tabindex', '-1');
         container.appendChild(card);
         if (followOutput) scrollPageBottom(false);
 
         function finishAll() {
-          var summary = questions.map(function (q, i) {
-            return q.question + ' ' + answers[i];
+          var summary = normalizedQuestions.map(function (question, index) {
+            var answer = answers[index];
+            var chosen = answer.choices.join(', ') || answer.custom || (question.required ? '(unanswered)' : '(skipped)');
+            return question.question + ': ' + chosen + (answer.notes ? '\nExtra notes: ' + answer.notes : '');
           }).join('\n');
           container.classList.remove('is-active');
           container.innerHTML = '';
@@ -3212,20 +3642,26 @@
 
         function renderStep() {
           card.innerHTML = '';
-          var q = questions[qIndex];
-          var rowsCount = (q.options || []).length + 1;
-          var selected = 0;
-
+          var question = normalizedQuestions[qIndex];
+          var answer = answers[qIndex];
           var head = document.createElement('div');
           head.className = 'question-head';
-          var qText = document.createElement('p');
-          qText.className = 'question-text';
-          qText.textContent = q.question;
-          head.appendChild(qText);
-          if (questions.length > 1) {
+          var headText = document.createElement('div');
+          var questionText = document.createElement('p');
+          questionText.className = 'question-text';
+          questionText.textContent = question.question;
+          headText.appendChild(questionText);
+          if (question.description) {
+            var description = document.createElement('div');
+            description.className = 'question-foot';
+            description.textContent = question.description;
+            headText.appendChild(description);
+          }
+          head.appendChild(headText);
+          if (normalizedQuestions.length > 1) {
             var stepLabel = document.createElement('span');
             stepLabel.className = 'question-step';
-            stepLabel.textContent = (qIndex + 1) + ' / ' + questions.length;
+            stepLabel.textContent = (qIndex + 1) + ' / ' + normalizedQuestions.length;
             head.appendChild(stepLabel);
           }
           var closeBtn = document.createElement('button');
@@ -3244,110 +3680,120 @@
           list.className = 'question-list';
           card.appendChild(list);
 
-          function lockIn(answerText) {
-            answers[qIndex] = answerText;
-            if (qIndex < questions.length - 1) {
-              qIndex++;
-              renderStep();
-            } else {
-              finishAll();
-            }
+          function updateRows() {
+            list.querySelectorAll('.question-row[data-option]').forEach(function (row) {
+              row.classList.toggle('is-selected', answer.choices.indexOf(row.getAttribute('data-option')) !== -1);
+            });
           }
 
-          var rowEls = [];
-
-          (q.options || []).forEach(function (optionText, i) {
-            var row = document.createElement('button');
-            row.type = 'button';
+          question.options.forEach(function (option, optionIndex) {
+            var row = document.createElement('div');
             row.className = 'question-row';
-            var num = document.createElement('span');
-            num.className = 'question-row-num';
-            num.textContent = String(i + 1);
+            row.setAttribute('data-option', option.label);
+            var check = document.createElement('span');
+            check.className = 'question-option-check';
             var label = document.createElement('span');
             label.className = 'question-row-label';
-            label.textContent = optionText;
-            var hint = document.createElement('span');
-            hint.className = 'question-row-hint';
-            hint.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M20 7v4a2 2 0 01-2 2H6M6 13l4-4M6 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-            row.appendChild(num);
+            label.textContent = option.label;
+            row.appendChild(check);
             row.appendChild(label);
-            row.appendChild(hint);
-            row.addEventListener('click', function () { lockIn(optionText); });
-            row.addEventListener('mouseenter', function () { setSelected(i); });
-            list.appendChild(row);
-            rowEls.push(row);
-          });
-
-          var customRowIndex = rowEls.length;
-          var customRow = document.createElement('div');
-          customRow.className = 'question-row question-row-custom';
-          var customIcon = document.createElement('span');
-          customIcon.className = 'question-row-num';
-          customIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4L18.5 9.5a2 2 0 000-2.8l-1.2-1.2a2 2 0 00-2.8 0L4 16v4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
-          var customInput = document.createElement('input');
-          customInput.type = 'text';
-          customInput.className = 'question-row-input';
-          customInput.placeholder = (q.options && q.options.length) ? 'Something else…' : 'Type your answer…';
-          customInput.setAttribute('aria-label', 'Your answer to: ' + q.question);
-          customRow.appendChild(customIcon);
-          customRow.appendChild(customInput);
-          if (q.options && q.options.length) {
-            var skipBtn = document.createElement('button');
-            skipBtn.type = 'button';
-            skipBtn.className = 'question-skip-btn';
-            skipBtn.textContent = 'Skip';
-            skipBtn.addEventListener('click', function (e) {
-              e.stopPropagation();
-              lockIn('(skipped)');
-            });
-            customRow.appendChild(skipBtn);
-          }
-          customRow.addEventListener('click', function (e) {
-            if (e.target === customInput || e.target.closest('.question-skip-btn')) return;
-            customInput.focus();
-          });
-          customRow.addEventListener('mouseenter', function () { setSelected(customRowIndex); });
-          list.appendChild(customRow);
-          rowEls.push(customRow);
-
-          customInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              var val = customInput.value.trim();
-              if (val) lockIn(val);
+            if (option.description) {
+              var infoButton = document.createElement('button');
+              infoButton.type = 'button';
+              infoButton.className = 'question-info-btn';
+              infoButton.textContent = 'i';
+              infoButton.setAttribute('aria-label', 'Details for ' + option.label);
+              var infoPanel = document.createElement('div');
+              infoPanel.className = 'question-info-panel';
+              infoPanel.hidden = true;
+              infoPanel.textContent = option.description;
+              infoButton.addEventListener('click', function (event) {
+                event.stopPropagation();
+                list.querySelectorAll('.question-info-panel').forEach(function (panel) {
+                  if (panel !== infoPanel) panel.hidden = true;
+                });
+                infoPanel.hidden = !infoPanel.hidden;
+              });
+              row.appendChild(infoButton);
+              list.appendChild(row);
+              list.appendChild(infoPanel);
+            } else {
+              list.appendChild(row);
             }
-          });
-
-          function setSelected(i) {
-            selected = i;
-            rowEls.forEach(function (row, idx) { row.classList.toggle('is-selected', idx === i); });
-          }
-          setSelected(0);
-
-          function onKeydown(e) {
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              setSelected((selected + 1) % rowEls.length);
-            } else if (e.key === 'ArrowUp') {
-              e.preventDefault();
-              setSelected((selected - 1 + rowEls.length) % rowEls.length);
-            } else if (e.key === 'Enter' && document.activeElement !== customInput) {
-              e.preventDefault();
-              if (selected === customRowIndex) {
-                customInput.focus();
+            row.addEventListener('click', function (event) {
+              if (option.description && event && event.target && event.target.closest('.question-info-btn')) return;
+              if (question.multiple) {
+                var choiceIndex = answer.choices.indexOf(option.label);
+                if (choiceIndex === -1) answer.choices.push(option.label);
+                else answer.choices.splice(choiceIndex, 1);
               } else {
-                lockIn(q.options[selected]);
+                answer.choices = [option.label];
+                answer.custom = '';
               }
-            }
-          }
-          card.addEventListener('keydown', onKeydown);
-          card.setAttribute('tabindex', '-1');
-          card.focus();
+              updateRows();
+              updateNavigation();
+            });
+          });
 
-          var foot = document.createElement('div');
-          foot.className = 'question-foot';
-          foot.innerHTML = '<span>&uarr;&darr; to navigate &middot; <kbd>enter</kbd> to select</span>';
-          card.appendChild(foot);
+          var answerInput = document.createElement('textarea');
+          answerInput.className = 'question-answer-input';
+          answerInput.placeholder = question.options.length ? 'Something else…' : 'Type your answer…';
+          answerInput.value = answer.custom;
+          answerInput.setAttribute('aria-label', 'Your answer to: ' + question.question);
+          answerInput.addEventListener('input', function () {
+            answer.custom = answerInput.value.trim();
+            if (answer.custom && !question.multiple) answer.choices = [];
+            updateRows();
+            updateNavigation();
+          });
+          card.appendChild(answerInput);
+
+          var notes = document.createElement('textarea');
+          notes.className = 'question-extra-notes';
+          notes.placeholder = 'Extra notes (optional)';
+          notes.value = answer.notes;
+          notes.setAttribute('aria-label', 'Extra notes for: ' + question.question);
+          notes.addEventListener('input', function () { answer.notes = notes.value.trim(); });
+          card.appendChild(notes);
+
+          var navigation = document.createElement('div');
+          navigation.className = 'question-nav';
+          var leftGroup = document.createElement('div');
+          leftGroup.className = 'question-nav-group';
+          var previous = document.createElement('button');
+          previous.type = 'button';
+          previous.textContent = '← Back';
+          previous.disabled = qIndex === 0;
+          previous.addEventListener('click', function () { if (qIndex > 0) { qIndex--; renderStep(); } });
+          leftGroup.appendChild(previous);
+          var skip = document.createElement('button');
+          skip.type = 'button';
+          skip.textContent = 'Skip';
+          skip.disabled = question.required;
+          skip.addEventListener('click', function () { if (!question.required) { answer.choices = []; answer.custom = ''; goNext(); } });
+          leftGroup.appendChild(skip);
+          navigation.appendChild(leftGroup);
+          var next = document.createElement('button');
+          next.type = 'button';
+          next.className = 'question-next';
+          next.textContent = qIndex === normalizedQuestions.length - 1 ? 'Submit →' : 'Next →';
+          next.addEventListener('click', goNext);
+          navigation.appendChild(next);
+          card.appendChild(navigation);
+
+          function hasAnswer() {
+            return answer.choices.length > 0 || Boolean(answer.custom);
+          }
+          function updateNavigation() {
+            next.disabled = question.required && !hasAnswer();
+          }
+          function goNext() {
+            if (question.required && !hasAnswer()) return;
+            if (qIndex < normalizedQuestions.length - 1) { qIndex++; renderStep(); }
+            else finishAll();
+          }
+          updateNavigation();
+          card.focus();
         }
 
         renderStep();
@@ -3433,7 +3879,7 @@
             clearInterval(thinkingTimer);
             return;
           }
-          thinkingElapsed.textContent = Math.floor((Date.now() - thinkingStartedAt) / 1000) + ' sec';
+          thinkingElapsed.textContent = formatElapsed((Date.now() - thinkingStartedAt) / 1000);
         }, 1000);
         function stopThinking() {
           clearInterval(thinkingTimer);
@@ -3447,6 +3893,13 @@
         var typewriterDone = false;
         var streamedAnswer = '';
         var generationTimes = [];
+        var responseSettled = false;
+
+        function completeResponse() {
+          if (responseSettled) return;
+          responseSettled = true;
+          onBotDone();
+        }
 
         function renderCompletedReply(text) {
           div.innerHTML = renderMarkdown(text);
@@ -3454,10 +3907,11 @@
 
         function addSimplifiedLabel(seconds) {
           trace.hidden = false;
+          if (generationTimes.indexOf(seconds) !== -1) return;
           generationTimes.push(seconds);
           var label = document.createElement('div');
           label.className = 'thinking-indicator generation-time-label';
-          label.textContent = 'Simplified in ' + seconds + ' sec';
+          label.textContent = 'Simplified in ' + formatElapsed(seconds);
           trace.appendChild(label);
         }
 
@@ -3512,7 +3966,6 @@
             return;
           }
           if (event.type === 'simplified') {
-            addSimplifiedLabel(event.seconds);
             return;
           }
           if (event.type === 'reply') {
@@ -3536,7 +3989,6 @@
             refreshRetry();
             typewriterDone = true;
             maybeShowFollowup();
-            onBotDone();
             return;
           }
           if (event.type === 'question') {
@@ -3561,7 +4013,7 @@
               refreshRetry();
               typewriterDone = true;
               maybeShowFollowup();
-              onBotDone();
+              completeResponse();
             }, function () { return requestGeneration !== viewGeneration; });
             renderQuestionCard(questionDock, event.questions, function (answerText) {
               handleUserMessage(answerText);
@@ -3578,6 +4030,7 @@
             if (event.title && chatTopTitle) chatTopTitle.textContent = event.title;
             setSuggestions(event.suggestions);
             maybeShowFollowup();
+            if (!questionDock.classList.contains('is-active')) completeResponse();
             return;
           }
           if (event.type === 'error') {
@@ -3587,20 +4040,33 @@
           }
         }
 
-        fetch('/api/chat/message', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: sourceMessage, conversationId: currentConversationId }),
-        })
-          .then(function (response) {
-            if (response.status === 429) return Promise.reject(new Error('rate_limited'));
-            if (!response.ok) return response.json().then(function (data) {
-              var err = new Error(data.error || 'request_failed');
-              err.conversationId = data.conversationId || null;
-              return Promise.reject(err);
-            });
-            return readMessageStream(response, handleEvent);
+        var requestAttempts = 0;
+        function requestReply() {
+          requestAttempts++;
+          return fetch('/api/chat/message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: sourceMessage, conversationId: currentConversationId }),
           })
+            .then(function (response) {
+              if (response.status === 429) return Promise.reject(new Error('rate_limited'));
+              if (!response.ok) return response.json().then(function (data) {
+                var err = new Error(data.error || 'request_failed');
+                err.conversationId = data.conversationId || null;
+                return Promise.reject(err);
+              });
+              return readMessageStream(response, handleEvent);
+            })
+            .catch(function (error) {
+              if (!replyReceived && requestAttempts < 2 && (!error || error.message !== 'rate_limited')) {
+                setThinkingPhase('Reconnecting');
+                return new Promise(function (resolve) { setTimeout(resolve, 800); }).then(requestReply);
+              }
+              throw error;
+            });
+        }
+
+        requestReply()
           .then(function () {
             if (!replyReceived && requestGeneration === viewGeneration) {
               throw new Error('request_failed');
@@ -3609,7 +4075,11 @@
           .catch(function (error) {
             stopThinking();
             if (requestGeneration !== viewGeneration) {
-              onBotDone();
+              completeResponse();
+              return;
+            }
+            if (replyReceived) {
+              completeResponse();
               return;
             }
             if (error && error.conversationId && error.conversationId !== currentConversationId) {
@@ -3623,7 +4093,7 @@
             typewriteText(div, message, function () {
               content.appendChild(makeMeta(message, formatTime(new Date()), false, null));
               refreshRetry();
-              onBotDone();
+              completeResponse();
             }, function () { return requestGeneration !== viewGeneration; });
           });
       }
@@ -3682,7 +4152,18 @@
                     type: 'object',
                     properties: {
                       question: { type: 'string' },
-                      options: { type: 'array', items: { type: 'string' } },
+                      description: { type: 'string' },
+                      options: {
+                        type: 'array',
+                        items: {
+                          anyOf: [
+                            { type: 'string' },
+                            { type: 'object', properties: { label: { type: 'string' }, description: { type: 'string' } }, required: ['label'] },
+                          ],
+                        },
+                      },
+                      multiple: { type: 'boolean' },
+                      required: { type: 'boolean' },
                     },
                     required: ['question'],
                   },
@@ -3708,7 +4189,16 @@
               .map(function (q) {
                 return {
                   question: q.question.trim(),
-                  options: Array.isArray(q.options) ? q.options.filter(function (o) { return typeof o === 'string' && o.trim(); }).map(function (o) { return o.trim(); }) : [],
+                  description: typeof q.description === 'string' ? q.description.trim() : '',
+                  options: Array.isArray(q.options) ? q.options.map(function (option) {
+                    if (typeof option === 'string') return { label: option.trim(), description: '' };
+                    return {
+                      label: option && typeof option.label === 'string' ? option.label.trim() : '',
+                      description: option && typeof option.description === 'string' ? option.description.trim() : '',
+                    };
+                  }).filter(function (option) { return option.label; }) : [],
+                  multiple: q.multiple === true,
+                  required: q.required !== false,
                 };
               }),
           };
@@ -3802,7 +4292,7 @@
             clearInterval(thinkingTimer);
             return;
           }
-          thinkingElapsed.textContent = Math.floor((Date.now() - thinkingStartedAt) / 1000) + ' sec';
+          thinkingElapsed.textContent = formatElapsed((Date.now() - thinkingStartedAt) / 1000);
         }, 1000);
         function stopThinking() { clearInterval(thinkingTimer); }
         function setThinkingPhase(label) { thinkingPhase.textContent = label + '...'; }
@@ -3810,10 +4300,11 @@
 
         function addLocalSimplifiedLabel(seconds) {
           trace.hidden = false;
+          if (generationTimes.indexOf(seconds) !== -1) return;
           generationTimes.push(seconds);
           var label = document.createElement('div');
           label.className = 'thinking-indicator';
-          label.textContent = 'Simplified in ' + seconds + ' sec';
+          label.textContent = 'Simplified in ' + formatElapsed(seconds);
           trace.appendChild(label);
         }
 
@@ -3821,13 +4312,13 @@
           content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
           refreshRetry();
           showFollowup();
-          onBotDone();
         }
 
         function failBubble(message) {
           stopThinking();
           div.innerHTML = renderMarkdown(message);
           finishBubble(message);
+          onBotDone();
         }
 
         var toolCalls = [];
@@ -4023,9 +4514,11 @@
                     setSuggestions(data.suggestions);
                     showFollowup();
                     if (data.highlighted) div.innerHTML = renderMarkdown(data.highlighted);
+                    onBotDone();
                   })
                   .catch(function (error) {
                     console.error('Failed to save local reply:', error);
+                    onBotDone();
                   });
               }
 
@@ -4086,9 +4579,34 @@
       // Appearance controls
       var USER_OUTLINE_STYLE_KEY = 'simplicity-user-outline-style';
       var USER_OUTLINE_COLOR_KEY = 'simplicity-user-outline-color';
+      var ASSISTANT_TEXT_COLOR_KEY = 'simplicity-assistant-text-color';
+      var HIGHLIGHT_COLOR_KEY = 'simplicity-highlight-color';
 
-      var styleSelect = document.getElementById('user-outline-style-select');
+      var stylePicker = document.getElementById('user-outline-style-picker');
+      var styleTrigger = document.getElementById('user-outline-style-trigger');
+      var styleMenu = document.getElementById('user-outline-style-menu');
+      var styleOptions = styleMenu ? Array.prototype.slice.call(styleMenu.querySelectorAll('.outline-style-option')) : [];
+      var selectedStyle = 'dashed';
       var colorSwatches = document.getElementById('user-outline-color-swatches');
+      var assistantTextSwatches = document.getElementById('assistant-text-color-swatches');
+      var highlightSwatches = document.getElementById('highlight-color-swatches');
+
+      function setupColorSwatches(container, storageKey, cssVariable, fallback) {
+        if (!container) return;
+        var saved = localStorage.getItem(storageKey) || fallback;
+        document.documentElement.style.setProperty(cssVariable, saved);
+        container.querySelectorAll('.swatch-btn').forEach(function (btn) {
+          btn.classList.toggle('is-selected', btn.getAttribute('data-color') === saved);
+          btn.addEventListener('click', function () {
+            var color = btn.getAttribute('data-color');
+            localStorage.setItem(storageKey, color);
+            document.documentElement.style.setProperty(cssVariable, color);
+            container.querySelectorAll('.swatch-btn').forEach(function (swatch) {
+              swatch.classList.toggle('is-selected', swatch.getAttribute('data-color') === color);
+            });
+          });
+        });
+      }
 
       function applyAppearanceSettings() {
         var savedStyle = localStorage.getItem(USER_OUTLINE_STYLE_KEY) || 'dashed';
@@ -4097,7 +4615,19 @@
         document.documentElement.style.setProperty('--user-bubble-border-style', savedStyle);
         document.documentElement.style.setProperty('--user-bubble-border-color', savedColor);
 
-        if (styleSelect) styleSelect.value = savedStyle;
+        selectedStyle = savedStyle;
+        if (styleTrigger) {
+          var selectedOption = styleOptions.find(function (option) { return option.getAttribute('data-value') === savedStyle; }) || styleOptions[0];
+          if (selectedOption) {
+            selectedStyle = selectedOption.getAttribute('data-value');
+            styleTrigger.textContent = selectedOption.textContent;
+          }
+        }
+        styleOptions.forEach(function (option) {
+          var isSelected = option.getAttribute('data-value') === selectedStyle;
+          option.classList.toggle('is-selected', isSelected);
+          option.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        });
         if (colorSwatches) {
           colorSwatches.querySelectorAll('.swatch-btn').forEach(function (btn) {
             btn.classList.toggle('is-selected', btn.getAttribute('data-color') === savedColor);
@@ -4105,10 +4635,63 @@
         }
       }
 
-      if (styleSelect) {
-        styleSelect.addEventListener('change', function () {
-          localStorage.setItem(USER_OUTLINE_STYLE_KEY, styleSelect.value);
-          applyAppearanceSettings();
+      function closeStylePicker() {
+        if (!stylePicker) return;
+        stylePicker.classList.remove('is-open');
+        if (styleTrigger) styleTrigger.setAttribute('aria-expanded', 'false');
+      }
+
+      if (stylePicker && styleTrigger && styleMenu) {
+        styleTrigger.addEventListener('click', function () {
+          var isOpen = stylePicker.classList.toggle('is-open');
+          styleTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          if (isOpen && styleOptions.length) {
+            var activeOption = styleOptions.find(function (option) { return option.getAttribute('data-value') === selectedStyle; });
+            if (activeOption) activeOption.focus();
+          }
+        });
+        styleOptions.forEach(function (option) {
+          option.addEventListener('click', function () {
+            selectedStyle = option.getAttribute('data-value');
+            localStorage.setItem(USER_OUTLINE_STYLE_KEY, selectedStyle);
+            applyAppearanceSettings();
+            closeStylePicker();
+            styleTrigger.focus();
+          });
+        });
+        styleMenu.addEventListener('keydown', function (event) {
+          var currentIndex = styleOptions.indexOf(document.activeElement);
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            var nextIndex = (currentIndex + (event.key === 'ArrowDown' ? 1 : styleOptions.length - 1)) % styleOptions.length;
+            styleOptions[nextIndex].focus();
+          } else if (event.key === 'Escape') {
+            closeStylePicker();
+            styleTrigger.focus();
+          }
+        });
+        document.addEventListener('click', function (event) {
+          if (!stylePicker.contains(event.target)) closeStylePicker();
+        });
+      }
+
+      if (styleTrigger) {
+        styleTrigger.addEventListener('keydown', function (event) {
+          if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            stylePicker.classList.add('is-open');
+            styleTrigger.setAttribute('aria-expanded', 'true');
+            if (styleOptions.length) styleOptions[0].focus();
+          }
+        });
+      }
+
+      if (stylePicker) {
+        stylePicker.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape') {
+            closeStylePicker();
+            styleTrigger.focus();
+          }
         });
       }
 
@@ -4123,6 +4706,8 @@
       }
 
       applyAppearanceSettings();
+      setupColorSwatches(assistantTextSwatches, ASSISTANT_TEXT_COLOR_KEY, '--assistant-text-color', '#F3F1EC');
+      setupColorSwatches(highlightSwatches, HIGHLIGHT_COLOR_KEY, '--highlight-background', '#FF5A1F');
       var accountDropdown = document.getElementById('account-dropdown');
       var accountToggleBtn = document.getElementById('account-toggle');
       var sidebarAccountName = document.getElementById('sidebar-account-name');

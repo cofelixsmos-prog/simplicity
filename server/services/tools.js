@@ -26,11 +26,23 @@ const TOOL_DEFINITIONS = [
               type: 'object',
               properties: {
                 question: { type: 'string', description: 'The question text.' },
+                description: { type: 'string', description: 'Optional explanation shown with the question.' },
                 options: {
                   type: 'array',
                   description: 'Optional multiple-choice options. Omit or leave empty for a free-text-only question. The user can always type their own answer even when options are given.',
-                  items: { type: 'string' },
+                  items: {
+                    anyOf: [
+                      { type: 'string' },
+                      {
+                        type: 'object',
+                        properties: { label: { type: 'string' }, description: { type: 'string' } },
+                        required: ['label'],
+                      },
+                    ],
+                  },
                 },
+                multiple: { type: 'boolean', description: 'Allow selecting more than one option.' },
+                required: { type: 'boolean', description: 'Whether an answer is required.' },
               },
               required: ['question'],
             },
@@ -62,7 +74,16 @@ const TOOL_EXECUTORS = {
         .filter((q) => q && typeof q.question === 'string' && q.question.trim())
         .map((q) => ({
           question: q.question.trim(),
-          options: Array.isArray(q.options) ? q.options.filter((o) => typeof o === 'string' && o.trim()).map((o) => o.trim()) : [],
+          description: typeof q.description === 'string' ? q.description.trim() : '',
+          options: Array.isArray(q.options) ? q.options.map((option) => {
+            if (typeof option === 'string') return { label: option.trim(), description: '' };
+            return {
+              label: option && typeof option.label === 'string' ? option.label.trim() : '',
+              description: option && typeof option.description === 'string' ? option.description.trim() : '',
+            };
+          }).filter((option) => option.label) : [],
+          multiple: q.multiple === true,
+          required: q.required !== false,
         })),
     };
   },
