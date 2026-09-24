@@ -315,7 +315,7 @@
 
   .btn-primary:hover {
     background: var(--accent-hover);
-    transform: translateY(-1px);
+    transform: none;
   }
 
   :where(a, button, input, [tabindex]):focus-visible {
@@ -381,16 +381,16 @@
   }
 
   .hero-right h1 {
-    font-size: 38px;
+    font-size: 28px;
     line-height: 1.2;
     letter-spacing: -0.02em;
-    font-weight: 400;
+    font-weight: 200;
     color: var(--fg);
     text-align: center;
   }
 
   .hero-right h1 strong {
-    font-weight: 600;
+    font-weight: 100;
   }
 
   .tagline {
