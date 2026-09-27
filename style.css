@@ -21,13 +21,13 @@
   }
 
   html[data-theme="dark"] {
-    --bg: #0A0A0A;
+    --bg: #141414;
     --fg: #F3F1EC;
     --fg-muted: #9A968C;
-    --nav-border: rgba(255,255,255,0.08);
+    --nav-border: rgba(255,255,255,0.10);
     --nav-link: #B8B4AA;
     --btn-outline-border: rgba(255,255,255,0.18);
-    --btn-outline-hover: rgba(255,255,255,0.06);
+    --btn-outline-hover: rgba(255,255,255,0.08);
     --accent: #FF5A1F;
     --accent-hover: #FF7440;
   }
@@ -1267,8 +1267,8 @@
     font-size: 15px !important;
     font-weight: 600 !important;
     letter-spacing: -0.01em !important;
-    color: rgba(243, 241, 236, 0.72) !important;
-    opacity: 0.9 !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    opacity: 1 !important;
     white-space: nowrap !important;
   }
 

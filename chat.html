@@ -259,8 +259,8 @@
   :root {
     --user-bubble-border-style: dashed;
     --user-bubble-border-color: #FF5A1F;
-    --assistant-text-color: var(--fg);
-    --highlight-background: var(--accent);
+    --assistant-text-color: rgba(243, 241, 236, 0.78);
+    --highlight-background: rgba(255, 90, 31, 0.22);
   }
 
   .chat-bubble.user {
@@ -498,12 +498,25 @@
     display: inline;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
-    background: var(--highlight-background);
-    color: rgba(243, 241, 236, 0.9);
-    border-radius: 4px;
-    padding: 1px 4px;
-    font-weight: 550;
+    background: transparent;
+    color: inherit;
+    border-radius: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: inherit;
     line-height: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--highlight-background) 80%, currentColor);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+    transition: none;
+  }
+
+  .chat-bubble.bot .md-hl:hover {
+    background: transparent;
+    color: inherit;
+    box-shadow: none;
+    text-decoration-color: color-mix(in srgb, var(--highlight-background) 80%, currentColor);
   }
 
   .question-dock {
@@ -1447,7 +1460,7 @@
     gap: 8px;
     padding: 16px 12px;
     border-right: 1px solid var(--nav-border);
-    background: var(--btn-outline-hover);
+    background: rgba(10, 10, 10, 0.96);
     overflow: hidden;
     transition: margin-left 0.25s ease;
   }
@@ -1508,20 +1521,19 @@
     gap: 8px;
     padding: 9px 12px;
     border-radius: 10px;
-    border: 1px solid var(--btn-outline-border);
-    background: transparent;
-    color: rgba(243, 241, 236, 0.72);
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(243, 241, 236, 0.92);
     font: inherit;
     font-size: 13.5px;
     font-weight: 550;
     cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
   }
 
   .new-chat-btn:hover {
-    border-color: var(--accent);
-    background: var(--btn-outline-hover);
-    color: rgba(243, 241, 236, 0.88);
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 1);
   }
 
   .new-chat-btn svg {
@@ -1650,6 +1662,7 @@
   .chat-sidebar-foot {
     padding-top: 8px;
     border-top: 1px solid var(--nav-border);
+    background: rgba(10, 10, 10, 0.96);
   }
 
   .sidebar-account-btn {
@@ -2305,11 +2318,11 @@
           <p>Choose the color used for assistant replies.</p>
         </div>
         <div class="appearance-swatches" id="assistant-text-color-swatches">
-          <button type="button" class="swatch-btn is-selected" data-color="#F3F1EC" style="background:#F3F1EC" title="Warm white"></button>
-          <button type="button" class="swatch-btn" data-color="#CBD5E1" style="background:#CBD5E1" title="Cool white"></button>
-          <button type="button" class="swatch-btn" data-color="#93C5FD" style="background:#93C5FD" title="Soft blue"></button>
-          <button type="button" class="swatch-btn" data-color="#A7F3D0" style="background:#A7F3D0" title="Soft green"></button>
-          <button type="button" class="swatch-btn" data-color="#FDE68A" style="background:#FDE68A" title="Soft yellow"></button>
+          <button type="button" class="swatch-btn is-selected" data-color="#EAE3DB" style="background:#EAE3DB" title="Warm white"></button>
+          <button type="button" class="swatch-btn" data-color="#DCE5F2" style="background:#DCE5F2" title="Cool white"></button>
+          <button type="button" class="swatch-btn" data-color="#C8DDF6" style="background:#C8DDF6" title="Soft blue"></button>
+          <button type="button" class="swatch-btn" data-color="#CFEAD8" style="background:#CFEAD8" title="Soft green"></button>
+          <button type="button" class="swatch-btn" data-color="#F2E7B7" style="background:#F2E7B7" title="Soft yellow"></button>
         </div>
       </div>
 
@@ -2319,11 +2332,11 @@
           <p>Choose the background for important reply passages.</p>
         </div>
         <div class="appearance-swatches" id="highlight-color-swatches">
-          <button type="button" class="swatch-btn is-selected" data-color="#FF5A1F" style="background:#FF5A1F" title="Accent orange"></button>
-          <button type="button" class="swatch-btn" data-color="#2563EB" style="background:#2563EB" title="Blue"></button>
-          <button type="button" class="swatch-btn" data-color="#059669" style="background:#059669" title="Green"></button>
-          <button type="button" class="swatch-btn" data-color="#DB2777" style="background:#DB2777" title="Pink"></button>
-          <button type="button" class="swatch-btn" data-color="#7C3AED" style="background:#7C3AED" title="Violet"></button>
+          <button type="button" class="swatch-btn is-selected" data-color="#E9A17D" style="background:#E9A17D" title="Muted orange"></button>
+          <button type="button" class="swatch-btn" data-color="#9BB7E6" style="background:#9BB7E6" title="Muted blue"></button>
+          <button type="button" class="swatch-btn" data-color="#8AC8A0" style="background:#8AC8A0" title="Muted green"></button>
+          <button type="button" class="swatch-btn" data-color="#D89CC1" style="background:#D89CC1" title="Muted pink"></button>
+          <button type="button" class="swatch-btn" data-color="#A693E7" style="background:#A693E7" title="Muted violet"></button>
         </div>
       </div>
 
