@@ -116,12 +116,15 @@ async function highlightReply(replyText) {
   }
 }
 
-async function generateSuggestions(userMessage, assistantReply) {
+async function generateSuggestions(userMessage, assistantReply, previousMessages) {
   try {
+    const context = (previousMessages || []).slice(-8).map((message) =>
+      `${message.role === 'assistant' ? 'Assistant' : 'User'}: ${message.content}`
+    ).join('\n');
     const reply = await createChatCompletion({
       messages: [
         { role: 'system', content: SUGGESTIONS_SYSTEM_PROMPT },
-        { role: 'user', content: `User: ${userMessage}\nAssistant: ${assistantReply}` },
+        { role: 'user', content: `${context ? `Recent conversation:\n${context}\n` : ''}Current exchange:\nUser: ${userMessage}\nAssistant: ${assistantReply}` },
       ],
       // Same reasoning-budget concern as generateTitle above — this model's
       // reasoning-token usage varies per call, so leave extra headroom.
@@ -160,7 +163,6 @@ async function sendMessage(req, res, next) {
 
   const trimmedMessage = message.trim();
   let activeConversationId = conversationId;
-  const isNewConversation = !conversationId;
   const generationTimes = [];
   const trace = [];
   const turnStartedAt = Date.now();
@@ -172,7 +174,7 @@ async function sendMessage(req, res, next) {
   }
 
   async function finishTurn(replyText, toolCalls) {
-    await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null, generationTimes, trace);
+    const assistantMessageId = await conversations.saveMessage(activeConversationId, 'assistant', replyText, toolCalls.length ? toolCalls : null, generationTimes, trace);
     await conversations.touchConversation(activeConversationId);
 
     sendEvent({
@@ -181,50 +183,11 @@ async function sendMessage(req, res, next) {
       toolCalls,
       generationTimes,
       conversationId: activeConversationId,
+      assistantMessageId,
     });
-
-    // Best-effort: the reply itself is already saved by this point, so a
-    // title-generation or title-write failure must never turn into an error
-    // response for a turn that actually succeeded.
-    let title;
-    if (isNewConversation) {
-      try {
-        title = await generateTitle(trimmedMessage, replyText);
-        if (title) await conversations.updateTitle(activeConversationId, title);
-      } catch (titleError) {
-        console.error('Failed to save generated title:', titleError);
-        title = null;
-      }
-    }
-
-    // Same best-effort contract as the title: never let a suggestions
-    // failure affect a turn whose reply already succeeded and was saved.
-    let suggestions = [];
-    try {
-      suggestions = await generateSuggestions(trimmedMessage, replyText);
-    } catch (suggestionError) {
-      console.error('Failed to generate suggestions:', suggestionError);
-    }
-
-    // Best-effort second pass that adds ==yellow==/++green++ highlight
-    // markers to the reply already shown to the user. Runs after the
-    // typewriter would have finished, so the client swaps it in once ready
-    // rather than delaying the initial reply for this.
-    const highlighted = await highlightReply(replyText);
-    if (highlighted) {
-      await conversations.updateLastAssistantMessage(activeConversationId, highlighted);
-      sendEvent({
-        type: 'highlight',
-        reply: highlighted,
-        conversationId: activeConversationId,
-      });
-    }
-
     sendEvent({
       type: 'done',
       conversationId: activeConversationId,
-      title: title || undefined,
-      suggestions: suggestions.length ? suggestions : undefined,
     });
     return res.end();
   }
@@ -273,6 +236,8 @@ async function sendMessage(req, res, next) {
     const toolCalls = [];
     const seenCalls = new Set();
     let forceFinalAnswer = false;
+    let lastSimplifiedAt = turnStartedAt;
+    let reportedActionCount = 0;
 
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
       sendEvent({ type: 'thinking', phase: round + 1, label: 'Simplifying' });
@@ -281,10 +246,14 @@ async function sendMessage(req, res, next) {
         tools: forceFinalAnswer ? undefined : TOOL_DEFINITIONS,
         onToken: (token, content) => sendEvent({ type: 'token', token, content, conversationId: activeConversationId }),
       });
-      const seconds = Math.max(1, Math.round((Date.now() - turnStartedAt) / 1000));
+      const now = Date.now();
+      const seconds = Math.max(1, Math.round((now - lastSimplifiedAt) / 1000));
+      const actions = toolCalls.length - reportedActionCount;
+      lastSimplifiedAt = now;
+      reportedActionCount = toolCalls.length;
       generationTimes.push(seconds);
-      trace.push({ type: 'simplified', seconds });
-      sendEvent({ type: 'simplified', seconds, conversationId: activeConversationId });
+      trace.push({ type: 'simplified', seconds, actions });
+      sendEvent({ type: 'simplified', seconds, actions, conversationId: activeConversationId });
 
       if (!reply.tool_calls || reply.tool_calls.length === 0) {
         const replyText = reply.content || "I don't have a response for that.";
@@ -342,10 +311,12 @@ async function sendMessage(req, res, next) {
       tools: undefined,
       onToken: (token, content) => sendEvent({ type: 'token', token, content, conversationId: activeConversationId }),
     });
-    const seconds = Math.max(1, Math.round((Date.now() - turnStartedAt) / 1000));
+    const now = Date.now();
+    const seconds = Math.max(1, Math.round((now - lastSimplifiedAt) / 1000));
+    const actions = toolCalls.length - reportedActionCount;
     generationTimes.push(seconds);
-    trace.push({ type: 'simplified', seconds });
-    sendEvent({ type: 'simplified', seconds, conversationId: activeConversationId });
+    trace.push({ type: 'simplified', seconds, actions });
+    sendEvent({ type: 'simplified', seconds, actions, conversationId: activeConversationId });
     const fallbackReply = finalReply.content || "I wasn't able to finish that — could you try asking again?";
     return await finishTurn(fallbackReply, toolCalls);
   } catch (error) {
@@ -427,7 +398,7 @@ async function startLocalMessage(req, res, next) {
 }
 
 async function finishLocalMessage(req, res, next) {
-  const { conversationId, message, reply, toolCalls, generationTimes, isNewConversation, clientTitle } = req.body || {};
+  const { conversationId, message, reply, toolCalls, generationTimes, trace, isNewConversation, clientTitle } = req.body || {};
   if (!conversationId || typeof reply !== 'string' || !reply.trim()) {
     return res.status(400).json({ error: 'conversationId and reply are required.' });
   }
@@ -438,7 +409,21 @@ async function finishLocalMessage(req, res, next) {
 
     const replyText = reply.trim();
     const cleanToolCalls = Array.isArray(toolCalls) && toolCalls.length ? toolCalls : null;
-    await conversations.saveMessage(conversationId, 'assistant', replyText, cleanToolCalls, Array.isArray(generationTimes) ? generationTimes : null);
+    const cleanTrace = Array.isArray(trace) ? trace.map((entry) => {
+      if (!entry || typeof entry !== 'object') return null;
+      if (entry.type === 'tool' && Number.isInteger(entry.callIndex) && cleanToolCalls && cleanToolCalls[entry.callIndex]) {
+        return { type: 'tool', call: cleanToolCalls[entry.callIndex] };
+      }
+      if (entry.type === 'simplified') {
+        return {
+          type: 'simplified',
+          seconds: Math.max(1, Math.round(Number(entry.seconds) || 1)),
+          actions: Math.max(0, Math.round(Number(entry.actions) || 0)),
+        };
+      }
+      return null;
+    }).filter(Boolean) : [];
+    const assistantMessageId = await conversations.saveMessage(conversationId, 'assistant', replyText, cleanToolCalls, Array.isArray(generationTimes) ? generationTimes : null, cleanTrace.length ? cleanTrace : null);
     await conversations.touchConversation(conversationId);
 
     const trimmedMessage = typeof message === 'string' ? message.trim() : '';
@@ -454,26 +439,39 @@ async function finishLocalMessage(req, res, next) {
       if (title) await conversations.updateTitle(conversationId, title);
     }
 
-    let suggestions = [];
-    try {
-      suggestions = await generateSuggestions(trimmedMessage, replyText);
-    } catch (suggestionError) {
-      console.error('Failed to generate suggestions:', suggestionError);
-    }
-
-    let highlighted = null;
-    try {
-      highlighted = await highlightReply(replyText);
-      if (highlighted) await conversations.updateLastAssistantMessage(conversationId, highlighted);
-    } catch (highlightError) {
-      console.error('Failed to generate highlight:', highlightError);
-    }
-
     res.json({
       conversationId,
       title: title || undefined,
+      assistantMessageId,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function enhanceReply(req, res, next) {
+  const { conversationId, assistantMessageId, message, generateTitle: shouldGenerateTitle } = req.body || {};
+  if (!conversationId || !assistantMessageId || typeof message !== 'string' || !message.trim()) {
+    return res.status(400).json({ error: 'conversationId, assistantMessageId, and message are required.' });
+  }
+
+  try {
+    const context = await conversations.getAssistantMessageContext(req.user.id, conversationId, assistantMessageId);
+    if (!context) return res.status(404).json({ error: 'Assistant message not found.' });
+    const replyText = context.content;
+    const [suggestions, highlighted, title] = await Promise.all([
+      generateSuggestions(message.trim(), replyText, context.previousMessages),
+      highlightReply(replyText),
+      shouldGenerateTitle ? generateTitle(message.trim(), replyText) : Promise.resolve(null),
+    ]);
+
+    if (highlighted) await conversations.updateAssistantMessage(conversationId, assistantMessageId, highlighted);
+    if (title) await conversations.updateTitle(conversationId, title);
+
+    res.json({
       suggestions: suggestions.length ? suggestions : undefined,
       highlighted: highlighted || undefined,
+      title: title || undefined,
     });
   } catch (error) {
     next(error);
@@ -537,4 +535,4 @@ async function deleteAllConversations(req, res, next) {
   }
 }
 
-module.exports = { sendMessage, startLocalMessage, finishLocalMessage, listConversations, getConversation, deleteConversation, deleteAllConversations, updateConversationTitle };
+module.exports = { sendMessage, startLocalMessage, finishLocalMessage, enhanceReply, listConversations, getConversation, deleteConversation, deleteAllConversations, updateConversationTitle };

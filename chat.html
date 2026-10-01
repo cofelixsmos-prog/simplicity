@@ -10,7 +10,7 @@
   (function () {
     var match = document.cookie.match(/(?:^|; )simplicity-theme=([^;]*)/);
     var saved = match ? decodeURIComponent(match[1]) : null;
-    var theme = saved || 'light';
+    var theme = ['light', 'grey', 'dark'].indexOf(saved) !== -1 ? saved : 'light';
     document.documentElement.setAttribute('data-theme', theme);
 
     window.simplicitySetThemeCookie = function (value) {
@@ -24,7 +24,8 @@
   })();
 </script>
 <style>
-  html[data-theme="light"] { background: #F3F1EC; color: #000; }
+  html[data-theme="light"] { background: #FFFFFF; color: #171717; }
+  html[data-theme="grey"] { background: #E7E8E8; color: #222526; }
   html[data-theme="dark"] { background: #0A0A0A; color: #F3F1EC; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,7 +82,7 @@
      Dark #0A0A0A, Muted #6B6A63. Poppins + dot-mark language. */
   ::selection {
     background: var(--accent);
-    color: rgba(243, 241, 236, 0.9);
+    color: var(--bg);
   }
 
   /* ---------- Very simple chat layout ---------- */
@@ -186,7 +187,7 @@
 
   .chat-empty {
     text-align: center;
-    color: rgba(243, 241, 236, 0.72);
+    color: var(--fg-muted);
     font-size: 15px;
     line-height: 1.6;
     display: flex;
@@ -197,7 +198,7 @@
   }
 
   .chat-empty strong {
-    color: rgba(243, 241, 236, 0.9);
+    color: var(--fg);
   }
 
   .chat-empty.is-leaving {
@@ -238,7 +239,7 @@
 
   .chat-empty strong {
     display: block;
-    color: rgba(243, 241, 236, 0.68);
+    color: var(--fg-muted);
     font-size: clamp(1.15rem, 2.4vw, 1.5rem);
     font-weight: 400;
     letter-spacing: -0.02em;
@@ -258,9 +259,9 @@
 
   :root {
     --user-bubble-border-style: dashed;
-    --user-bubble-border-color: #FF5A1F;
-    --assistant-text-color: rgba(243, 241, 236, 0.78);
-    --highlight-background: rgba(255, 90, 31, 0.22);
+    --user-bubble-border-color: #B86F58;
+    --assistant-text-color: color-mix(in srgb, var(--fg) 78%, transparent);
+    --highlight-background: #C7BF8B;
   }
 
   .chat-bubble.user {
@@ -498,25 +499,15 @@
     display: inline;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
-    background: transparent;
+    background: color-mix(in srgb, var(--highlight-background) 16%, transparent);
     color: inherit;
-    border-radius: 0;
-    padding: 0;
+    border-radius: 3px;
+    padding: 0 2px;
     font: inherit;
     font-weight: inherit;
     line-height: inherit;
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--highlight-background) 80%, currentColor);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.18em;
-    transition: none;
-  }
-
-  .chat-bubble.bot .md-hl:hover {
-    background: transparent;
-    color: inherit;
-    box-shadow: none;
-    text-decoration-color: color-mix(in srgb, var(--highlight-background) 80%, currentColor);
+    text-decoration: none;
+    pointer-events: none;
   }
 
   .question-dock {
@@ -636,7 +627,7 @@
 
   .question-row.is-selected .question-row-num {
     background: var(--accent);
-    color: rgba(243, 241, 236, 0.9);
+    color: var(--bg);
   }
 
   .question-row-num svg {
@@ -709,7 +700,6 @@
     line-height: 1.45;
   }
 
-  .question-extra-notes,
   .question-answer-input {
     width: 100%;
     min-height: 54px;
@@ -724,7 +714,6 @@
     resize: vertical;
   }
 
-  .question-extra-notes::placeholder,
   .question-answer-input::placeholder {
     color: var(--fg-muted);
   }
@@ -1098,7 +1087,7 @@
   }
 
   .chat-form-top {
-    order: 2;
+    order: 1;
     width: 100%;
     display: flex;
   }
@@ -1123,7 +1112,7 @@
   }
 
   .chat-form-toolbar {
-    order: 1;
+    order: 2;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1159,27 +1148,33 @@
   .model-picker-trigger {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 7px;
     height: 30px;
-    padding: 0 9px 0 11px;
-    border: 1px solid var(--btn-outline-border);
-    border-radius: 9px;
-    background: var(--btn-outline-hover);
-    color: var(--fg);
+    padding: 0 2px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--fg-muted);
     font: inherit;
-    font-size: 12.5px;
-    font-weight: 550;
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: color 0.15s ease;
   }
 
   .model-picker-label {
-    color: var(--fg-muted);
+    color: inherit;
   }
 
   .model-picker-trigger:hover {
-    border-color: var(--accent);
+    color: var(--fg);
+  }
+
+  .model-picker-trigger:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 3px;
   }
 
   .model-picker-chevron {
@@ -1200,7 +1195,7 @@
     left: 0;
     width: 220px;
     background: var(--bg);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--btn-outline-border);
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     padding: 5px;
@@ -1331,8 +1326,8 @@
     height: 32px;
     border-radius: 50%;
     border: none;
-    background: rgba(255, 90, 31, 0.22);
-    color: rgba(243, 241, 236, 0.9);
+    background: color-mix(in srgb, var(--accent) 22%, var(--bg));
+    color: var(--fg);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -1343,6 +1338,14 @@
   .chat-send:hover {
     background: rgba(255, 116, 64, 0.28);
     transform: none;
+  }
+
+  .chat-form.has-draft .chat-send {
+    background: color-mix(in srgb, var(--accent) 46%, var(--bg));
+  }
+
+  .chat-form.has-draft .chat-send:hover {
+    background: color-mix(in srgb, var(--accent) 56%, var(--bg));
   }
 
   .chat-send svg {
@@ -1461,7 +1464,7 @@
     gap: 8px;
     padding: 16px 12px;
     border-right: 1px solid var(--nav-border);
-    background: rgba(10, 10, 10, 0.96);
+    background: color-mix(in srgb, var(--fg) 5%, var(--bg));
     overflow: hidden;
     transition: margin-left 0.25s ease;
   }
@@ -1517,14 +1520,17 @@
   }
 
   .new-chat-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 9px 12px;
-    border-radius: 10px;
-    border: none;
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(243, 241, 236, 0.92);
+    justify-content: center;
+    min-width: 76px;
+    height: 38px;
+    gap: 7px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--btn-outline-border);
+    background: transparent;
+    color: var(--fg);
     font: inherit;
     font-size: 13.5px;
     font-weight: 550;
@@ -1533,15 +1539,19 @@
   }
 
   .new-chat-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 1);
+    background: var(--btn-outline-hover);
+    color: var(--accent);
   }
 
   .new-chat-btn svg {
-    width: 15px;
-    height: 15px;
+    width: 17px;
+    height: 17px;
     flex-shrink: 0;
-    opacity: 0.72;
+  }
+
+  .new-chat-label {
+    font-size: 12.5px;
+    font-weight: 550;
   }
 
   .history-list {
@@ -1580,7 +1590,7 @@
     border-radius: 10px;
     border: none;
     background: none;
-    color: rgba(243, 241, 236, 0.8);
+    color: var(--fg-muted);
     font: inherit;
     font-size: 13.5px;
     line-height: 1.3;
@@ -1596,7 +1606,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: rgba(243, 241, 236, 0.9);
+    color: var(--fg);
   }
 
   .history-section-label {
@@ -1605,8 +1615,7 @@
     font-weight: 600;
     letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: rgba(243, 241, 236, 0.7);
-    opacity: 0.7;
+    color: var(--fg-muted);
   }
 
   .history-section-label:first-child {
@@ -1661,19 +1670,24 @@
   }
 
   .chat-sidebar-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     padding-top: 8px;
     border-top: 1px solid var(--nav-border);
-    background: rgba(10, 10, 10, 0.96);
+    background: transparent;
   }
 
   .sidebar-account-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 8px;
-    border-radius: 10px;
-    border: none;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--btn-outline-border);
     background: transparent;
     cursor: pointer;
     transition: background 0.15s ease;
@@ -1684,13 +1698,7 @@
   }
 
   .sidebar-account-name {
-    font-size: 13.5px;
-    font-weight: 550;
-    color: rgba(243, 241, 236, 0.68);
-    opacity: 0.85;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: none;
   }
 
   .account-panel-up {
@@ -1764,9 +1772,9 @@
   #settings-logout:hover,
   #settings-delete-all-chats:hover,
   .account-row-danger:hover {
-    color: rgba(243, 241, 236, 0.82);
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.04);
+    color: var(--fg);
+    border-color: var(--btn-outline-border);
+    background: var(--btn-outline-hover);
   }
 
   .account-row-danger svg,
@@ -1867,8 +1875,10 @@
 
   .settings-modal {
     width: 100%;
-    max-width: 760px;
+    max-width: 900px;
     max-height: 90vh;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -1897,14 +1907,14 @@
   }
 
   .settings-modal {
-    color: rgba(243, 241, 236, 0.72);
+    color: var(--fg);
   }
 
   .settings-modal-head h2 {
     font-size: 1.2rem;
     font-weight: 500;
     letter-spacing: -0.01em;
-    color: rgba(243, 241, 236, 0.72);
+    color: var(--fg);
   }
 
   .settings-modal-close {
@@ -1963,7 +1973,7 @@
   .settings-identity-name {
     font-size: 15px;
     font-weight: 500;
-    color: rgba(243, 241, 236, 0.72);
+    color: var(--fg);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1972,7 +1982,7 @@
   .settings-identity-label {
     margin-top: 2px;
     font-size: 12.5px;
-    color: rgba(243, 241, 236, 0.62);
+    color: var(--fg-muted);
     font-weight: 400;
   }
 
@@ -1984,6 +1994,121 @@
     gap: 18px;
     min-height: 56px;
   }
+
+  .settings-layout {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    align-items: start;
+    gap: 20px;
+    min-height: 0;
+    margin-top: 20px;
+  }
+
+  .settings-category-nav {
+    position: static;
+    top: auto;
+    z-index: auto;
+    display: grid;
+    align-content: start;
+    align-items: stretch;
+    justify-content: stretch;
+    gap: 4px;
+    min-height: 0;
+    padding: 0 12px 0 0;
+    border: 0;
+    border-right: 1px solid var(--nav-border);
+    background: transparent;
+    transition: none;
+  }
+
+  .settings-category-nav button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .settings-category-nav button:hover,
+  .settings-category-nav button[aria-current="page"] {
+    background: var(--btn-outline-hover);
+    color: var(--fg);
+  }
+
+  .settings-content {
+    min-width: 0;
+  }
+
+  .settings-section {
+    display: none;
+  }
+
+  .settings-section.is-active {
+    display: block;
+  }
+
+  .settings-section-title {
+    margin: 0 0 8px;
+    color: var(--fg-muted);
+    font-size: 11px;
+    font-weight: 650;
+    text-transform: uppercase;
+  }
+
+  .settings-mobile-back {
+    display: none;
+  }
+
+  .theme-picker {
+    display: flex;
+    flex-shrink: 0;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 10px;
+    background: var(--btn-outline-hover);
+  }
+
+  .theme-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 5px 8px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .theme-choice[aria-pressed="true"] {
+    border-color: var(--btn-outline-border);
+    background: var(--bg);
+    color: var(--fg);
+  }
+
+  .theme-preview {
+    width: 13px;
+    height: 13px;
+    border: 1px solid var(--btn-outline-border);
+    border-radius: 50%;
+  }
+
+  .theme-preview-white { background: #fff; }
+  .theme-preview-grey { background: #aeb2b3; }
+  .theme-preview-dark { background: #171717; }
 
   .settings-modal-row-text {
     flex: 1;
@@ -1998,11 +2123,11 @@
     font-weight: 500;
     margin: 0 0 3px;
     line-height: 1.3;
-    color: rgba(243, 241, 236, 0.72);
+    color: var(--fg);
   }
 
   .settings-modal-row-text p {
-    color: rgba(243, 241, 236, 0.62);
+    color: var(--fg-muted);
     font-size: 0.85rem;
     line-height: 1.45;
     max-width: 38ch;
@@ -2022,6 +2147,84 @@
   .settings-modal-row .settings-modal-actions {
     flex-shrink: 0;
     margin-left: auto;
+  }
+
+  @media (max-width: 600px) {
+    .settings-modal {
+      width: 100%;
+      height: 100dvh;
+      max-height: none;
+      min-height: 100dvh;
+      padding: 18px;
+      border-radius: 0;
+      overflow: hidden;
+    }
+
+    .settings-identity {
+      margin-top: 12px;
+      padding: 12px;
+    }
+
+    .settings-layout {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: stretch;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .settings-category-nav {
+      width: 100%;
+      gap: 7px;
+      padding: 0;
+      border: 0;
+    }
+
+    .settings-category-nav button {
+      min-height: 54px;
+      padding: 12px 14px;
+      border: 1px solid var(--btn-outline-border);
+      background: var(--btn-outline-hover);
+      color: var(--fg);
+      font-size: 14px;
+    }
+
+    .settings-category-nav button[aria-current="page"] {
+      border-color: var(--accent);
+    }
+
+    .settings-content {
+      display: none;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .settings-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .settings-modal.is-mobile-category-open .settings-category-nav {
+      display: none;
+    }
+
+    .settings-modal.is-mobile-category-open .settings-content {
+      display: block;
+    }
+
+    .settings-mobile-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0 0 12px;
+      padding: 8px 0;
+      border: 0;
+      background: transparent;
+      color: var(--fg-muted);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
   }
 
   .confirm-modal-overlay {
@@ -2101,46 +2304,26 @@
         </button>
       </div>
 
-      <button class="new-chat-btn" id="new-chat-btn" type="button" title="Start new chat">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        New chat
-      </button>
-
       <div class="history-list" id="history-list">
         <p class="history-empty" id="history-empty">No conversations yet.</p>
       </div>
 
       <div class="chat-sidebar-foot">
-        <div class="account-dropdown" id="account-dropdown">
-          <button class="sidebar-account-btn" id="account-toggle" aria-label="Account" title="Account menu" aria-expanded="false" aria-controls="account-panel">
-            <span class="account-btn" id="account-avatar">?</span>
-            <span class="sidebar-account-name" id="sidebar-account-name">Account</span>
-          </button>
-          <div class="account-panel account-panel-up" id="account-panel">
-            <div class="account-panel-head">
-              <span class="account-panel-avatar" id="account-panel-avatar">?</span>
-              <div class="account-panel-head-text">
-                <p class="account-panel-name" id="account-panel-username">—</p>
-                <p class="account-panel-sub">Simplicity account</p>
-              </div>
-            </div>
-            <button class="account-row is-button" id="settings-open" type="button" title="Open settings">
-              <svg viewBox="0 0 16 16" fill="none"><path d="M8 10a2 2 0 100-4 2 2 0 000 4Z" stroke="currentColor" stroke-width="1.3"/><path d="M12.9 8.6c.03-.2.05-.4.05-.6s-.02-.4-.05-.6l1.1-.86a.5.5 0 00.12-.64l-1.04-1.8a.5.5 0 00-.6-.22l-1.3.52a4.6 4.6 0 00-1.04-.6l-.2-1.38a.5.5 0 00-.5-.42H7.56a.5.5 0 00-.5.42l-.2 1.38c-.37.15-.72.35-1.04.6l-1.3-.52a.5.5 0 00-.6.22l-1.04 1.8a.5.5 0 00.12.64l1.1.86c-.03.2-.05.4-.05.6s.02.4.05.6l-1.1.86a.5.5 0 00-.12.64l1.04 1.8c.13.22.4.31.6.22l1.3-.52c.32.25.67.45 1.04.6l.2 1.38c.04.24.25.42.5.42h2.08c.25 0 .46-.18.5-.42l.2-1.38c.37-.15.72-.35 1.04-.6l1.3.52c.2.09.47 0 .6-.22l1.04-1.8a.5.5 0 00-.12-.64l-1.1-.86Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
-              Settings
-            </button>
-            <button class="account-row is-button account-row-danger" id="account-logout" type="button" title="Log out">
-              <svg viewBox="0 0 16 16" fill="none"><path d="M6 14H3.5a1 1 0 01-1-1V3a1 1 0 011-1H6M10.5 11.5L14 8l-3.5-3.5M14 8H6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Log out
-            </button>
-          </div>
-        </div>
+        <button class="new-chat-btn" id="new-chat-btn" type="button" aria-label="Start new chat" title="Start new chat">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span class="new-chat-label">Chat</span>
+        </button>
+        <button class="sidebar-account-btn" id="account-toggle" type="button" aria-label="Open settings" title="Settings">
+            <span class="account-btn" id="account-avatar" aria-hidden="true">…</span>
+            <span class="sidebar-account-name" id="sidebar-account-name">Loading account</span>
+        </button>
       </div>
     </aside>
 
     <div class="chat-main">
       <header class="chat-top">
         <button class="sidebar-toggle sidebar-toggle-mobile" id="sidebar-toggle-mobile" type="button" aria-label="Open sidebar" title="Open sidebar">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M15 5v14M9 5v14M4 5h16v14H4V5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
         </button>
       </header>
       <main class="chat-wrap is-loading">
@@ -2235,7 +2418,7 @@
         </div>
       </div>
       <div class="chat-form-top">
-        <textarea id="chat-input" rows="2" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message"></textarea>
+        <textarea id="chat-input" rows="1" placeholder="Message Simplicity…" autocomplete="off" aria-label="Message"></textarea>
       </div>
     </form>
     <button class="scroll-bottom" id="scroll-bottom" type="button" aria-label="Scroll to bottom" hidden>↓</button>
@@ -2264,97 +2447,116 @@
       </div>
 
       <div class="settings-identity">
-        <span class="settings-identity-avatar" id="settings-avatar">?</span>
+        <span class="settings-identity-avatar" id="settings-avatar">…</span>
         <div class="settings-identity-text">
-          <p class="settings-identity-name" id="settings-username">—</p>
+          <p class="settings-identity-name" id="settings-username">Loading account</p>
           <p class="settings-identity-label">Simplicity account</p>
         </div>
       </div>
 
-      <div class="settings-modal-row">
-        <div class="settings-modal-row-text">
-          <h3>Theme</h3>
-          <p>Switch between light and dark.</p>
-        </div>
-        <button class="theme-toggle" id="modal-theme-toggle" aria-label="Toggle theme" title="Toggle theme">
-          <span class="theme-toggle-dot dot-light"></span>
-          <span class="theme-toggle-dot dot-dark"></span>
-          <span class="theme-toggle-thumb"></span>
-        </button>
-      </div>
+      <div class="settings-layout">
+        <nav class="settings-category-nav" aria-label="Settings categories">
+          <button type="button" data-settings-target="appearance" aria-current="page">Appearance<span aria-hidden="true">›</span></button>
+          <button type="button" data-settings-target="messages">Messages<span aria-hidden="true">›</span></button>
+          <button type="button" data-settings-target="account">Account<span aria-hidden="true">›</span></button>
+        </nav>
+        <div class="settings-content" id="settings-content">
+          <button class="settings-mobile-back" id="settings-mobile-back" type="button">‹ All settings</button>
+          <section class="settings-section is-active" data-settings-section="appearance" aria-labelledby="settings-appearance-title">
+            <h3 class="settings-section-title" id="settings-appearance-title">Appearance</h3>
+            <div class="settings-modal-row">
+              <div class="settings-modal-row-text">
+                <h3>Theme</h3>
+                <p>Choose white, grey, or dark.</p>
+              </div>
+              <div class="theme-picker" id="theme-picker" role="group" aria-label="Theme">
+                <button class="theme-choice" type="button" data-theme-option="light" aria-pressed="true"><span class="theme-preview theme-preview-white" aria-hidden="true"></span>White</button>
+                <button class="theme-choice" type="button" data-theme-option="grey" aria-pressed="false"><span class="theme-preview theme-preview-grey" aria-hidden="true"></span>Grey</button>
+                <button class="theme-choice" type="button" data-theme-option="dark" aria-pressed="false"><span class="theme-preview theme-preview-dark" aria-hidden="true"></span>Dark</button>
+              </div>
+            </div>
+          </section>
 
-      <div class="settings-modal-row">
-        <div class="settings-modal-row-text">
-          <h3>Message Outline Style</h3>
-          <p>Choose user message border style.</p>
-        </div>
-        <div class="outline-style-picker" id="user-outline-style-picker">
-          <button class="outline-style-trigger" id="user-outline-style-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">Dotted / Dashed</button>
-          <div class="outline-style-menu" id="user-outline-style-menu" role="listbox" aria-label="User message border style">
-            <button class="outline-style-option is-selected" type="button" role="option" aria-selected="true" data-value="dashed">Dotted / Dashed</button>
-            <button class="outline-style-option" type="button" role="option" aria-selected="false" data-value="solid">Solid Line</button>
-            <button class="outline-style-option" type="button" role="option" aria-selected="false" data-value="double">Double Line</button>
-            <button class="outline-style-option" type="button" role="option" aria-selected="false" data-value="groove">Groove</button>
-          </div>
-        </div>
-      </div>
+          <section class="settings-section" data-settings-section="messages" aria-labelledby="settings-messages-title">
+            <h3 class="settings-section-title" id="settings-messages-title">Messages</h3>
+            <div class="settings-modal-row">
+              <div class="settings-modal-row-text">
+                <h3>Message Outline Style</h3>
+                <p>Choose user message border style.</p>
+              </div>
+              <div class="outline-style-picker" id="user-outline-style-picker">
+                <button class="outline-style-trigger" id="user-outline-style-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">Dotted / Dashed</button>
+                <div class="outline-style-menu" id="user-outline-style-menu" role="listbox" aria-label="User message border style">
+                  <button class="outline-style-option is-selected" type="button" role="option" aria-selected="true" data-value="dashed">Dotted / Dashed</button>
+                  <button class="outline-style-option" type="button" role="option" aria-selected="false" data-value="solid">Solid Line</button>
+                  <button class="outline-style-option" type="button" role="option" aria-selected="false" data-value="double">Double Line</button>
+                  <button class="outline-style-option" type="button" role="option" aria-selected="false" data-value="groove">Groove</button>
+                </div>
+              </div>
+            </div>
 
-      <div class="settings-modal-row">
-        <div class="settings-modal-row-text">
-          <h3>Message Outline Color</h3>
-          <p>Choose user message border color.</p>
-        </div>
-        <div class="appearance-swatches" id="user-outline-color-swatches">
-          <button type="button" class="swatch-btn is-selected" data-color="#FF5A1F" style="background:#FF5A1F" title="Accent Orange"></button>
-          <button type="button" class="swatch-btn" data-color="#3B82F6" style="background:#3B82F6" title="Blue"></button>
-          <button type="button" class="swatch-btn" data-color="#10B981" style="background:#10B981" title="Green"></button>
-          <button type="button" class="swatch-btn" data-color="#8B5CF6" style="background:#8B5CF6" title="Purple"></button>
-          <button type="button" class="swatch-btn" data-color="#EC4899" style="background:#EC4899" title="Pink"></button>
-        </div>
-      </div>
+            <div class="settings-modal-row">
+              <div class="settings-modal-row-text">
+                <h3>Message Outline Color</h3>
+                <p>Choose user message border color.</p>
+              </div>
+              <div class="appearance-swatches" id="user-outline-color-swatches">
+                <button type="button" class="swatch-btn is-selected" data-color="#B86F58" style="background:#B86F58" title="Soft terracotta"></button>
+                <button type="button" class="swatch-btn" data-color="#6F8EAD" style="background:#6F8EAD" title="Slate blue"></button>
+                <button type="button" class="swatch-btn" data-color="#6F9A82" style="background:#6F9A82" title="Sage green"></button>
+                <button type="button" class="swatch-btn" data-color="#947CA8" style="background:#947CA8" title="Muted violet"></button>
+                <button type="button" class="swatch-btn" data-color="#B8798E" style="background:#B8798E" title="Dusty rose"></button>
+              </div>
+            </div>
 
-      <div class="settings-modal-row">
-        <div class="settings-modal-row-text">
-          <h3>Assistant Text Color</h3>
-          <p>Choose the color used for assistant replies.</p>
-        </div>
-        <div class="appearance-swatches" id="assistant-text-color-swatches">
-          <button type="button" class="swatch-btn is-selected" data-color="#EAE3DB" style="background:#EAE3DB" title="Warm white"></button>
-          <button type="button" class="swatch-btn" data-color="#DCE5F2" style="background:#DCE5F2" title="Cool white"></button>
-          <button type="button" class="swatch-btn" data-color="#C8DDF6" style="background:#C8DDF6" title="Soft blue"></button>
-          <button type="button" class="swatch-btn" data-color="#CFEAD8" style="background:#CFEAD8" title="Soft green"></button>
-          <button type="button" class="swatch-btn" data-color="#F2E7B7" style="background:#F2E7B7" title="Soft yellow"></button>
-        </div>
-      </div>
+            <div class="settings-modal-row">
+              <div class="settings-modal-row-text">
+                <h3>Assistant Text Color</h3>
+                <p>Choose the color used for assistant replies.</p>
+              </div>
+              <div class="appearance-swatches" id="assistant-text-color-swatches">
+                <button type="button" class="swatch-btn is-selected" data-color="#EAE3DB" style="background:#EAE3DB" title="Warm white"></button>
+                <button type="button" class="swatch-btn" data-color="#DCE5F2" style="background:#DCE5F2" title="Cool white"></button>
+                <button type="button" class="swatch-btn" data-color="#C8DDF6" style="background:#C8DDF6" title="Soft blue"></button>
+                <button type="button" class="swatch-btn" data-color="#CFEAD8" style="background:#CFEAD8" title="Soft green"></button>
+                <button type="button" class="swatch-btn" data-color="#F2E7B7" style="background:#F2E7B7" title="Soft yellow"></button>
+              </div>
+            </div>
 
-      <div class="settings-modal-row">
-        <div class="settings-modal-row-text">
-          <h3>Highlight Color</h3>
-          <p>Choose the background for important reply passages.</p>
-        </div>
-        <div class="appearance-swatches" id="highlight-color-swatches">
-          <button type="button" class="swatch-btn is-selected" data-color="#E9A17D" style="background:#E9A17D" title="Muted orange"></button>
-          <button type="button" class="swatch-btn" data-color="#9BB7E6" style="background:#9BB7E6" title="Muted blue"></button>
-          <button type="button" class="swatch-btn" data-color="#8AC8A0" style="background:#8AC8A0" title="Muted green"></button>
-          <button type="button" class="swatch-btn" data-color="#D89CC1" style="background:#D89CC1" title="Muted pink"></button>
-          <button type="button" class="swatch-btn" data-color="#A693E7" style="background:#A693E7" title="Muted violet"></button>
-        </div>
-      </div>
+            <div class="settings-modal-row">
+              <div class="settings-modal-row-text">
+                <h3>Highlight Color</h3>
+                <p>Choose the background for important reply passages.</p>
+              </div>
+              <div class="appearance-swatches" id="highlight-color-swatches">
+                <button type="button" class="swatch-btn is-selected" data-color="#C7BF8B" style="background:#C7BF8B" title="Soft olive"></button>
+                <button type="button" class="swatch-btn" data-color="#9BB7E6" style="background:#9BB7E6" title="Muted blue"></button>
+                <button type="button" class="swatch-btn" data-color="#8AC8A0" style="background:#8AC8A0" title="Muted green"></button>
+                <button type="button" class="swatch-btn" data-color="#D89CC1" style="background:#D89CC1" title="Muted pink"></button>
+                <button type="button" class="swatch-btn" data-color="#A693E7" style="background:#A693E7" title="Muted violet"></button>
+              </div>
+            </div>
+          </section>
 
-      <div class="settings-modal-row">
-        <div class="settings-modal-row-text">
-          <h3>Log out</h3>
-          <p>End your current session and return to the sign-in screen.</p>
-        </div>
-        <button class="btn btn-outline" id="settings-logout" type="button" title="Log out">Log out</button>
-      </div>
+          <section class="settings-section" data-settings-section="account" aria-labelledby="settings-account-title">
+            <h3 class="settings-section-title" id="settings-account-title">Account</h3>
+            <div class="settings-modal-row">
+              <div class="settings-modal-row-text">
+                <h3>Log out</h3>
+                <p>End your current session and return to the sign-in screen.</p>
+              </div>
+              <button class="btn btn-outline" id="settings-logout" type="button" title="Log out">Log out</button>
+            </div>
 
-      <div class="settings-modal-row">
-        <div class="settings-modal-row-text">
-          <h3>Delete all chats</h3>
-          <p>Remove every saved conversation from this account.</p>
+            <div class="settings-modal-row">
+              <div class="settings-modal-row-text">
+                <h3>Delete all chats</h3>
+                <p>Remove every saved conversation from this account.</p>
+              </div>
+              <button class="btn btn-outline account-row-danger" id="settings-delete-all-chats" type="button" title="Delete all chats">Delete all chats</button>
+            </div>
+          </section>
         </div>
-        <button class="btn btn-outline account-row-danger" id="settings-delete-all-chats" type="button" title="Delete all chats">Delete all chats</button>
       </div>
     </div>
   </div>
@@ -2388,8 +2590,15 @@
         });
       }
 
+      function openMobileSidebar() {
+        sidebar.classList.remove('is-collapsed');
+        sidebar.classList.add('is-open');
+        if (sidebarToggleMobile) sidebarToggleMobile.setAttribute('aria-expanded', 'true');
+      }
+
       function closeMobileSidebar() {
         sidebar.classList.remove('is-open');
+        if (sidebarToggleMobile) sidebarToggleMobile.setAttribute('aria-expanded', 'false');
       }
 
       if (sidebarToggleMobile) {
@@ -2397,10 +2606,33 @@
           if (sidebar.classList.contains('is-collapsed')) {
             sidebar.classList.remove('is-collapsed');
           } else {
-            sidebar.classList.toggle('is-open');
+            if (sidebar.classList.contains('is-open')) closeMobileSidebar();
+            else openMobileSidebar();
           }
         });
       }
+
+      var sidebarTouchStart = null;
+      document.addEventListener('touchstart', function (event) {
+        if (!event.touches || event.touches.length !== 1) return;
+        var touch = event.touches[0];
+        sidebarTouchStart = { x: touch.clientX, y: touch.clientY, target: event.target };
+      }, { passive: true });
+      document.addEventListener('touchend', function (event) {
+        if (!sidebarTouchStart || !event.changedTouches || !event.changedTouches.length) return;
+        var start = sidebarTouchStart;
+        sidebarTouchStart = null;
+        if (window.innerWidth > 860) return;
+        var touch = event.changedTouches[0];
+        var deltaX = touch.clientX - start.x;
+        var deltaY = touch.clientY - start.y;
+        if (Math.abs(deltaX) < 70 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25) return;
+        if (deltaX > 0 && start.x < 28 && !sidebar.classList.contains('is-open')) {
+          openMobileSidebar();
+        } else if (deltaX < 0 && sidebar.classList.contains('is-open') && sidebar.contains(start.target)) {
+          closeMobileSidebar();
+        }
+      }, { passive: true });
 
       document.addEventListener('click', function (event) {
         if (!sidebar.classList.contains('is-open')) return;
@@ -2801,22 +3033,32 @@
         if ((msg.toolCalls && msg.toolCalls.length) || (msg.generationTimes && msg.generationTimes.length)) {
           var trace = document.createElement('div');
           trace.className = 'tool-trace';
-          function appendGenerationTime(seconds) {
+          function appendGenerationTime(seconds, actions) {
             var label = document.createElement('div');
             label.className = 'thinking-indicator generation-time-label';
-            label.textContent = 'Simplified in ' + formatElapsed(seconds);
+            actions = Number(actions) || 0;
+            label.textContent = 'Simplifying in ' + formatElapsed(seconds) + ' · ' + actions + ' action' + (actions === 1 ? '' : 's');
             trace.appendChild(label);
           }
           if (msg.trace && msg.trace.length) {
+            var actionsSinceSimplification = 0;
             msg.trace.forEach(function (entry) {
-              if (entry.type === 'tool' && entry.call) trace.appendChild(createToolStep(entry.call, false));
-              if (entry.type === 'simplified') appendGenerationTime(entry.seconds);
+              if (entry.type === 'tool' && entry.call) {
+                trace.appendChild(createToolStep(entry.call, false));
+                actionsSinceSimplification++;
+              }
+              if (entry.type === 'simplified') {
+                appendGenerationTime(entry.seconds, entry.actions === undefined ? actionsSinceSimplification : entry.actions);
+                actionsSinceSimplification = 0;
+              }
             });
           } else {
             (msg.toolCalls || []).forEach(function (call) {
               trace.appendChild(createToolStep(call, false));
             });
-            (msg.generationTimes || []).forEach(appendGenerationTime);
+            (msg.generationTimes || []).forEach(function (seconds, index) {
+              appendGenerationTime(seconds, index === 1 ? (msg.toolCalls || []).length : 0);
+            });
           }
           content.appendChild(trace);
         }
@@ -2975,6 +3217,7 @@
       function autosizeInput() {
         input.style.height = 'auto';
         input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+        form.classList.toggle('has-draft', Boolean(input.value.trim()));
       }
 
       input.addEventListener('input', autosizeInput);
@@ -3340,20 +3583,22 @@
       // live tag; every literal "<" in the reply stays inert text.
       function renderMarkdown(raw) {
         var blocks = [];
-        var text = escapeHtml(raw).replace(/\r\n/g, '\n');
+        var text = escapeHtml(raw).replace(/\r\n?/g, '\n');
 
         // Fenced code blocks first — their contents must survive untouched
         // by every other rule below (bold/italic/links inside code would be
         // wrong), so pull them out and swap back in at the very end.
         text = text.replace(/```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g, function (m, lang, code) {
-          var token = ' BLOCK' + blocks.length + ' ';
+          var token = '\u0000BLOCK' + blocks.length + '\u0000';
           blocks.push('<pre class="md-code-block"><code>' + code.replace(/\n$/, '') + '</code></pre>');
           return token;
         });
 
+        text = text.replace(/\n[ \t]*\n+/g, '\n');
+
         // Inline code next, same reasoning — protect before bold/italic run.
         text = text.replace(/`([^`\n]+)`/g, function (m, code) {
-          var token = ' BLOCK' + blocks.length + ' ';
+          var token = '\u0000BLOCK' + blocks.length + '\u0000';
           blocks.push('<code class="md-inline-code">' + code + '</code>');
           return token;
         });
@@ -3374,7 +3619,7 @@
           // rather than inline, so it becomes its own block element instead
           // of an inline span broken across line breaks.
           .replace(/==([\s\S]+?)==/g, function (m, inner) {
-            var token = ' BLOCK' + blocks.length + ' ';
+            var token = '\u0000BLOCK' + blocks.length + '\u0000';
             blocks.push('<div class="md-hl">' + inner.trim().replace(/\n/g, '<br>') + '</div>');
             return token;
           })
@@ -3408,7 +3653,7 @@
           if (line.indexOf('|') !== -1 && nextLine && isTableSeparator(nextLine) && !ulMatch) {
             flushList();
             var headerCells = splitTableRow(line);
-            var token = ' BLOCK' + blocks.length + ' ';
+            var token = '\u0000BLOCK' + blocks.length + '\u0000';
             var rows = [];
             var scan = li + 2;
             while (scan < lines.length && lines[scan].indexOf('|') !== -1 && lines[scan].trim() !== '') {
@@ -3446,7 +3691,7 @@
         // formatting, so this only affects plain paragraph text.
         text = text.replace(/\n/g, '<br>');
 
-        text = text.replace(/ BLOCK(\d+) /g, function (m, i) {
+        text = text.replace(/\u0000BLOCK(\d+)\u0000/g, function (m, i) {
           return blocks[Number(i)];
         });
 
@@ -3517,7 +3762,7 @@
         currentSuggestions = suggestions || [];
       }
 
-      function showFollowup() {
+      function showFollowup(targetRow) {
         hideFollowup();
         if (!currentSuggestions.length) return;
         var rows = messages.querySelectorAll('.bot-row');
@@ -3536,9 +3781,40 @@
           followupRow.appendChild(chip);
         });
 
-        var last = rows[rows.length - 1];
-        last.parentNode.insertBefore(followupRow, last.nextSibling);
+        var target = targetRow && targetRow.isConnected ? targetRow : rows[rows.length - 1];
+        target.parentNode.insertBefore(followupRow, target.nextSibling);
         if (followOutput) scrollPageBottom(false);
+      }
+
+      function requestEnhancements(options) {
+        return fetch('/api/chat/enhance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId: options.conversationId,
+            assistantMessageId: options.assistantMessageId,
+            message: options.message,
+            generateTitle: Boolean(options.generateTitle),
+          }),
+        })
+          .then(function (response) { return response.ok ? response.json() : null; })
+          .then(function (data) {
+            if (!data || options.requestGeneration !== viewGeneration || !options.row.isConnected) return;
+            if (data.title && currentConversationId === options.conversationId) {
+              if (chatTopTitle) chatTopTitle.textContent = data.title;
+              if (conversationCache[options.conversationId]) conversationCache[options.conversationId].title = data.title;
+              historyList.querySelectorAll('.history-item').forEach(function (item) {
+                if (item.getAttribute('data-id') === options.conversationId) {
+                  var title = item.querySelector('.history-item-title');
+                  if (title) title.textContent = data.title;
+                }
+              });
+            }
+            if (data.highlighted) options.bubble.innerHTML = renderMarkdown(data.highlighted);
+            setSuggestions(data.suggestions);
+            showFollowup(options.row);
+          })
+          .catch(function (error) { console.error('Reply enhancements failed:', error); });
       }
 
       function makeMeta(text, time, showRetry, onRetry) {
@@ -3632,7 +3908,7 @@
           normalized.required = normalized.required !== false;
           return normalized;
         });
-        var answers = normalizedQuestions.map(function () { return { choices: [], custom: '', notes: '' }; });
+        var answers = normalizedQuestions.map(function () { return { choices: [], custom: '' }; });
         var qIndex = 0;
 
         container.innerHTML = '';
@@ -3647,7 +3923,7 @@
           var summary = normalizedQuestions.map(function (question, index) {
             var answer = answers[index];
             var chosen = answer.choices.join(', ') || answer.custom || (question.required ? '(unanswered)' : '(skipped)');
-            return question.question + ': ' + chosen + (answer.notes ? '\nExtra notes: ' + answer.notes : '');
+            return question.question + ': ' + chosen;
           }).join('\n');
           container.classList.remove('is-active');
           container.innerHTML = '';
@@ -3751,7 +4027,7 @@
 
           var answerInput = document.createElement('textarea');
           answerInput.className = 'question-answer-input';
-          answerInput.placeholder = question.options.length ? 'Something else…' : 'Type your answer…';
+          answerInput.placeholder = question.options.length ? 'Other details…' : 'Type your answer…';
           answerInput.value = answer.custom;
           answerInput.setAttribute('aria-label', 'Your answer to: ' + question.question);
           answerInput.addEventListener('input', function () {
@@ -3761,14 +4037,6 @@
             updateNavigation();
           });
           card.appendChild(answerInput);
-
-          var notes = document.createElement('textarea');
-          notes.className = 'question-extra-notes';
-          notes.placeholder = 'Extra notes (optional)';
-          notes.value = answer.notes;
-          notes.setAttribute('aria-label', 'Extra notes for: ' + question.question);
-          notes.addEventListener('input', function () { answer.notes = notes.value.trim(); });
-          card.appendChild(notes);
 
           var navigation = document.createElement('div');
           navigation.className = 'question-nav';
@@ -3859,6 +4127,7 @@
         hideFollowup();
         setSuggestions([]);
         var requestGeneration = viewGeneration;
+        var wasNewConversation = !currentConversationId;
 
         var row = document.createElement('div');
         row.className = 'bot-row';
@@ -3906,6 +4175,7 @@
         var replyReceived = false;
         var typewriterDone = false;
         var streamedAnswer = '';
+        var assistantMessageId = null;
         var generationTimes = [];
         var responseSettled = false;
 
@@ -3919,13 +4189,13 @@
           div.innerHTML = renderMarkdown(text);
         }
 
-        function addSimplifiedLabel(seconds) {
+        function addSimplifiedLabel(seconds, actions) {
           trace.hidden = false;
-          if (generationTimes.indexOf(seconds) !== -1) return;
           generationTimes.push(seconds);
           var label = document.createElement('div');
           label.className = 'thinking-indicator generation-time-label';
-          label.textContent = 'Simplified in ' + formatElapsed(seconds);
+          actions = Number(actions) || 0;
+          label.textContent = 'Simplifying in ' + formatElapsed(seconds) + ' · ' + actions + ' action' + (actions === 1 ? '' : 's');
           trace.appendChild(label);
         }
 
@@ -3980,6 +4250,7 @@
             return;
           }
           if (event.type === 'simplified') {
+            addSimplifiedLabel(event.seconds, event.actions);
             return;
           }
           if (event.type === 'reply') {
@@ -3998,6 +4269,7 @@
               event.toolCalls.forEach(function (call) { trace.appendChild(createToolStep(call, false)); });
             }
             var answer = event.reply || streamedAnswer || "I don't have a response for that.";
+            assistantMessageId = event.assistantMessageId || null;
             renderCompletedReply(answer);
             content.appendChild(makeMeta(answer, formatTime(new Date()), false, null));
             refreshRetry();
@@ -4041,8 +4313,17 @@
             return;
           }
           if (event.type === 'done') {
-            if (event.title && chatTopTitle) chatTopTitle.textContent = event.title;
-            setSuggestions(event.suggestions);
+            if (assistantMessageId && event.conversationId) {
+              requestEnhancements({
+                conversationId: event.conversationId,
+                assistantMessageId: assistantMessageId,
+                message: sourceMessage,
+                generateTitle: wasNewConversation,
+                row: row,
+                bubble: div,
+                requestGeneration: requestGeneration,
+              });
+            }
             maybeShowFollowup();
             if (!questionDock.classList.contains('is-active')) completeResponse();
             return;
@@ -4311,14 +4592,23 @@
         function stopThinking() { clearInterval(thinkingTimer); }
         function setThinkingPhase(label) { thinkingPhase.textContent = label + '...'; }
         var generationTimes = [];
+        var toolCalls = [];
+        var localTrace = [];
+        var lastSimplifiedAt = thinkingStartedAt;
+        var reportedActionCount = 0;
 
-        function addLocalSimplifiedLabel(seconds) {
+        function addLocalSimplifiedLabel() {
           trace.hidden = false;
-          if (generationTimes.indexOf(seconds) !== -1) return;
+          var now = Date.now();
+          var seconds = Math.max(1, Math.round((now - lastSimplifiedAt) / 1000));
+          var actions = toolCalls.length - reportedActionCount;
+          lastSimplifiedAt = now;
+          reportedActionCount = toolCalls.length;
           generationTimes.push(seconds);
+          localTrace.push({ type: 'simplified', seconds: seconds, actions: actions });
           var label = document.createElement('div');
-          label.className = 'thinking-indicator';
-          label.textContent = 'Simplified in ' + formatElapsed(seconds);
+          label.className = 'thinking-indicator generation-time-label';
+          label.textContent = 'Simplifying in ' + formatElapsed(seconds) + ' · ' + actions + ' action' + (actions === 1 ? '' : 's');
           trace.appendChild(label);
         }
 
@@ -4335,7 +4625,6 @@
           onBotDone();
         }
 
-        var toolCalls = [];
         var isNewConversation = !currentConversationId;
 
         fetch('/api/chat/local/start', {
@@ -4404,7 +4693,7 @@
 
                 return callPromise.then(function (completion) {
                   if (requestGeneration !== viewGeneration) return;
-                  addLocalSimplifiedLabel(Math.max(1, Math.round((Date.now() - thinkingStartedAt) / 1000)));
+                  addLocalSimplifiedLabel();
                   var msg = completion.choices && completion.choices[0] && completion.choices[0].message;
                   var calls = msg && msg.tool_calls;
 
@@ -4439,6 +4728,7 @@
                     }
                     var doneCall = { name: call.function.name, args: args, result: result, durationMs: Date.now() - startedAt };
                     toolCalls.push(doneCall);
+                    localTrace.push({ type: 'tool', callIndex: toolCalls.length - 1 });
                     finishToolStep(step, doneCall);
                     if (followOutput) scrollPageBottom(false);
 
@@ -4466,10 +4756,10 @@
                     return streamIter.next().then(function (step) {
                       if (requestGeneration !== viewGeneration) return;
                       if (step.done) {
-                        addLocalSimplifiedLabel(Math.max(1, Math.round((Date.now() - thinkingStartedAt) / 1000)));
+                        addLocalSimplifiedLabel();
                         var finalText = accumulated || "I don't have a response for that.";
                         div.innerHTML = renderMarkdown(finalText);
-                        saveLocalReply(finalText);
+                        saveLocalReply(finalText, true);
                         finishBubble(finalText);
                         return;
                       }
@@ -4494,14 +4784,14 @@
                   ? 'I have a few questions before continuing — see below.'
                   : 'I have a question before continuing — see below.';
                 div.innerHTML = renderMarkdown(qSummary);
-                saveLocalReply(qSummary);
+                saveLocalReply(qSummary, false);
                 finishBubble(qSummary);
                 renderQuestionCard(questionDock, questions, function (answerText) {
                   handleUserMessage(answerText);
                 });
               }
 
-              function saveLocalReply(replyText) {
+              function saveLocalReply(replyText, shouldEnhance) {
                 var titlePromise = isNewConversation
                   ? generateLocalTitle(engine, sourceMessage, replyText)
                   : Promise.resolve(null);
@@ -4516,6 +4806,7 @@
                       reply: replyText,
                       toolCalls: toolCalls,
                       generationTimes: generationTimes,
+                      trace: localTrace,
                       isNewConversation: isNewConversation,
                       clientTitle: clientTitle,
                     }),
@@ -4525,9 +4816,16 @@
                   .then(function (data) {
                     if (!data || requestGeneration !== viewGeneration) return;
                     if (data.title && chatTopTitle) chatTopTitle.textContent = data.title;
-                    setSuggestions(data.suggestions);
-                    showFollowup();
-                    if (data.highlighted) div.innerHTML = renderMarkdown(data.highlighted);
+                    if (shouldEnhance && data.assistantMessageId) {
+                      requestEnhancements({
+                        conversationId: data.conversationId,
+                        assistantMessageId: data.assistantMessageId,
+                        message: sourceMessage,
+                        row: row,
+                        bubble: div,
+                        requestGeneration: requestGeneration,
+                      });
+                    }
                     onBotDone();
                   })
                   .catch(function (error) {
@@ -4582,10 +4880,9 @@
       });
 
       var settingsOverlay = document.getElementById('settings-modal-overlay');
-      var settingsOpenBtn = document.getElementById('settings-open');
       var settingsCloseBtn = document.getElementById('settings-modal-close');
       var settingsUsernameEl = document.getElementById('settings-username');
-      var settingsThemeToggle = document.getElementById('modal-theme-toggle');
+      var themeChoices = document.querySelectorAll('.theme-choice');
       var settingsLogoutBtn = document.getElementById('settings-logout');
       var settingsDeleteAllBtn = document.getElementById('settings-delete-all-chats');
       if (settingsDeleteAllBtn) settingsDeleteAllBtn.addEventListener('click', deleteAllConversations);
@@ -4595,6 +4892,13 @@
       var USER_OUTLINE_COLOR_KEY = 'simplicity-user-outline-color';
       var ASSISTANT_TEXT_COLOR_KEY = 'simplicity-assistant-text-color';
       var HIGHLIGHT_COLOR_KEY = 'simplicity-highlight-color';
+      var OUTLINE_COLOR_MIGRATIONS = {
+        '#FF5A1F': '#B86F58',
+        '#3B82F6': '#6F8EAD',
+        '#10B981': '#6F9A82',
+        '#8B5CF6': '#947CA8',
+        '#EC4899': '#B8798E',
+      };
 
       var stylePicker = document.getElementById('user-outline-style-picker');
       var styleTrigger = document.getElementById('user-outline-style-trigger');
@@ -4608,6 +4912,10 @@
       function setupColorSwatches(container, storageKey, cssVariable, fallback) {
         if (!container) return;
         var saved = localStorage.getItem(storageKey) || fallback;
+        if (cssVariable === '--highlight-background' && (saved === '#FF5A1F' || saved === '#E9A17D')) {
+          saved = fallback;
+          localStorage.setItem(storageKey, saved);
+        }
         document.documentElement.style.setProperty(cssVariable, saved);
         container.querySelectorAll('.swatch-btn').forEach(function (btn) {
           btn.classList.toggle('is-selected', btn.getAttribute('data-color') === saved);
@@ -4624,7 +4932,9 @@
 
       function applyAppearanceSettings() {
         var savedStyle = localStorage.getItem(USER_OUTLINE_STYLE_KEY) || 'dashed';
-        var savedColor = localStorage.getItem(USER_OUTLINE_COLOR_KEY) || '#FF5A1F';
+        var storedColor = localStorage.getItem(USER_OUTLINE_COLOR_KEY);
+        var savedColor = OUTLINE_COLOR_MIGRATIONS[storedColor] || storedColor || '#B86F58';
+        if (storedColor && savedColor !== storedColor) localStorage.setItem(USER_OUTLINE_COLOR_KEY, savedColor);
 
         document.documentElement.style.setProperty('--user-bubble-border-style', savedStyle);
         document.documentElement.style.setProperty('--user-bubble-border-color', savedColor);
@@ -4720,30 +5030,113 @@
       }
 
       applyAppearanceSettings();
-      setupColorSwatches(assistantTextSwatches, ASSISTANT_TEXT_COLOR_KEY, '--assistant-text-color', '#F3F1EC');
-      setupColorSwatches(highlightSwatches, HIGHLIGHT_COLOR_KEY, '--highlight-background', '#FF5A1F');
-      var accountDropdown = document.getElementById('account-dropdown');
+      setupColorSwatches(assistantTextSwatches, ASSISTANT_TEXT_COLOR_KEY, '--assistant-text-color', 'color-mix(in srgb, var(--fg) 78%, transparent)');
+      setupColorSwatches(highlightSwatches, HIGHLIGHT_COLOR_KEY, '--highlight-background', '#C7BF8B');
       var accountToggleBtn = document.getElementById('account-toggle');
       var sidebarAccountName = document.getElementById('sidebar-account-name');
+      var accountAvatar = document.getElementById('account-avatar');
+      var settingsAvatarEl = document.getElementById('settings-avatar');
+      var settingsModal = document.querySelector('.settings-modal');
+      var settingsCategoryButtons = Array.prototype.slice.call(document.querySelectorAll('[data-settings-target]'));
+      var settingsSections = Array.prototype.slice.call(document.querySelectorAll('[data-settings-section]'));
+      var settingsContent = document.getElementById('settings-content');
+      var settingsMobileBack = document.getElementById('settings-mobile-back');
+      var accountName = '';
+
+      function applyAccountName(username) {
+        if (!username) return;
+        accountName = username;
+        var initials = username.trim().split(/[._-]+/).filter(Boolean).map(function (part) { return part.charAt(0); }).join('').slice(0, 2).toUpperCase();
+        if (sidebarAccountName) sidebarAccountName.textContent = username;
+        if (accountAvatar) accountAvatar.textContent = initials || username.charAt(0).toUpperCase();
+        if (accountToggleBtn) accountToggleBtn.title = 'Settings for ' + username;
+        if (settingsUsernameEl) settingsUsernameEl.textContent = username;
+        if (settingsAvatarEl) settingsAvatarEl.textContent = initials || username.charAt(0).toUpperCase();
+      }
+
+      function applyAccountFallback() {
+        if (sidebarAccountName) sidebarAccountName.textContent = 'Account';
+        if (accountAvatar) accountAvatar.textContent = '?';
+        if (accountToggleBtn) accountToggleBtn.title = 'Settings';
+        if (settingsUsernameEl) settingsUsernameEl.textContent = 'Account';
+        if (settingsAvatarEl) settingsAvatarEl.textContent = '?';
+      }
+
+      var accountRequest = fetch('/api/auth/me')
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (user) {
+          if (user && user.username) applyAccountName(user.username);
+          else applyAccountFallback();
+        })
+        .catch(function (error) {
+          applyAccountFallback();
+          console.error('Failed to load account identity:', error);
+        });
+
+      function selectSettingsCategory(category) {
+        var isMobile = window.matchMedia('(max-width: 600px)').matches;
+        settingsCategoryButtons.forEach(function (button) {
+          button.setAttribute('aria-current', button.getAttribute('data-settings-target') === category ? 'page' : 'false');
+        });
+        settingsSections.forEach(function (section) {
+          section.classList.toggle('is-active', section.getAttribute('data-settings-section') === category);
+        });
+        if (isMobile) {
+          settingsModal.classList.add('is-mobile-category-open');
+          settingsContent.scrollTop = 0;
+        } else {
+          settingsModal.classList.remove('is-mobile-category-open');
+        }
+      }
+
+      settingsCategoryButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          selectSettingsCategory(button.getAttribute('data-settings-target'));
+        });
+      });
+
+      if (settingsMobileBack) {
+        settingsMobileBack.addEventListener('click', function () {
+          settingsModal.classList.remove('is-mobile-category-open');
+          settingsSections.forEach(function (section) { section.classList.remove('is-active'); });
+          var activeButton = settingsCategoryButtons.find(function (button) { return button.getAttribute('aria-current') === 'page'; });
+          if (activeButton) activeButton.focus();
+        });
+      }
+
+      window.addEventListener('resize', function () {
+        if (window.innerWidth > 600) {
+          settingsModal.classList.remove('is-mobile-category-open');
+          if (settingsOverlay.classList.contains('is-visible') && !settingsSections.some(function (section) { return section.classList.contains('is-active'); })) {
+            var activeButton = settingsCategoryButtons.find(function (button) { return button.getAttribute('aria-current') === 'page'; });
+            selectSettingsCategory(activeButton ? activeButton.getAttribute('data-settings-target') : 'appearance');
+          }
+        }
+      });
 
       function openSettings() {
-        if (accountDropdown) accountDropdown.classList.remove('is-open');
-        if (accountToggleBtn) accountToggleBtn.setAttribute('aria-expanded', 'false');
-        if (settingsUsernameEl && sidebarAccountName) settingsUsernameEl.textContent = sidebarAccountName.textContent;
-        var settingsAvatarEl = document.getElementById('settings-avatar');
-        if (settingsAvatarEl && sidebarAccountName && sidebarAccountName.textContent && sidebarAccountName.textContent !== '—') {
-          settingsAvatarEl.textContent = sidebarAccountName.textContent.charAt(0).toUpperCase();
-        }
+        if (accountName) applyAccountName(accountName);
+        else accountRequest.then(function () { if (accountName) applyAccountName(accountName); });
+        settingsModal.classList.remove('is-mobile-category-open');
+        var isMobile = window.matchMedia('(max-width: 600px)').matches;
+        settingsSections.forEach(function (section, index) {
+          section.classList.toggle('is-active', !isMobile && index === 0);
+        });
+        settingsCategoryButtons.forEach(function (button, index) {
+          button.setAttribute('aria-current', index === 0 ? 'page' : 'false');
+        });
         settingsOverlay.classList.add('is-visible');
         if (settingsCloseBtn) settingsCloseBtn.focus();
       }
 
       function closeSettings() {
         settingsOverlay.classList.remove('is-visible');
+        settingsModal.classList.remove('is-mobile-category-open');
+        settingsSections.forEach(function (section) { section.classList.remove('is-active'); });
       }
 
       if (settingsOverlay) {
-        if (settingsOpenBtn) settingsOpenBtn.addEventListener('click', openSettings);
+        if (accountToggleBtn) accountToggleBtn.addEventListener('click', openSettings);
         if (settingsCloseBtn) settingsCloseBtn.addEventListener('click', closeSettings);
         settingsOverlay.addEventListener('click', function (event) {
           if (event.target === settingsOverlay) closeSettings();
@@ -4753,16 +5146,20 @@
         });
       }
 
-      if (settingsThemeToggle) {
-        settingsThemeToggle.setAttribute('aria-pressed', document.documentElement.getAttribute('data-theme') === 'dark' ? 'true' : 'false');
-        settingsThemeToggle.addEventListener('click', function () {
-          var root = document.documentElement;
-          var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-          root.setAttribute('data-theme', next);
-          settingsThemeToggle.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
-          if (window.simplicitySetThemeCookie) window.simplicitySetThemeCookie(next);
+      function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        themeChoices.forEach(function (choice) {
+          choice.setAttribute('aria-pressed', choice.getAttribute('data-theme-option') === theme ? 'true' : 'false');
         });
+        if (window.simplicitySetThemeCookie) window.simplicitySetThemeCookie(theme);
       }
+
+      themeChoices.forEach(function (choice) {
+        choice.addEventListener('click', function () {
+          setTheme(choice.getAttribute('data-theme-option'));
+        });
+      });
+      setTheme(document.documentElement.getAttribute('data-theme') || 'light');
 
       if (settingsLogoutBtn) {
         settingsLogoutBtn.addEventListener('click', function () {

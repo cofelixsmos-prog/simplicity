@@ -76,6 +76,20 @@ async function getConversationHistory(conversationId) {
   return result.rows.map((row) => ({ role: row.role, content: row.content }));
 }
 
+async function getAssistantMessageContext(userId, conversationId, messageId) {
+  const result = await db.execute({
+    sql: 'SELECT m.id, m.role, m.content FROM messages m JOIN conversations c ON c.id = m.conversation_id WHERE m.conversation_id = ? AND c.user_id = ? ORDER BY m.created_at ASC, m.id ASC',
+    args: [conversationId, userId],
+  });
+  const rows = result.rows;
+  const index = rows.findIndex((row) => row.id === messageId && row.role === 'assistant');
+  if (index === -1) return null;
+  return {
+    content: rows[index].content,
+    previousMessages: rows.slice(Math.max(0, index - 8), index).map((row) => ({ role: row.role, content: row.content })),
+  };
+}
+
 async function saveMessage(conversationId, role, content, toolCalls, generationTimes, trace) {
   const id = crypto.randomUUID();
   await db.execute({
@@ -95,6 +109,13 @@ async function updateLastAssistantMessage(conversationId, content) {
   await db.execute({
     sql: 'UPDATE messages SET content = ? WHERE id = ?',
     args: [content, message.id],
+  });
+}
+
+async function updateAssistantMessage(conversationId, messageId, content) {
+  await db.execute({
+    sql: "UPDATE messages SET content = ? WHERE id = ? AND conversation_id = ? AND role = 'assistant'",
+    args: [content, messageId, conversationId],
   });
 }
 
@@ -137,8 +158,10 @@ module.exports = {
   touchConversation,
   updateTitle,
   getConversationHistory,
+  getAssistantMessageContext,
   saveMessage,
   updateLastAssistantMessage,
+  updateAssistantMessage,
   deleteConversation,
   deleteAllConversations,
   ownsConversation,

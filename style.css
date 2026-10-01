@@ -9,15 +9,27 @@
   }
 
   :root {
-    --bg: #F3F1EC;
-    --fg: #000000;
-    --fg-muted: #6B6A63;
+    --bg: #FFFFFF;
+    --fg: #171717;
+    --fg-muted: #626262;
     --nav-border: rgba(0,0,0,0.06);
     --nav-link: #4B4A45;
     --btn-outline-border: rgba(0,0,0,0.14);
     --btn-outline-hover: rgba(0,0,0,0.03);
     --accent: #FF5A1F;
     --accent-hover: #F04E15;
+  }
+
+  html[data-theme="grey"] {
+    --bg: #E7E8E8;
+    --fg: #222526;
+    --fg-muted: #666C6D;
+    --nav-border: rgba(25, 30, 31, 0.12);
+    --nav-link: #4F5657;
+    --btn-outline-border: rgba(25, 30, 31, 0.18);
+    --btn-outline-hover: rgba(25, 30, 31, 0.06);
+    --accent: #C84A20;
+    --accent-hover: #A93C1B;
   }
 
   html[data-theme="dark"] {
